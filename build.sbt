@@ -8,9 +8,9 @@ ScalariformKeys.preferences := ScalariformKeys.preferences.value
   .setPreference(DoubleIndentClassDeclaration, true)
   .setPreference(SpacesAroundMultiImports, false)
 
-name := "spark-daria"
+name := "spark-fast-tests"
 
-spName := "mrpowers/spark-fast-tests"
+spName := "MrPowers/spark-fast-tests"
 
 spShortDescription := "Fast tests with Spark"
 
@@ -23,8 +23,9 @@ sparkVersion := "2.1.0"
 
 sparkComponents ++= Seq("sql", "hive")
 
-libraryDependencies ++= Seq(
-)
+artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
+  artifact.name + "_2.11" + "-" + sparkVersion.value + "_" + module.revision + "." + artifact.extension
+}
 
 parallelExecution in Test := false
 
