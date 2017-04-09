@@ -21,7 +21,7 @@ version := "0.0.1"
 scalaVersion := "2.11.8"
 sparkVersion := "2.1.0"
 
-sparkComponents ++= Seq("sql", "hive")
+sparkComponents ++= Seq("sql")
 
 artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
   artifact.name + "_2.11" + "-" + sparkVersion.value + "_" + module.revision + "." + artifact.extension
