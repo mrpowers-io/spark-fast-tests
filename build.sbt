@@ -27,8 +27,6 @@ artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
   artifact.name + "_2.11" + "-" + sparkVersion.value + "_" + module.revision + "." + artifact.extension
 }
 
-parallelExecution in Test := false
-
 // All Spark Packages need a license
 licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
 
