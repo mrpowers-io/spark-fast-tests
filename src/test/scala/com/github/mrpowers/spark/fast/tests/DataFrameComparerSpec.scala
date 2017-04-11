@@ -54,7 +54,7 @@ class DataFrameComparerSpec extends FunSpec with DataFrameComparer with SparkSes
         (5)
       ).toDF("number")
 
-      intercept[DataFrameContentMismatch] {
+      intercept[org.scalatest.exceptions.TestFailedException] {
         assertDataFrameEquality(sourceDF, expectedDF)
       }
 

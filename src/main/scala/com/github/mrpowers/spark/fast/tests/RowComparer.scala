@@ -1,6 +1,7 @@
 package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.Row
+
 import scala.math.abs
 
 object RowComparer {
@@ -13,8 +14,7 @@ object RowComparer {
       var idx = 0
       val length = r1.length
       while (idx < length) {
-        if (r1.isNullAt(idx) != r2.isNullAt(idx))
-          return false
+        if (r1.isNullAt(idx) != r2.isNullAt(idx)) return false
 
         if (!r1.isNullAt(idx)) {
           val o1 = r1.get(idx)

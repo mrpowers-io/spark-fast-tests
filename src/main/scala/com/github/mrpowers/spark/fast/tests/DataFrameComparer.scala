@@ -1,12 +1,19 @@
 package com.github.mrpowers.spark.fast.tests
 
+import org.scalatest.Suite
+
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Row}
 
 case class DataFrameSchemaMismatch(smth: String) extends Exception(smth)
 case class DataFrameContentMismatch(smth: String) extends Exception(smth)
 
-trait DataFrameComparer {
+trait DataFrameComparer
+    extends TestSuite
+    with DataFrameComparerLike { self: Suite =>
+}
+
+trait DataFrameComparerLike extends TestSuiteLike {
 
   def schemaMismatchMessage(actualDF: DataFrame, expectedDF: DataFrame): String = {
     s"""
@@ -66,10 +73,9 @@ Expected DataFrame Row Count: '${expectedCount}'
             !(r1.equals(r2) || RowComparer.areRowsEqual(r1, r2, 0.0))
         }
 
-      if (!unequalRDD.isEmpty()) {
-        val maxUnequalRowsToShow = 10
-        throw new DataFrameContentMismatch("NEED GOOD ERROR MESSAGE")
-      }
+      val maxUnequalRowsToShow = 10
+      assertEmpty(unequalRDD.take(maxUnequalRowsToShow))
+
     } finally {
       actualDF.rdd.unpersist()
       expectedDF.rdd.unpersist()
@@ -86,10 +92,6 @@ Expected DataFrame Row Count: '${expectedCount}'
       case (row, idx) =>
         (idx, row)
     }
-  }
-
-  def approxEquals(r1: Row, r2: Row, tol: Double): Boolean = {
-    RowComparer.areRowsEqual(r1, r2, tol)
   }
 
 }
