@@ -4,7 +4,7 @@ A fast Apache Spark testing framework!
 
 The project currently contains traits to support DataFrame and RDD tests.  It will be extended in the future to support streaming and machine learning tests.
 
-For example, it provides an `assertDataFrameEquality` method to compare two DataFrames.
+For example, it provides an `assertSmallDataFrameEquality` method to compare two DataFrames.
 
 ```scala
 val sourceDF = Seq(
@@ -17,7 +17,7 @@ val expectedDF = Seq(
   (5, "word")
 ).toDF("number", "word")
 
-assertDataFrameEquality(sourceDF, expectedDF)
+assertSmallDataFrameEquality(sourceDF, expectedDF)
 // throws a DataFrameSchemaMismatch exception
 ```
 
@@ -48,7 +48,7 @@ trait SparkSessionTestWrapper {
 }
 ```
 
-The `DataFrameComparer` trait defines the `assertDataFrameEquality` method.  Extend your spec file with the `SparkSessionTestWrapper` trait to create DataFrames and the `DataFrameComparer` trait to make DataFrame comparisons.
+The `DataFrameComparer` trait defines the `assertSmallDataFrameEquality` method.  Extend your spec file with the `SparkSessionTestWrapper` trait to create DataFrames and the `DataFrameComparer` trait to make DataFrame comparisons.
 
 ```scala
 class DatasetSpec extends FunSpec with SparkSessionTestWrapper with DataFrameComparer {
@@ -73,7 +73,7 @@ class DatasetSpec extends FunSpec with SparkSessionTestWrapper with DataFrameCom
         ("luisa")
       ).toDF("student")
 
-      assertDataFrameEquality(actualDF, expectedDF)
+      assertSmallDataFrameEquality(actualDF, expectedDF)
 
     }
 
@@ -81,6 +81,14 @@ class DatasetSpec extends FunSpec with SparkSessionTestWrapper with DataFrameCom
 
 }
 ```
+
+To compare two large DataFrames that are partitioned across different nodes in a cluster, use the `assertLargeDataFrameEquality` method instead:
+
+```scala
+assertLargeDataFrameEquality(actualDF, expectedDF)
+```
+
+`assertSmallDataFrameEquality` is generally faster for test suites that run on your local machine.  `assertLargeDataFrameEquality` should only be used for DataFrames that are split among nodes in a cluster.
 
 ## Spark Versions
 
