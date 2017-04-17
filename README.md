@@ -94,11 +94,15 @@ You might want to use spark-fast-tests instead when:
 
 * You want to run tests in parallel (you need to set `parallelExecution in Test := false` with spark-testing-base)
 * You don't want to include hive as a project dependency
-* You want a test suite that runs faster because you don't restart the SparkSession after each test file runs
+* You don't want to restart the SparkSession after each test file runs so the suite runs faster
 
 ## Additional Goals
 
-* Spark test runs consume a lot of memory and we want to consume memory sparingly
+* Use memory efficiently so Spark test runs don't crash
 * Provide readable error messages
 * Easy to use in conjunction with other test suites
+
+## Contributing
+
+Open an issue or send a pull request to contribute.  Anyone that makes good contributions to the project will be promoted to be a project maintainer.
 
