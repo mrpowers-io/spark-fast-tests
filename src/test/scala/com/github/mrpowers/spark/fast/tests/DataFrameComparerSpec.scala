@@ -20,7 +20,7 @@ class DataFrameComparerSpec extends FunSpec with DataFrameComparer with SparkSes
         (5)
       ).toDF("number")
 
-      assertDataFrameEquality(sourceDF, expectedDF)
+      assertLargeDataFrameEquality(sourceDF, expectedDF)
 
     }
 
@@ -37,7 +37,7 @@ class DataFrameComparerSpec extends FunSpec with DataFrameComparer with SparkSes
       ).toDF("number", "word")
 
       intercept[DataFrameSchemaMismatch] {
-        assertDataFrameEquality(sourceDF, expectedDF)
+        assertLargeDataFrameEquality(sourceDF, expectedDF)
       }
 
     }
@@ -55,7 +55,7 @@ class DataFrameComparerSpec extends FunSpec with DataFrameComparer with SparkSes
       ).toDF("number")
 
       intercept[org.scalatest.exceptions.TestFailedException] {
-        assertDataFrameEquality(sourceDF, expectedDF)
+        assertLargeDataFrameEquality(sourceDF, expectedDF)
       }
 
     }

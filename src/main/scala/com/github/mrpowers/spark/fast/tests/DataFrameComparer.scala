@@ -49,7 +49,7 @@ Expected DataFrame Row Count: '${expectedCount}'
     }
   }
 
-  def assertDataFrameEquality(actualDF: DataFrame, expectedDF: DataFrame): Unit = {
+  def assertLargeDataFrameEquality(actualDF: DataFrame, expectedDF: DataFrame): Unit = {
     if (!actualDF.schema.equals(expectedDF.schema)) {
       throw new DataFrameSchemaMismatch(schemaMismatchMessage(actualDF, expectedDF))
     }
