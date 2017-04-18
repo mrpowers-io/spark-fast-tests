@@ -4,6 +4,7 @@ import org.scalatest.Suite
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.functions._
 
 case class DataFrameSchemaMismatch(smth: String) extends Exception(smth)
 case class DataFrameContentMismatch(smth: String) extends Exception(smth)
@@ -40,13 +41,27 @@ Expected DataFrame Row Count: '${expectedCount}'
 """
   }
 
-  def assertSmallDataFrameEquality(actualDF: DataFrame, expectedDF: DataFrame): Unit = {
+  def assertSmallDataFrameEquality(actualDF: DataFrame, expectedDF: DataFrame, orderedComparison: Boolean = true): Unit = {
     if (!actualDF.schema.equals(expectedDF.schema)) {
       throw new DataFrameSchemaMismatch(schemaMismatchMessage(actualDF, expectedDF))
     }
-    if (!actualDF.collect().sameElements(expectedDF.collect())) {
-      throw new DataFrameContentMismatch(contentMismatchMessage(actualDF, expectedDF))
+    if (orderedComparison == true) {
+      if (!actualDF.collect().sameElements(expectedDF.collect())) {
+        throw new DataFrameContentMismatch(contentMismatchMessage(actualDF, expectedDF))
+      }
+    } else {
+      val actualSortedDF = defaultSortDataFrame(actualDF)
+      val expectedSortedDF = defaultSortDataFrame(expectedDF)
+      if (!actualSortedDF.collect().sameElements(expectedSortedDF.collect())) {
+        throw new DataFrameContentMismatch(contentMismatchMessage(actualSortedDF, expectedSortedDF))
+      }
     }
+  }
+
+  def defaultSortDataFrame(df: DataFrame): DataFrame = {
+    val colNames = df.columns.sorted
+    val cols = colNames.map(col(_))
+    df.sort(cols: _*)
   }
 
   def assertLargeDataFrameEquality(actualDF: DataFrame, expectedDF: DataFrame): Unit = {
