@@ -1,10 +1,8 @@
 # spark-fast-tests
 
-A fast Apache Spark testing framework!
+A fast Apache Spark testing framework with beautifully formatted error messages!
 
-The project currently contains traits to support DataFrame and RDD tests.  It will be extended in the future to support streaming and machine learning tests.
-
-For example, it provides an `assertSmallDataFrameEquality` method to compare two DataFrames.
+For example, the `assertSmallDataFrameEquality` method can be used to compare two DataFrames.
 
 ```scala
 val sourceDF = Seq(
@@ -23,9 +21,9 @@ assertSmallDataFrameEquality(sourceDF, expectedDF)
 
 ## Setup
 
-Add the [sbt-spark-package plugin](https://github.com/databricks/sbt-spark-package).
+Add the [sbt-spark-package plugin](https://github.com/databricks/sbt-spark-package) so you can install Spark Packages.
 
-Add these lines to your `build.sbt` file:
+Then add these lines to your `build.sbt` file to install Spark SQL and spark-fast-tests:
 
 ```scala
 spDependencies += "MrPowers/spark-fast-tests:0.2.0"
@@ -82,35 +80,35 @@ class DatasetSpec extends FunSpec with SparkSessionTestWrapper with DataFrameCom
 }
 ```
 
-To compare two large DataFrames that are partitioned across different nodes in a cluster, use the `assertLargeDataFrameEquality` method instead:
+To compare large DataFrames that are partitioned across different nodes in a cluster, use the `assertLargeDataFrameEquality` method.
 
 ```scala
 assertLargeDataFrameEquality(actualDF, expectedDF)
 ```
 
-`assertSmallDataFrameEquality` is generally faster for test suites that run on your local machine.  `assertLargeDataFrameEquality` should only be used for DataFrames that are split among nodes in a cluster.
-
-## Spark Versions
-
-spark-fast-tests supports Spark 2.x.  There are no plans to retrofit the project to work with Spark 1.x.
+`assertSmallDataFrameEquality` is faster for test suites that run on your local machine.  `assertLargeDataFrameEquality` should only be used for DataFrames that are split across nodes in a cluster.
 
 ## Alternatives
 
-The [spark-testing-base](https://github.com/holdenk/spark-testing-base) project more features (e.g. streaming apps) and is compiled to support a variety of Scala and Spark versions.  spark-testing-base is a very good option for many use cases.
+The [spark-testing-base](https://github.com/holdenk/spark-testing-base) project has more features (e.g. streaming support) and is compiled to support a variety of Scala and Spark versions.
 
-You might want to use spark-fast-tests instead when:
+You might want to use spark-fast-tests instead of spark-testing-base in these cases:
 
 * You want to run tests in parallel (you need to set `parallelExecution in Test := false` with spark-testing-base)
 * You don't want to include hive as a project dependency
-* You don't want to restart the SparkSession after each test file runs so the suite runs faster
+* You don't want to restart the SparkSession after each test file executes so the suite runs faster
 
 ## Additional Goals
 
 * Use memory efficiently so Spark test runs don't crash
 * Provide readable error messages
 * Easy to use in conjunction with other test suites
+* Give the user control of the SparkSession
+
+## Spark Versions
+
+spark-fast-tests supports Spark 2.x.  There are no plans to retrofit the project to work with Spark 1.x.
 
 ## Contributing
 
-Open an issue or send a pull request to contribute.  Anyone that makes good contributions to the project will be promoted to be a project maintainer.
-
+Open an issue or send a pull request to contribute.  Anyone that makes good contributions to the project will be promoted to project maintainer status.
