@@ -2,6 +2,10 @@
 
 A fast Apache Spark testing framework with beautifully formatted error messages!
 
+[![Build Status](https://travis-ci.org/MrPowers/spark-fast-tests.svg?branch=master)](https://travis-ci.org/MrPowers/spark-fast-tests)
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ab42211c18984740bee7f87c631a8f42)](https://www.codacy.com/app/MrPowers/spark-fast-tests?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MrPowers/spark-fast-tests&amp;utm_campaign=Badge_Grade)
+
 For example, the `assertSmallDataFrameEquality` method can be used to compare two DataFrames.
 
 ```scala
