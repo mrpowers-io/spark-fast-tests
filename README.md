@@ -57,8 +57,6 @@ class DatasetSpec extends FunSpec with SparkSessionTestWrapper with DataFrameCom
 
   import spark.implicits._
 
-  describe("#alias") {
-
     it("aliases a DataFrame") {
 
       val sourceDF = Seq(
@@ -116,3 +114,4 @@ spark-fast-tests supports Spark 2.x.  There are no plans to retrofit the project
 ## Contributing
 
 Open an issue or send a pull request to contribute.  Anyone that makes good contributions to the project will be promoted to project maintainer status.
+
