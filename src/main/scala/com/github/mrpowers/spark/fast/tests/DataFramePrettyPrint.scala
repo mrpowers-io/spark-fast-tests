@@ -3,7 +3,7 @@ package com.github.mrpowers.spark.fast.tests
 import java.sql.Date
 
 import org.apache.commons.lang3.StringUtils
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Dataset}
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
 
 object DataFramePrettyPrint {

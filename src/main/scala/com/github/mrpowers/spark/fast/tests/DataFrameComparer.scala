@@ -1,9 +1,8 @@
 package com.github.mrpowers.spark.fast.tests
 
 import org.scalatest.Suite
-
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, Row}
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import org.apache.spark.sql.functions._
 
 case class DataFrameSchemaMismatch(smth: String) extends Exception(smth)
@@ -16,7 +15,7 @@ trait DataFrameComparer
 
 trait DataFrameComparerLike extends TestSuiteLike {
 
-  def schemaMismatchMessage(actualDF: DataFrame, expectedDF: DataFrame): String = {
+  def schemaMismatchMessage[T](actualDF: Dataset[T], expectedDF: Dataset[T]): String = {
     s"""
 Actual Schema:
 ${actualDF.schema}
@@ -25,12 +24,12 @@ ${expectedDF.schema}
 """
   }
 
-  def contentMismatchMessage(actualDF: DataFrame, expectedDF: DataFrame): String = {
+  def contentMismatchMessage[T](actualDF: Dataset[T], expectedDF: Dataset[T]): String = {
     s"""
 Actual DataFrame Content:
-${DataFramePrettyPrint.showString(actualDF, 5)}
+${DataFramePrettyPrint.showString(actualDF.toDF(), 5)}
 Expected DataFrame Content:
-${DataFramePrettyPrint.showString(expectedDF, 5)}
+${DataFramePrettyPrint.showString(expectedDF.toDF(), 5)}
 """
   }
 
@@ -41,7 +40,7 @@ Expected DataFrame Row Count: '${expectedCount}'
 """
   }
 
-  def assertSmallDataFrameEquality(actualDF: DataFrame, expectedDF: DataFrame, orderedComparison: Boolean = true): Unit = {
+  def assertSmallDataFrameEquality[T](actualDF: Dataset[T], expectedDF: Dataset[T], orderedComparison: Boolean = true): Unit = {
     if (!actualDF.schema.equals(expectedDF.schema)) {
       throw new DataFrameSchemaMismatch(schemaMismatchMessage(actualDF, expectedDF))
     }
@@ -58,7 +57,7 @@ Expected DataFrame Row Count: '${expectedCount}'
     }
   }
 
-  def defaultSortDataFrame(df: DataFrame): DataFrame = {
+  def defaultSortDataFrame[T](df: Dataset[T]): Dataset[T] = {
     val colNames = df.columns.sorted
     val cols = colNames.map(col(_))
     df.sort(cols: _*)
