@@ -4,7 +4,7 @@ import org.scalatest.FunSpec
 
 class DataFrameComparerSpec
     extends FunSpec
-    with DataFrameComparer
+    with DatasetComparer
     with SparkSessionTestWrapper {
 
   import spark.implicits._
@@ -23,7 +23,7 @@ class DataFrameComparerSpec
         (5)
       ).toDF("number")
 
-      assertLargeDataFrameEquality(sourceDF, expectedDF)
+      assertLargeDatasetEquality(sourceDF, expectedDF)
 
     }
 
@@ -39,8 +39,8 @@ class DataFrameComparerSpec
         (5, "word")
       ).toDF("number", "word")
 
-      intercept[DataFrameSchemaMismatch] {
-        assertLargeDataFrameEquality(sourceDF, expectedDF)
+      intercept[DatasetSchemaMismatch] {
+        assertLargeDatasetEquality(sourceDF, expectedDF)
       }
 
     }
@@ -58,7 +58,7 @@ class DataFrameComparerSpec
       ).toDF("number")
 
       intercept[org.scalatest.exceptions.TestFailedException] {
-        assertLargeDataFrameEquality(sourceDF, expectedDF)
+        assertLargeDatasetEquality(sourceDF, expectedDF)
       }
 
     }
@@ -79,7 +79,7 @@ class DataFrameComparerSpec
         (5)
       ).toDF("number")
 
-      assertSmallDataFrameEquality(sourceDF, expectedDF)
+      assertSmallDatasetEquality(sourceDF, expectedDF)
 
     }
 
@@ -95,7 +95,7 @@ class DataFrameComparerSpec
         (1)
       ).toDF("number")
 
-      assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
+      assertSmallDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
 
     }
 
@@ -112,8 +112,8 @@ class DataFrameComparerSpec
         (10)
       ).toDF("number")
 
-      intercept[DataFrameContentMismatch] {
-        assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
+      intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
       }
 
     }
@@ -130,8 +130,8 @@ class DataFrameComparerSpec
         (5, "word")
       ).toDF("number", "word")
 
-      intercept[DataFrameSchemaMismatch] {
-        assertSmallDataFrameEquality(sourceDF, expectedDF)
+      intercept[DatasetSchemaMismatch] {
+        assertSmallDatasetEquality(sourceDF, expectedDF)
       }
 
     }
@@ -148,8 +148,8 @@ class DataFrameComparerSpec
         (5)
       ).toDF("number")
 
-      intercept[DataFrameContentMismatch] {
-        assertSmallDataFrameEquality(sourceDF, expectedDF)
+      intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(sourceDF, expectedDF)
       }
 
     }
@@ -166,7 +166,7 @@ class DataFrameComparerSpec
         (5, "anne")
       ).toDF("fun_level", "name")
 
-      val actualDF = defaultSortDataFrame(sourceDF)
+      val actualDF = defaultSortDataset(sourceDF)
 
       val expectedDF = Seq(
         (1, "phil"),
@@ -174,7 +174,7 @@ class DataFrameComparerSpec
         (5, "bob")
       ).toDF("fun_level", "name")
 
-      assertSmallDataFrameEquality(actualDF, expectedDF)
+      assertSmallDatasetEquality(actualDF, expectedDF)
 
     }
 
