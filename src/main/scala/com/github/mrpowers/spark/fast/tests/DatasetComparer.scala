@@ -70,7 +70,10 @@ Expected DataFrame Row Count: '${expectedCount}'
     ds.sort(cols: _*)
   }
 
-  def assertLargeDatasetEquality[T: ClassTag](actualDS: Dataset[T], expectedDS: Dataset[T]): Unit = {
+  def assertLargeDatasetEquality[T: ClassTag](
+    actualDS: Dataset[T],
+    expectedDS: Dataset[T]
+  ): Unit = {
     if (!actualDS.schema.equals(expectedDS.schema)) {
       throw DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
     }

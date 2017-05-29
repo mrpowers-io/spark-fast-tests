@@ -135,7 +135,7 @@ class DatasetComparerSpec
 
     }
 
-    it("can performed unordered comparisons") {
+    it("can performed unordered DataFrame comparisons") {
 
       val sourceDF = Seq(
         (1),
@@ -151,7 +151,42 @@ class DatasetComparerSpec
 
     }
 
-    it("throws an error for unordered comparisons that don't match") {
+    it("can performed unordered Dataset comparisons") {
+
+      val sourceDS = Seq(
+        Person("bob", 1),
+        Person("frank", 5)
+      ).toDS
+
+      val expectedDS = Seq(
+        Person("frank", 5),
+        Person("bob", 1)
+      ).toDS
+
+      assertSmallDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
+
+    }
+
+    it("throws an error for unordered Dataset comparisons that don't match") {
+
+      val sourceDS = Seq(
+        Person("bob", 1),
+        Person("frank", 5)
+      ).toDS
+
+      val expectedDS = Seq(
+        Person("frank", 5),
+        Person("bob", 1),
+        Person("sadie", 2)
+      ).toDS
+
+      intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
+      }
+
+    }
+
+    it("throws an error for unordered DataFrame comparisons that don't match") {
 
       val sourceDF = Seq(
         (1),
@@ -170,7 +205,7 @@ class DatasetComparerSpec
 
     }
 
-    it("throws an error if the DataFrames have the different schemas") {
+    it("throws an error if the Datasets have the different schemas") {
 
       val sourceDF = Seq(
         (1),
@@ -206,6 +241,23 @@ class DatasetComparerSpec
 
     }
 
+    it("returns false if the Dataset content is different") {
+
+      val sourceDS = Seq(
+        Person("bob", 1),
+        Person("frank", 5)
+      ).toDS
+
+      val expectedDS = Seq(
+        Person("sally", 66),
+        Person("sue", 54)
+      ).toDS
+
+      intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(sourceDS, expectedDS)
+      }
+
+    }
   }
 
   describe("#defaultSortDataset") {
