@@ -4,7 +4,6 @@ import org.apache.spark.rdd.{PairRDDFunctions, RDD}
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
 import org.scalatest.Suite
-import org.apache.spark.SparkContext._
 
 import scala.reflect.ClassTag
 

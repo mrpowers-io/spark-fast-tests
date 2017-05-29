@@ -6,7 +6,7 @@ A fast Apache Spark testing framework with beautifully formatted error messages!
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ab42211c18984740bee7f87c631a8f42)](https://www.codacy.com/app/MrPowers/spark-fast-tests?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MrPowers/spark-fast-tests&amp;utm_campaign=Badge_Grade)
 
-For example, the `assertSmallDataFrameEquality` method can be used to compare two DataFrames.
+For example, the `assertSmallDatasetEquality` method can be used to compare two DataFrames.
 
 ```scala
 val sourceDF = Seq(
@@ -19,8 +19,25 @@ val expectedDF = Seq(
   (5, "word")
 ).toDF("number", "word")
 
-assertSmallDataFrameEquality(sourceDF, expectedDF)
-// throws a DataFrameSchemaMismatch exception
+assertSmallDatasetEquality(sourceDF, expectedDF)
+// throws a DatasetSchemaMismatch exception
+```
+
+The `assertSmallDatasetEquality` method can also be used to compare Datasets.
+
+```scala
+val sourceDS = Seq(
+  Person("bob", 1),
+  Person("alice", 5)
+).toDS
+
+val expectedDS = Seq(
+  Person("frank", 10),
+  Person("lucy", 5)
+).toDS
+
+assertLargeDatasetEquality(sourceDS, expectedDS)
+// throws an exception because the Datasets have different data
 ```
 
 ## Setup
@@ -50,10 +67,10 @@ trait SparkSessionTestWrapper {
 }
 ```
 
-The `DataFrameComparer` trait defines the `assertSmallDataFrameEquality` method.  Extend your spec file with the `SparkSessionTestWrapper` trait to create DataFrames and the `DataFrameComparer` trait to make DataFrame comparisons.
+The `DatasetComparer` trait defines the `assertSmallDatasetEquality` method.  Extend your spec file with the `SparkSessionTestWrapper` trait to create DataFrames and the `DatasetComparer` trait to make DataFrame comparisons.
 
 ```scala
-class DatasetSpec extends FunSpec with SparkSessionTestWrapper with DataFrameComparer {
+class DatasetSpec extends FunSpec with SparkSessionTestWrapper with DatasetComparer {
 
   import spark.implicits._
 
@@ -73,7 +90,7 @@ class DatasetSpec extends FunSpec with SparkSessionTestWrapper with DataFrameCom
         ("luisa")
       ).toDF("student")
 
-      assertSmallDataFrameEquality(actualDF, expectedDF)
+      assertSmallDatasetEquality(actualDF, expectedDF)
 
     }
 
@@ -82,13 +99,13 @@ class DatasetSpec extends FunSpec with SparkSessionTestWrapper with DataFrameCom
 }
 ```
 
-To compare large DataFrames that are partitioned across different nodes in a cluster, use the `assertLargeDataFrameEquality` method.
+To compare large DataFrames that are partitioned across different nodes in a cluster, use the `assertLargeDatasetEquality` method.
 
 ```scala
-assertLargeDataFrameEquality(actualDF, expectedDF)
+assertLargeDatasetEquality(actualDF, expectedDF)
 ```
 
-`assertSmallDataFrameEquality` is faster for test suites that run on your local machine.  `assertLargeDataFrameEquality` should only be used for DataFrames that are split across nodes in a cluster.
+`assertSmallDatasetEquality` is faster for test suites that run on your local machine.  `assertLargeDatasetEquality` should only be used for DataFrames that are split across nodes in a cluster.
 
 ## Alternatives
 
