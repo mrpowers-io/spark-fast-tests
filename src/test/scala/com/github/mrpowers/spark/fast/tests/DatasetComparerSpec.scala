@@ -2,16 +2,18 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.scalatest.FunSpec
 
-class DataFrameComparerSpec
+case class Person(name: String, age: Int)
+
+class DatasetComparerSpec
     extends FunSpec
     with DatasetComparer
     with SparkSessionTestWrapper {
 
   import spark.implicits._
 
-  describe("#assertLargeDataFrameEquality") {
+  describe("#assertLargeDatasetEquality") {
 
-    it("does nothing true if the DataFrames have the same schemas and content") {
+    it("does nothing if the DataFrames have the same schemas and content") {
 
       val sourceDF = Seq(
         (1),
@@ -27,7 +29,23 @@ class DataFrameComparerSpec
 
     }
 
-    it("throws an error if the DataFrames have the different schemas") {
+    it("does nothing if the Datasets have the same schemas and content") {
+
+      val sourceDS = Seq(
+        Person("Alice", 12),
+        Person("Bob", 17)
+      ).toDS
+
+      val expectedDS = Seq(
+        Person("Alice", 12),
+        Person("Bob", 17)
+      ).toDS
+
+      assertLargeDatasetEquality(sourceDS, expectedDS)
+
+    }
+
+    it("throws an error if the DataFrames have different schemas") {
 
       val sourceDF = Seq(
         (1),
@@ -63,9 +81,27 @@ class DataFrameComparerSpec
 
     }
 
+    it("returns false if the Dataset content is different") {
+
+      val sourceDS = Seq(
+        Person("bob", 1),
+        Person("alice", 5)
+      ).toDS
+
+      val expectedDS = Seq(
+        Person("frank", 10),
+        Person("lucy", 5)
+      ).toDS
+
+      intercept[org.scalatest.exceptions.TestFailedException] {
+        assertLargeDatasetEquality(sourceDS, expectedDS)
+      }
+
+    }
+
   }
 
-  describe("#assertSmallDataFrameEquality") {
+  describe("#assertSmallDatasetEquality") {
 
     it("does nothing true if the DataFrames have the same schemas and content") {
 
@@ -80,6 +116,22 @@ class DataFrameComparerSpec
       ).toDF("number")
 
       assertSmallDatasetEquality(sourceDF, expectedDF)
+
+    }
+
+    it("does nothing true if the Datasets have the same schemas and content") {
+
+      val sourceDS = Seq(
+        Person("bob", 1),
+        Person("frank", 5)
+      ).toDS
+
+      val expectedDS = Seq(
+        Person("bob", 1),
+        Person("frank", 5)
+      ).toDS
+
+      assertSmallDatasetEquality(sourceDS, expectedDS)
 
     }
 
@@ -156,7 +208,7 @@ class DataFrameComparerSpec
 
   }
 
-  describe("#defaultSortDataFrame") {
+  describe("#defaultSortDataset") {
 
     it("sorts a DataFrame by the column names in alphabetical order") {
 

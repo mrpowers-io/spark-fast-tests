@@ -2,8 +2,10 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.scalatest.Suite
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, Dataset}
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import org.apache.spark.sql.functions._
+
+import scala.reflect.ClassTag
 
 case class DatasetSchemaMismatch(smth: String) extends Exception(smth)
 case class DatasetContentMismatch(smth: String) extends Exception(smth)
@@ -67,7 +69,7 @@ Expected DataFrame Row Count: '${expectedCount}'
     ds.sort(cols: _*)
   }
 
-  def assertLargeDatasetEquality(actualDS: DataFrame, expectedDS: DataFrame): Unit = {
+  def assertLargeDatasetEquality[U](actualDS: Dataset[U], expectedDS: Dataset[U])(implicit UCT: ClassTag[U]): Unit = {
     if (!actualDS.schema.equals(expectedDS.schema)) {
       throw new DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
     }
@@ -81,16 +83,14 @@ Expected DataFrame Row Count: '${expectedCount}'
         throw new DatasetContentMismatch(countMismatchMessage(actualCount, expectedCount))
       }
 
-      val expectedIndexValue = zipWithIndex(actualDS.rdd)
-      val resultIndexValue = zipWithIndex(expectedDS.rdd)
-
+      val expectedIndexValue: RDD[(Long, U)] = zipWithIndex(actualDS.rdd)
+      val resultIndexValue: RDD[(Long, U)] = zipWithIndex(expectedDS.rdd)
       val unequalRDD = expectedIndexValue
         .join(resultIndexValue)
         .filter {
-          case (idx, (r1, r2)) =>
-            !(r1.equals(r2) || RowComparer.areRowsEqual(r1, r2, 0.0))
+          case (idx, (o1, o2)) =>
+            !o1.equals(o2)
         }
-
       val maxUnequalRowsToShow = 10
       assertEmpty(unequalRDD.take(maxUnequalRowsToShow))
 
