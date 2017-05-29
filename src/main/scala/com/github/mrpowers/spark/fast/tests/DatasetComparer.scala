@@ -1,9 +1,9 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.scalatest.Suite
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, Dataset, Row}
+import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
+import org.scalatest.Suite
 
 import scala.reflect.ClassTag
 
@@ -48,30 +48,30 @@ Expected DataFrame Row Count: '${expectedCount}'
     orderedComparison: Boolean = true
   ): Unit = {
     if (!actualDS.schema.equals(expectedDS.schema)) {
-      throw new DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
+      throw DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
     }
-    if (orderedComparison == true) {
+    if (orderedComparison) {
       if (!actualDS.collect().sameElements(expectedDS.collect())) {
-        throw new DatasetContentMismatch(contentMismatchMessage(actualDS, expectedDS))
+        throw DatasetContentMismatch(contentMismatchMessage(actualDS, expectedDS))
       }
     } else {
       val actualSortedDF = defaultSortDataset(actualDS)
       val expectedSortedDF = defaultSortDataset(expectedDS)
       if (!actualSortedDF.collect().sameElements(expectedSortedDF.collect())) {
-        throw new DatasetContentMismatch(contentMismatchMessage(actualSortedDF, expectedSortedDF))
+        throw DatasetContentMismatch(contentMismatchMessage(actualSortedDF, expectedSortedDF))
       }
     }
   }
 
   def defaultSortDataset[T](ds: Dataset[T]): Dataset[T] = {
     val colNames = ds.columns.sorted
-    val cols = colNames.map(col(_))
+    val cols = colNames.map(col)
     ds.sort(cols: _*)
   }
 
   def assertLargeDatasetEquality[U](actualDS: Dataset[U], expectedDS: Dataset[U])(implicit UCT: ClassTag[U]): Unit = {
     if (!actualDS.schema.equals(expectedDS.schema)) {
-      throw new DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
+      throw DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
     }
     try {
       actualDS.rdd.cache
@@ -80,7 +80,7 @@ Expected DataFrame Row Count: '${expectedCount}'
       val actualCount = actualDS.rdd.count
       val expectedCount = expectedDS.rdd.count
       if (actualCount != expectedCount) {
-        throw new DatasetContentMismatch(countMismatchMessage(actualCount, expectedCount))
+        throw DatasetContentMismatch(countMismatchMessage(actualCount, expectedCount))
       }
 
       val expectedIndexValue: RDD[(Long, U)] = zipWithIndex(actualDS.rdd)
