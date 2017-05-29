@@ -1,9 +1,10 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.apache.spark.rdd.RDD
+import org.apache.spark.rdd.{PairRDDFunctions, RDD}
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
 import org.scalatest.Suite
+import org.apache.spark.SparkContext._
 
 import scala.reflect.ClassTag
 
@@ -69,7 +70,7 @@ Expected DataFrame Row Count: '${expectedCount}'
     ds.sort(cols: _*)
   }
 
-  def assertLargeDatasetEquality[U](actualDS: Dataset[U], expectedDS: Dataset[U])(implicit UCT: ClassTag[U]): Unit = {
+  def assertLargeDatasetEquality[T: ClassTag](actualDS: Dataset[T], expectedDS: Dataset[T]): Unit = {
     if (!actualDS.schema.equals(expectedDS.schema)) {
       throw DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
     }
@@ -83,8 +84,8 @@ Expected DataFrame Row Count: '${expectedCount}'
         throw DatasetContentMismatch(countMismatchMessage(actualCount, expectedCount))
       }
 
-      val expectedIndexValue: RDD[(Long, U)] = zipWithIndex(actualDS.rdd)
-      val resultIndexValue: RDD[(Long, U)] = zipWithIndex(expectedDS.rdd)
+      val expectedIndexValue: RDD[(Long, T)] = zipWithIndex(actualDS.rdd)
+      val resultIndexValue: RDD[(Long, T)] = zipWithIndex(expectedDS.rdd)
       val unequalRDD = expectedIndexValue
         .join(resultIndexValue)
         .filter {
@@ -105,7 +106,7 @@ Expected DataFrame Row Count: '${expectedCount}'
    * Rows together regardless of if the source is different but still compare based on
    * the order.
    */
-  def zipWithIndex[U](rdd: RDD[U]) = {
+  def zipWithIndex[T](rdd: RDD[T]): RDD[(Long, T)] = {
     rdd.zipWithIndex().map {
       case (row, idx) =>
         (idx, row)
