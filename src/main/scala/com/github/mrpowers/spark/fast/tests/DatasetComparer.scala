@@ -1,5 +1,6 @@
 package com.github.mrpowers.spark.fast.tests
 
+import com.github.mrpowers.spark.fast.tests.DatasetComparerLike.naiveEquality
 import org.apache.spark.rdd.{PairRDDFunctions, RDD}
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
@@ -13,6 +14,12 @@ case class DatasetContentMismatch(smth: String) extends Exception(smth)
 trait DatasetComparer
     extends TestSuite
     with DatasetComparerLike { self: Suite =>
+}
+
+object DatasetComparerLike {
+  def naiveEquality[T](o1: T, o2: T): Boolean = {
+    o1.equals(o2)
+  }
 }
 
 trait DatasetComparerLike extends TestSuiteLike {
@@ -69,10 +76,8 @@ Expected DataFrame Row Count: '${expectedCount}'
     ds.sort(cols: _*)
   }
 
-  def assertLargeDatasetEquality[T: ClassTag](
-    actualDS: Dataset[T],
-    expectedDS: Dataset[T]
-  ): Unit = {
+  def assertLargeDatasetEquality[T: ClassTag](actualDS: Dataset[T], expectedDS: Dataset[T],
+    equals: (T, T) => Boolean = naiveEquality _): Unit = {
     if (!actualDS.schema.equals(expectedDS.schema)) {
       throw DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
     }
@@ -92,7 +97,7 @@ Expected DataFrame Row Count: '${expectedCount}'
         .join(resultIndexValue)
         .filter {
           case (idx, (o1, o2)) =>
-            !o1.equals(o2)
+            !equals(o1, o2)
         }
       val maxUnequalRowsToShow = 10
       assertEmpty(unequalRDD.take(maxUnequalRowsToShow))

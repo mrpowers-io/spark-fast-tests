@@ -2,6 +2,11 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.scalatest.FunSpec
 
+object Person {
+  def caseInsensitivePersonEquals(some: Person, other: Person): Boolean = {
+    some.name.equalsIgnoreCase(other.name) && some.age == other.age
+  }
+}
 case class Person(name: String, age: Int)
 
 class DatasetComparerSpec
@@ -99,6 +104,20 @@ class DatasetComparerSpec
 
     }
 
+    it("succeeds if custom comparator returns true") {
+      val sourceDS = Seq(Person("bob", 1), Person("alice", 5)).toDS
+      val expectedDS = Seq(Person("Bob", 1), Person("Alice", 5)).toDS
+      assertLargeDatasetEquality(sourceDS, expectedDS, Person.caseInsensitivePersonEquals)
+    }
+
+    it("fails if custom comparator for returns false") {
+      val sourceDS = Seq(Person("bob", 10), Person("alice", 5)).toDS
+      val expectedDS = Seq(Person("Bob", 1), Person("Alice", 5)).toDS
+      intercept[org.scalatest.exceptions.TestFailedException] {
+        assertLargeDatasetEquality(sourceDS, expectedDS, Person.caseInsensitivePersonEquals)
+      }
+    }
+
   }
 
   describe("#assertSmallDatasetEquality") {
@@ -132,7 +151,6 @@ class DatasetComparerSpec
       ).toDS
 
       assertSmallDatasetEquality(sourceDS, expectedDS)
-
     }
 
     it("can performed unordered DataFrame comparisons") {
