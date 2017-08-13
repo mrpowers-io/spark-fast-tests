@@ -2,7 +2,7 @@ package com.github.mrpowers.spark.fast.tests
 
 import com.github.mrpowers.spark.fast.tests.DatasetComparerLike.naiveEquality
 import org.apache.spark.rdd.{PairRDDFunctions, RDD}
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{DataFrame, Dataset}
 import org.apache.spark.sql.functions._
 import org.scalatest.Suite
 
@@ -12,6 +12,11 @@ case class DatasetSchemaMismatch(smth: String) extends Exception(smth)
 case class DatasetContentMismatch(smth: String) extends Exception(smth)
 
 trait DatasetComparer
+    extends TestSuite
+    with DatasetComparerLike { self: Suite =>
+}
+
+trait DataFrameComparer
     extends TestSuite
     with DatasetComparerLike { self: Suite =>
 }
@@ -70,6 +75,14 @@ Expected DataFrame Row Count: '${expectedCount}'
     }
   }
 
+  def assertSmallDataFrameEquality(
+    actualDF: DataFrame,
+    expectedDF: DataFrame,
+    orderedComparison: Boolean = true
+  ): Unit = {
+    assertSmallDatasetEquality(actualDF, expectedDF, orderedComparison)
+  }
+
   def defaultSortDataset[T](ds: Dataset[T]): Dataset[T] = {
     val colNames = ds.columns.sorted
     val cols = colNames.map(col)
@@ -106,6 +119,13 @@ Expected DataFrame Row Count: '${expectedCount}'
       actualDS.rdd.unpersist()
       expectedDS.rdd.unpersist()
     }
+  }
+
+  def assertLargeDataFrameEquality(
+    actualDF: DataFrame,
+    expectedDF: DataFrame
+  ): Unit = {
+    assertLargeDatasetEquality(actualDF, expectedDF)
   }
 
   /**

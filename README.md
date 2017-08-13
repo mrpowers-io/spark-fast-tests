@@ -40,6 +40,10 @@ assertLargeDatasetEquality(sourceDS, expectedDS)
 // throws an exception because the Datasets have different data
 ```
 
+The `DatasetComparer` has `assertSmallDatasetEquality` and `assertLargeDatasetEquality` methods to compare either Datasets or DataFrames.
+
+If you only need to compare DataFrames, you can use the `DataFrameComparer` with the associated `assertSmallDataFrameEquality` and `assertLargeDataFrameEquality` methods.  Under the hood, `DataFrameComparer` uses the `assertSmallDatasetEquality` and `assertLargeDatasetEquality`.
+
 ## Setup
 
 Add the [sbt-spark-package plugin](https://github.com/databricks/sbt-spark-package) so you can install Spark Packages.
@@ -47,7 +51,7 @@ Add the [sbt-spark-package plugin](https://github.com/databricks/sbt-spark-packa
 Then add these lines to your `build.sbt` file to install Spark SQL and spark-fast-tests:
 
 ```scala
-spDependencies += "MrPowers/spark-fast-tests:0.2.0"
+spDependencies += "MrPowers/spark-fast-tests:0.4.0"
 sparkComponents ++= Seq("sql")
 ```
 
