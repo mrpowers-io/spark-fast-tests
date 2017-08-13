@@ -19,9 +19,11 @@ spDescription := "Test your code quickly"
 version := "0.3.0"
 
 scalaVersion := "2.11.8"
-sparkVersion := "2.1.0"
+sparkVersion := "2.2.0"
 
 sparkComponents ++= Seq("sql")
+
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "provided"
 
 artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
   artifact.name + "_2.11" + "-" + sparkVersion.value + "_" + module.revision + "." + artifact.extension
