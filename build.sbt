@@ -16,7 +16,7 @@ spShortDescription := "Fast tests with Spark"
 
 spDescription := "Test your code quickly"
 
-version := "0.3.0"
+version := "0.4.0"
 
 scalaVersion := "2.11.8"
 sparkVersion := "2.2.0"
