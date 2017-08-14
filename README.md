@@ -6,7 +6,7 @@ A fast Apache Spark testing framework with beautifully formatted error messages!
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ab42211c18984740bee7f87c631a8f42)](https://www.codacy.com/app/MrPowers/spark-fast-tests?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MrPowers/spark-fast-tests&amp;utm_campaign=Badge_Grade)
 
-For example, the `assertSmallDatasetEquality` method can be used to compare two DataFrames.
+For example, the `assertSmallDatasetEquality` method can be used to compare two Datasets (or two DataFrames).
 
 ```scala
 val sourceDF = Seq(
@@ -42,7 +42,7 @@ assertLargeDatasetEquality(sourceDS, expectedDS)
 
 The `DatasetComparer` has `assertSmallDatasetEquality` and `assertLargeDatasetEquality` methods to compare either Datasets or DataFrames.
 
-If you only need to compare DataFrames, you can use the `DataFrameComparer` with the associated `assertSmallDataFrameEquality` and `assertLargeDataFrameEquality` methods.  Under the hood, `DataFrameComparer` uses the `assertSmallDatasetEquality` and `assertLargeDatasetEquality`.
+If you only need to compare DataFrames, you can use `DataFrameComparer` with the associated `assertSmallDataFrameEquality` and `assertLargeDataFrameEquality` methods.  Under the hood, `DataFrameComparer` uses the `assertSmallDatasetEquality` and `assertLargeDatasetEquality`.
 
 ## Setup
 

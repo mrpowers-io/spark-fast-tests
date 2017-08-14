@@ -2,7 +2,10 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.scalatest.FunSpec
 
-class RDDComparerSpec extends FunSpec with RDDComparer with SparkSessionTestWrapper {
+class RDDComparerSpec
+    extends FunSpec
+    with RDDComparer
+    with SparkSessionTestWrapper {
 
   describe("contentMismatchMessage") {
 
