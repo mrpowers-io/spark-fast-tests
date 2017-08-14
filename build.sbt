@@ -33,3 +33,6 @@ artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
 licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".sbtcredentials")
+
+fork in Test := true
+javaOptions ++= Seq("-Xms512M", "-Xmx2048M", "-XX:+CMSClassUnloadingEnabled","-Duser.timezone=GMT")
