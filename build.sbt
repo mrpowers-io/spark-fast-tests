@@ -16,17 +16,18 @@ spShortDescription := "Fast tests with Spark"
 
 spDescription := "Test your code quickly"
 
-version := "0.4.0"
-
 scalaVersion := "2.11.8"
 sparkVersion := "2.2.0"
 
+version := s"${sparkVersion.value}_0.5.0"
+
 sparkComponents ++= Seq("sql")
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "provided"
+libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.1"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1"
 
 artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
-  artifact.name + "_2.11" + "-" + sparkVersion.value + "_" + module.revision + "." + artifact.extension
+  s"${artifact.name}-${module.revision}.${artifact.extension}"
 }
 
 // All Spark Packages need a license
