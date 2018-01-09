@@ -105,6 +105,29 @@ class ColumnComparerSpec
 
     }
 
+    it("works properly, even when ArrayType is compared") {
+
+      val sourceData = Seq(
+        Row(Array(1, 2, 3), Array(1, 2, 3)),
+        Row(Array(), Array()),
+        Row(Array(3, 2, 1), Array(1, 2, 3)),
+        Row(null, null)
+      )
+
+      val sourceSchema = List(
+        StructField("foo", ArrayType(IntegerType), true),
+        StructField("expected_foo", ArrayType(IntegerType), true)
+      )
+
+      val sourceDF = spark.createDataFrame(
+        spark.sparkContext.parallelize(sourceData),
+        StructType(sourceSchema)
+      )
+
+      assertColumnEquality(sourceDF, "foo", "expected_foo")
+
+    }
+
   }
 
 }
