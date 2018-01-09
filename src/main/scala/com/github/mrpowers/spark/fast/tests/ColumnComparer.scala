@@ -27,8 +27,8 @@ Columns aren't equal
 
     val zippedArrays = colName1Elements.zip(colName2Elements)
 
-    def compareSets(tuple: (Any, Any), a: mutable.WrappedArray[_]) = {
-      val equalSets = a.toSet == tuple._2.asInstanceOf[mutable.WrappedArray[_]].toSet
+    def compareSets(a: mutable.WrappedArray[_], b: mutable.WrappedArray[_]) = {
+      val equalSets = a.toSet == b.toSet
       if (!equalSets) {
         throw ColumnMismatch(mismatchMessage)
       }
@@ -37,10 +37,20 @@ Columns aren't equal
     val isNotArrayElement = zippedArrays.map((tuple) => {
       val comparingArrayElements = tuple._1 match {
         case a: mutable.WrappedArray[_] =>
-          compareSets(tuple, a)
+          tuple._2 match {
+            case b: mutable.WrappedArray[_] =>
+              compareSets(a, b)
+            case _ => throw ColumnMismatch(mismatchMessage)
+          }
           false
-        case a =>
+        case a if Option(a).isEmpty && Option(tuple._2).isDefined || Option(tuple._2).isEmpty && Option(a).isDefined =>
+
+          throw ColumnMismatch(mismatchMessage)
+        case a if Option(a).isEmpty && Option(tuple._2).isEmpty => false
+        case _ =>
+
           true
+
       }
       comparingArrayElements
     }).exists(a => a)

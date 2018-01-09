@@ -110,7 +110,8 @@ class ColumnComparerSpec
       val sourceData = Seq(
         Row(Array(1, 2, 3), Array(1, 2, 3)),
         Row(Array(), Array()),
-        Row(Array(3, 2, 1), Array(1, 2, 3))
+        Row(Array(3, 2, 1), Array(1, 2, 3)),
+        Row(null, null)
       )
 
       val sourceSchema = List(
