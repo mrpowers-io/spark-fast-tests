@@ -105,6 +105,29 @@ class ColumnComparerSpec
 
     }
 
+    it("works for ArrayType columns") {
+
+      val sourceData = Seq(
+        Row(Array("a"), Array("a")),
+        Row(Array("a", "b"), Array("a", "b")),
+        Row(Array(), Array()),
+        Row(null, null)
+      )
+
+      val sourceSchema = List(
+        StructField("l1", ArrayType(StringType, true), true),
+        StructField("l2", ArrayType(StringType, true), true)
+      )
+
+      val sourceDF = spark.createDataFrame(
+        spark.sparkContext.parallelize(sourceData),
+        StructType(sourceSchema)
+      )
+
+      assertColumnEquality(sourceDF, "l1", "l2")
+
+    }
+
   }
 
 }
