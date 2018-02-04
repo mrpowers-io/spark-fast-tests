@@ -29,7 +29,7 @@ object DatasetComparerLike {
 
 trait DatasetComparerLike extends TestSuiteLike {
 
-  def schemaMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
+  private def schemaMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
     s"""
 Actual Schema:
 ${actualDS.schema}
@@ -38,7 +38,7 @@ ${expectedDS.schema}
 """
   }
 
-  def contentMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
+  private def contentMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
     s"""
 Actual DataFrame Content:
 ${DataFramePrettyPrint.showString(actualDS.toDF(), 5)}
@@ -47,13 +47,16 @@ ${DataFramePrettyPrint.showString(expectedDS.toDF(), 5)}
 """
   }
 
-  def countMismatchMessage(actualCount: Long, expectedCount: Long): String = {
+  private def countMismatchMessage(actualCount: Long, expectedCount: Long): String = {
     s"""
 Actual DataFrame Row Count: '${actualCount}'
 Expected DataFrame Row Count: '${expectedCount}'
 """
   }
 
+  /**
+   * Raises an error unless `actualDS` and `expectedDS` are equal
+   */
   def assertSmallDatasetEquality[T](
     actualDS: Dataset[T],
     expectedDS: Dataset[T],
@@ -75,6 +78,9 @@ Expected DataFrame Row Count: '${expectedCount}'
     }
   }
 
+  /**
+   * Raises an error unless `actualDF` and `expectedDF` are equal
+   */
   def assertSmallDataFrameEquality(
     actualDF: DataFrame,
     expectedDF: DataFrame,
@@ -89,6 +95,9 @@ Expected DataFrame Row Count: '${expectedCount}'
     ds.sort(cols: _*)
   }
 
+  /**
+   * Raises an error unless `actualDS` and `expectedDS` are equal
+   */
   def assertLargeDatasetEquality[T: ClassTag](actualDS: Dataset[T], expectedDS: Dataset[T],
     equals: (T, T) => Boolean = naiveEquality _): Unit = {
     if (!actualDS.schema.equals(expectedDS.schema)) {
@@ -121,6 +130,9 @@ Expected DataFrame Row Count: '${expectedCount}'
     }
   }
 
+  /**
+   * Raises an error unless `actualDF` and `expectedDF` are equal
+   */
   def assertLargeDataFrameEquality(
     actualDF: DataFrame,
     expectedDF: DataFrame
@@ -133,7 +145,7 @@ Expected DataFrame Row Count: '${expectedCount}'
    * Rows together regardless of if the source is different but still compare based on
    * the order.
    */
-  def zipWithIndex[T](rdd: RDD[T]): RDD[(Long, T)] = {
+  private def zipWithIndex[T](rdd: RDD[T]): RDD[(Long, T)] = {
     rdd.zipWithIndex().map {
       case (row, idx) =>
         (idx, row)
