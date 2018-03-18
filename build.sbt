@@ -27,7 +27,7 @@ libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.1"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1"
 
 artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
-  s"${artifact.name}-${module.revision}.${artifact.extension}"
+  s"${artifact.name}_${module.revision}.${artifact.extension}"
 }
 
 // All Spark Packages need a license
