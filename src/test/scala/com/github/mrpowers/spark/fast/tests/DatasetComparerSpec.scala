@@ -80,7 +80,7 @@ class DatasetComparerSpec
         (5)
       ).toDF("number")
 
-      intercept[org.scalatest.exceptions.TestFailedException] {
+      intercept[DatasetContentMismatch] {
         assertLargeDatasetEquality(sourceDF, expectedDF)
       }
 
@@ -98,7 +98,7 @@ class DatasetComparerSpec
         Person("lucy", 5)
       ).toDS
 
-      intercept[org.scalatest.exceptions.TestFailedException] {
+      intercept[DatasetContentMismatch] {
         assertLargeDatasetEquality(sourceDS, expectedDS)
       }
 
@@ -113,7 +113,7 @@ class DatasetComparerSpec
     it("fails if custom comparator for returns false") {
       val sourceDS = Seq(Person("bob", 10), Person("alice", 5)).toDS
       val expectedDS = Seq(Person("Bob", 1), Person("Alice", 5)).toDS
-      intercept[org.scalatest.exceptions.TestFailedException] {
+      intercept[DatasetContentMismatch] {
         assertLargeDatasetEquality(sourceDS, expectedDS, Person.caseInsensitivePersonEquals)
       }
     }

@@ -57,7 +57,7 @@ class DataFrameComparerSpec
         (5)
       ).toDF("number")
 
-      intercept[org.scalatest.exceptions.TestFailedException] {
+      intercept[DatasetContentMismatch] {
         assertLargeDataFrameEquality(sourceDF, expectedDF)
       }
 

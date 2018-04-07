@@ -23,8 +23,7 @@ version := "0.7.0"
 
 sparkComponents ++= Seq("sql")
 
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.1"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
 artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
   s"${artifact.name}_${module.revision}.${artifact.extension}"
