@@ -9,7 +9,6 @@ import scala.reflect.ClassTag
 
 case class DatasetSchemaMismatch(smth: String) extends Exception(smth)
 case class DatasetContentMismatch(smth: String) extends Exception(smth)
-case class SomeError(smth: String) extends Exception(smth)
 
 trait DatasetComparer extends DatasetComparerLike
 
