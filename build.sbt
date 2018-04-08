@@ -12,7 +12,7 @@ resolvers += "jitpack" at "https://jitpack.io"
 
 name := "spark-fast-tests"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.11.12"
 
 version := "0.8.0"
 
