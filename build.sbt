@@ -23,7 +23,8 @@ version := "0.7.0"
 
 sparkComponents ++= Seq("sql")
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+libraryDependencies += "com.lihaoyi" %% "utest" % "0.6.3" % "test"
+testFrameworks += new TestFramework("utest.runner.Framework")
 
 artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
   s"${artifact.name}_${module.revision}.${artifact.extension}"
