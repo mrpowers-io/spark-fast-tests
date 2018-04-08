@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# link to the spark-daria GitHub release script: https://github.com/MrPowers/spark-daria/blob/master/scripts/github_release.sh
+# need to clone the spark-daria repo and feed the release script as an argument to this script
+
 SPARK_DARIA_GITHUB_RELEASE=$1
 if [ "$SPARK_DARIA_GITHUB_RELEASE" = "" ]
   then
