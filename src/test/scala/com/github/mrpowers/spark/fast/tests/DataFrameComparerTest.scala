@@ -1,5 +1,7 @@
 package com.github.mrpowers.spark.fast.tests
 
+import org.apache.spark.sql.types.{IntegerType, StringType}
+import com.github.mrpowers.spark.daria.sql.SparkSessionExt._
 import utest._
 
 object DataFrameComparerTest
@@ -9,134 +11,130 @@ object DataFrameComparerTest
 
   val tests = Tests {
 
-    'assertLargeDataFrameEquality - {
-      import spark.implicits._
+    'checkingDataFrameEquality - {
 
       "does nothing if the DataFrames have the same schemas and content" - {
-        val sourceDF = Seq(
-          (1),
-          (5)
-        ).toDF("number")
+        val sourceDF = spark.createDF(
+          List(
+            (1),
+            (5)
+          ), List(
+            ("number", IntegerType, true)
+          )
+        )
 
-        val expectedDF = Seq(
-          (1),
-          (5)
-        ).toDF("number")
+        val expectedDF = spark.createDF(
+          List(
+            (1),
+            (5)
+          ), List(
+            ("number", IntegerType, true)
+          )
+        )
 
+        assertSmallDataFrameEquality(sourceDF, expectedDF)
         assertLargeDataFrameEquality(sourceDF, expectedDF)
       }
 
       "throws an error if the DataFrames have different schemas" - {
-        val sourceDF = Seq(
-          (1),
-          (5)
-        ).toDF("number")
+        val sourceDF = spark.createDF(
+          List(
+            (1),
+            (5)
+          ), List(
+            ("number", IntegerType, true)
+          )
+        )
 
-        val expectedDF = Seq(
-          (1, "word"),
-          (5, "word")
-        ).toDF("number", "word")
+        val expectedDF = spark.createDF(
+          List(
+            (1, "word"),
+            (5, "word")
+          ), List(
+            ("number", IntegerType, true),
+            ("word", StringType, true)
+          )
+        )
 
         val e = intercept[DatasetSchemaMismatch] {
           assertLargeDataFrameEquality(sourceDF, expectedDF)
         }
+        val e2 = intercept[DatasetSchemaMismatch] {
+          assertSmallDataFrameEquality(sourceDF, expectedDF)
+        }
       }
 
       "throws an error if the DataFrames content is different" - {
-        val sourceDF = Seq(
-          (1),
-          (5)
-        ).toDF("number")
+        val sourceDF = spark.createDF(
+          List(
+            (1),
+            (5)
+          ), List(
+            ("number", IntegerType, true)
+          )
+        )
 
-        val expectedDF = Seq(
-          (10),
-          (5)
-        ).toDF("number")
+        val expectedDF = spark.createDF(
+          List(
+            (10),
+            (5)
+          ), List(
+            ("number", IntegerType, true)
+          )
+        )
 
         val e = intercept[DatasetContentMismatch] {
           assertLargeDataFrameEquality(sourceDF, expectedDF)
+        }
+        val e2 = intercept[DatasetContentMismatch] {
+          assertSmallDataFrameEquality(sourceDF, expectedDF)
         }
       }
 
     }
 
     'assertSmallDataFrameEquality - {
-      import spark.implicits._
-
-      "does nothing true if the DataFrames have the same schemas and content" - {
-        val sourceDF = Seq(
-          (1),
-          (5)
-        ).toDF("number")
-
-        val expectedDF = Seq(
-          (1),
-          (5)
-        ).toDF("number")
-
-        assertSmallDataFrameEquality(sourceDF, expectedDF)
-      }
 
       "can performed unordered DataFrame comparisons" - {
-        val sourceDF = Seq(
-          (1),
-          (5)
-        ).toDF("number")
-
-        val expectedDF = Seq(
-          (5),
-          (1)
-        ).toDF("number")
-
+        val sourceDF = spark.createDF(
+          List(
+            (1),
+            (5)
+          ), List(
+            ("number", IntegerType, true)
+          )
+        )
+        val expectedDF = spark.createDF(
+          List(
+            (5),
+            (1)
+          ), List(
+            ("number", IntegerType, true)
+          )
+        )
         assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
       }
 
       "throws an error for unordered DataFrame comparisons that don't match" - {
-        val sourceDF = Seq(
-          (1),
-          (5)
-        ).toDF("number")
-
-        val expectedDF = Seq(
-          (5),
-          (1),
-          (10)
-        ).toDF("number")
-
+        val sourceDF = spark.createDF(
+          List(
+            (1),
+            (5)
+          ), List(
+            ("number", IntegerType, true)
+          )
+        )
+        val expectedDF = spark.createDF(
+          List(
+            (5),
+            (1),
+            (10)
+          ), List(
+            ("number", IntegerType, true)
+          )
+        )
         val e = intercept[DatasetContentMismatch] {
           assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
-        }
-      }
-
-      "throws an error if the Datasets have the different schemas" - {
-        val sourceDF = Seq(
-          (1),
-          (5)
-        ).toDF("number")
-
-        val expectedDF = Seq(
-          (1, "word"),
-          (5, "word")
-        ).toDF("number", "word")
-
-        val e = intercept[DatasetSchemaMismatch] {
-          assertSmallDataFrameEquality(sourceDF, expectedDF)
-        }
-      }
-
-      "returns false if the DataFrames content is different" - {
-        val sourceDF = Seq(
-          (1),
-          (5)
-        ).toDF("number")
-
-        val expectedDF = Seq(
-          (10),
-          (5)
-        ).toDF("number")
-
-        val e = intercept[DatasetContentMismatch] {
-          assertSmallDataFrameEquality(sourceDF, expectedDF)
         }
       }
 

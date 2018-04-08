@@ -26,6 +26,8 @@ sparkComponents ++= Seq("sql")
 libraryDependencies += "com.lihaoyi" %% "utest" % "0.6.3" % "test"
 testFrameworks += new TestFramework("utest.runner.Framework")
 
+libraryDependencies += "mrpowers" % "spark-daria" % "2.3.0_0.18.0" % "test"
+
 artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
   s"${artifact.name}_${module.revision}.${artifact.extension}"
 }
