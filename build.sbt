@@ -19,7 +19,7 @@ spDescription := "Test your code quickly"
 scalaVersion := "2.11.8"
 sparkVersion := "2.3.0"
 
-version := "0.7.0"
+version := "0.8.0"
 
 sparkComponents ++= Seq("sql")
 
