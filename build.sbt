@@ -8,25 +8,20 @@ ScalariformKeys.preferences := ScalariformKeys.preferences.value
   .setPreference(DoubleIndentClassDeclaration, true)
   .setPreference(SpacesAroundMultiImports, false)
 
+resolvers += "jitpack" at "https://jitpack.io"
+
 name := "spark-fast-tests"
 
-spName := "MrPowers/spark-fast-tests"
-
-spShortDescription := "Fast tests with Spark"
-
-spDescription := "Test your code quickly"
-
 scalaVersion := "2.11.8"
-sparkVersion := "2.3.0"
 
 version := "0.8.0"
 
-sparkComponents ++= Seq("sql")
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.3.0" % "provided"
 
 libraryDependencies += "com.lihaoyi" %% "utest" % "0.6.3" % "test"
 testFrameworks += new TestFramework("utest.runner.Framework")
 
-libraryDependencies += "mrpowers" % "spark-daria" % "2.3.0_0.18.0" % "test"
+libraryDependencies += "com.github.mrpowers" % "spark-daria" % "v2.3.0_0.18.0" % "test"
 
 artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
   s"${artifact.name}_${module.revision}.${artifact.extension}"
