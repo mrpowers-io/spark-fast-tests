@@ -13,7 +13,7 @@ resolvers += "jitpack" at "https://jitpack.io"
 name := "spark-fast-tests"
 
 scalaVersion := "2.11.12"
-val sparkVersion = "2.2.0"
+val sparkVersion = "2.2.1"
 val sparkDariaVersion = s"v${sparkVersion}_0.18.0"
 
 version := "0.9.0"
@@ -26,7 +26,7 @@ testFrameworks += new TestFramework("utest.runner.Framework")
 libraryDependencies += "com.github.mrpowers" % "spark-daria" % sparkDariaVersion % "test"
 
 artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
-  s"${artifact.name}_${module.revision}.${artifact.extension}"
+  artifact.name + "_" + sv.binary + "-" + sparkVersion + "_" + module.revision + "." + artifact.extension
 }
 
 // All Spark Packages need a license
