@@ -67,7 +67,7 @@ Expected DataFrame Row Count: '${expectedCount}'
     }
   }
 
-  private def defaultSortDataset[T](ds: Dataset[T]): Dataset[T] = {
+  def defaultSortDataset[T](ds: Dataset[T]): Dataset[T] = {
     val colNames = ds.columns.sorted
     val cols = colNames.map(col)
     ds.sort(cols: _*)
@@ -128,27 +128,3 @@ Expected DataFrame Row Count: '${expectedCount}'
 
 }
 
-trait DataFrameComparer extends DatasetComparer {
-
-  /**
-   * Raises an error unless `actualDF` and `expectedDF` are equal
-   */
-  def assertSmallDataFrameEquality(
-    actualDF: DataFrame,
-    expectedDF: DataFrame,
-    orderedComparison: Boolean = true
-  ): Unit = {
-    assertSmallDatasetEquality(actualDF, expectedDF, orderedComparison)
-  }
-
-  /**
-   * Raises an error unless `actualDF` and `expectedDF` are equal
-   */
-  def assertLargeDataFrameEquality(
-    actualDF: DataFrame,
-    expectedDF: DataFrame
-  ): Unit = {
-    assertLargeDatasetEquality(actualDF, expectedDF)
-  }
-
-}
