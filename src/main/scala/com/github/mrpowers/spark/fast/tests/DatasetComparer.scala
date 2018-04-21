@@ -2,7 +2,7 @@ package com.github.mrpowers.spark.fast.tests
 
 import com.github.mrpowers.spark.fast.tests.DatasetComparerLike.naiveEquality
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, Dataset}
+import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
 
 import scala.reflect.ClassTag
