@@ -10,17 +10,13 @@ import scala.reflect.ClassTag
 case class DatasetSchemaMismatch(smth: String) extends Exception(smth)
 case class DatasetContentMismatch(smth: String) extends Exception(smth)
 
-trait DatasetComparer extends DatasetComparerLike
-
-trait DataFrameComparer extends DatasetComparerLike
-
 object DatasetComparerLike {
   def naiveEquality[T](o1: T, o2: T): Boolean = {
     o1.equals(o2)
   }
 }
 
-trait DatasetComparerLike {
+trait DatasetComparer {
 
   private def schemaMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
     s"""
@@ -71,18 +67,7 @@ Expected DataFrame Row Count: '${expectedCount}'
     }
   }
 
-  /**
-   * Raises an error unless `actualDF` and `expectedDF` are equal
-   */
-  def assertSmallDataFrameEquality(
-    actualDF: DataFrame,
-    expectedDF: DataFrame,
-    orderedComparison: Boolean = true
-  ): Unit = {
-    assertSmallDatasetEquality(actualDF, expectedDF, orderedComparison)
-  }
-
-  def defaultSortDataset[T](ds: Dataset[T]): Dataset[T] = {
+  private def defaultSortDataset[T](ds: Dataset[T]): Dataset[T] = {
     val colNames = ds.columns.sorted
     val cols = colNames.map(col)
     ds.sort(cols: _*)
@@ -91,8 +76,11 @@ Expected DataFrame Row Count: '${expectedCount}'
   /**
    * Raises an error unless `actualDS` and `expectedDS` are equal
    */
-  def assertLargeDatasetEquality[T: ClassTag](actualDS: Dataset[T], expectedDS: Dataset[T],
-    equals: (T, T) => Boolean = naiveEquality _): Unit = {
+  def assertLargeDatasetEquality[T: ClassTag](
+    actualDS: Dataset[T],
+    expectedDS: Dataset[T],
+    equals: (T, T) => Boolean = naiveEquality _
+  ): Unit = {
     if (!actualDS.schema.equals(expectedDS.schema)) {
       throw DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
     }
@@ -127,16 +115,6 @@ Expected DataFrame Row Count: '${expectedCount}'
   }
 
   /**
-   * Raises an error unless `actualDF` and `expectedDF` are equal
-   */
-  def assertLargeDataFrameEquality(
-    actualDF: DataFrame,
-    expectedDF: DataFrame
-  ): Unit = {
-    assertLargeDatasetEquality(actualDF, expectedDF)
-  }
-
-  /**
    * Zip RDD's with precise indexes. This is used so we can join two DataFrame's
    * Rows together regardless of if the source is different but still compare based on
    * the order.
@@ -146,6 +124,31 @@ Expected DataFrame Row Count: '${expectedCount}'
       case (row, idx) =>
         (idx, row)
     }
+  }
+
+}
+
+trait DataFrameComparer extends DatasetComparer {
+
+  /**
+   * Raises an error unless `actualDF` and `expectedDF` are equal
+   */
+  def assertSmallDataFrameEquality(
+    actualDF: DataFrame,
+    expectedDF: DataFrame,
+    orderedComparison: Boolean = true
+  ): Unit = {
+    assertSmallDatasetEquality(actualDF, expectedDF, orderedComparison)
+  }
+
+  /**
+   * Raises an error unless `actualDF` and `expectedDF` are equal
+   */
+  def assertLargeDataFrameEquality(
+    actualDF: DataFrame,
+    expectedDF: DataFrame
+  ): Unit = {
+    assertLargeDatasetEquality(actualDF, expectedDF)
   }
 
 }
