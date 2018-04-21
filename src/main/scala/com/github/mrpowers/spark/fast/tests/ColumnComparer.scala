@@ -26,4 +26,13 @@ Columns aren't equal
     }
   }
 
+  // ace stands for 'assertColumnEquality'
+  def ace(
+    df: DataFrame,
+    colName1: String,
+    colName2: String
+  ): Unit = {
+    assertColumnEquality(df, colName1, colName2)
+  }
+
 }
