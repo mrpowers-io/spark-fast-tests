@@ -13,15 +13,17 @@ resolvers += "jitpack" at "https://jitpack.io"
 name := "spark-fast-tests"
 
 scalaVersion := "2.11.12"
+val sparkVersion = "2.3.0"
+val sparkDariaVersion = s"v${sparkVersion}_0.18.0"
 
 version := "0.8.0"
 
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.3.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
 
 libraryDependencies += "com.lihaoyi" %% "utest" % "0.6.3" % "test"
 testFrameworks += new TestFramework("utest.runner.Framework")
 
-libraryDependencies += "com.github.mrpowers" % "spark-daria" % "v2.3.0_0.18.0" % "test"
+libraryDependencies += "com.github.mrpowers" % "spark-daria" % sparkDariaVersion % "test"
 
 artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
   s"${artifact.name}_${module.revision}.${artifact.extension}"

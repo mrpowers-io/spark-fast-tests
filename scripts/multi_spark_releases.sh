@@ -12,6 +12,6 @@ fi
 
 for sparkVersion in 2.2.0 2.2.1 2.3.0; do
   echo $sparkVersion
-  sed -i '' "s/^sparkVersion.*/sparkVersion := \"$sparkVersion\"/" build.sbt
+  sed -i '' "s/^val sparkVersion.*/val sparkVersion = \"$sparkVersion\"/" build.sbt
   $SPARK_DARIA_GITHUB_RELEASE package
 done
