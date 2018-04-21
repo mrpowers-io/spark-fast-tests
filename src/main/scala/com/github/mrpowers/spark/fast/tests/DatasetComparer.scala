@@ -30,9 +30,9 @@ ${expectedDS.schema}
   private def contentMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
     s"""
 Actual DataFrame Content:
-${DataFramePrettyPrint.showString(actualDS.toDF(), 5)}
+${DataFramePrettyPrint.showString(actualDS.toDF(), 10)}
 Expected DataFrame Content:
-${DataFramePrettyPrint.showString(expectedDS.toDF(), 5)}
+${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
 """
   }
 
