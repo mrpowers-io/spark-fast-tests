@@ -14,7 +14,7 @@ name := "spark-fast-tests"
 
 scalaVersion := "2.11.12"
 val sparkVersion = "2.3.0"
-val sparkDariaVersion = s"v${sparkVersion}_0.18.0"
+val sparkDariaVersion = s"v${sparkVersion}_0.21.0"
 
 version := "0.9.0"
 

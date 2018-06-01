@@ -49,10 +49,17 @@ Expected DataFrame Row Count: '${expectedCount}'
   def assertSmallDatasetEquality[T](
     actualDS: Dataset[T],
     expectedDS: Dataset[T],
+    ignoreNullable: Boolean = false,
     orderedComparison: Boolean = true
   ): Unit = {
-    if (!actualDS.schema.equals(expectedDS.schema)) {
-      throw DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
+    if (ignoreNullable) {
+      if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable = true)) {
+        throw DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
+      }
+    } else {
+      if (!actualDS.schema.equals(expectedDS.schema)) {
+        throw DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
+      }
     }
     if (orderedComparison) {
       if (!actualDS.collect().sameElements(expectedDS.collect())) {

@@ -10,9 +10,10 @@ trait DataFrameComparer extends DatasetComparer {
   def assertSmallDataFrameEquality(
     actualDF: DataFrame,
     expectedDF: DataFrame,
+    ignoreNullable: Boolean = false,
     orderedComparison: Boolean = true
   ): Unit = {
-    assertSmallDatasetEquality(actualDF, expectedDF, orderedComparison)
+    assertSmallDatasetEquality(actualDF, expectedDF, ignoreNullable, orderedComparison)
   }
 
   /**
