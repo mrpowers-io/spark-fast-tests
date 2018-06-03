@@ -15,6 +15,33 @@ object ColumnComparerTest
 
     'assertColumnEquality - {
 
+      "throws an easily readable error message" - {
+
+        val sourceData = Seq(
+          Row("phil", "phil"),
+          Row("rashid", "rashid"),
+          Row("matthew", "mateo"),
+          Row("sami", "sami"),
+          Row("li", "feng"),
+          Row(null, null)
+        )
+
+        val sourceSchema = List(
+          StructField("name", StringType, true),
+          StructField("expected_name", StringType, true)
+        )
+
+        val sourceDF = spark.createDataFrame(
+          spark.sparkContext.parallelize(sourceData),
+          StructType(sourceSchema)
+        )
+
+        val e = intercept[ColumnMismatch] {
+          assertColumnEquality(sourceDF, "name", "expected_name")
+        }
+
+      }
+
       "doesn't thrown an error when the columns are equal" - {
         val sourceData = Seq(
           Row(1, 1),
