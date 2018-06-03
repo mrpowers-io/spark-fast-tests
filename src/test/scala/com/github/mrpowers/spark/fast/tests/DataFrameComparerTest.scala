@@ -11,6 +11,36 @@ object DataFrameComparerTest
 
   val tests = Tests {
 
+    "prints a descriptive error message if it bugs out" - {
+
+      val sourceDF = spark.createDF(
+        List(
+          ("bob", 1, "uk"),
+          ("camila", 5, "peru")
+        ), List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("country", StringType, true)
+        )
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          ("bob", 1, "france"),
+          ("camila", 5, "peru")
+        ), List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("country", StringType, true)
+        )
+      )
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDataFrameEquality(sourceDF, expectedDF)
+      }
+
+    }
+
     'checkingDataFrameEquality - {
 
       "does nothing if the DataFrames have the same schemas and content" - {

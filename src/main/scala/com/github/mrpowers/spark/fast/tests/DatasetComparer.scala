@@ -27,20 +27,22 @@ ${expectedDS.schema}
 """
   }
 
-  private def contentMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
-    s"""
-Actual DataFrame Content:
-${DataFramePrettyPrint.showString(actualDS.toDF(), 10)}
-Expected DataFrame Content:
-${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
-"""
-  }
-
   private def countMismatchMessage(actualCount: Long, expectedCount: Long): String = {
     s"""
 Actual DataFrame Row Count: '${actualCount}'
 Expected DataFrame Row Count: '${expectedCount}'
 """
+  }
+
+  private def betterContentMismatchMessage[T](a: Array[T], e: Array[T]): String = {
+    "\n" + a.zip(e).map {
+      case (r1, r2) =>
+        if (r1.equals(r2)) {
+          ufansi.Color.Red(s"$r1 | $r2")
+        } else {
+          ufansi.Color.Green(s"$r1 | $r2")
+        }
+    }.mkString("\n")
   }
 
   /**
@@ -62,14 +64,16 @@ Expected DataFrame Row Count: '${expectedCount}'
       }
     }
     if (orderedComparison) {
-      if (!actualDS.collect().sameElements(expectedDS.collect())) {
-        throw DatasetContentMismatch(contentMismatchMessage(actualDS, expectedDS))
+      val a = actualDS.collect()
+      val e = expectedDS.collect()
+      if (!a.sameElements(e)) {
+        throw DatasetContentMismatch(betterContentMismatchMessage(a, e))
       }
     } else {
-      val actualSortedDF = defaultSortDataset(actualDS)
-      val expectedSortedDF = defaultSortDataset(expectedDS)
-      if (!actualSortedDF.collect().sameElements(expectedSortedDF.collect())) {
-        throw DatasetContentMismatch(contentMismatchMessage(actualSortedDF, expectedSortedDF))
+      val a = defaultSortDataset(actualDS).collect()
+      val e = defaultSortDataset(expectedDS).collect()
+      if (!a.sameElements(e)) {
+        throw DatasetContentMismatch(betterContentMismatchMessage(a, e))
       }
     }
   }
@@ -101,8 +105,8 @@ Expected DataFrame Row Count: '${expectedCount}'
         throw DatasetContentMismatch(countMismatchMessage(actualCount, expectedCount))
       }
 
-      val expectedIndexValue: RDD[(Long, T)] = zipWithIndex(actualDS.rdd)
-      val resultIndexValue: RDD[(Long, T)] = zipWithIndex(expectedDS.rdd)
+      val expectedIndexValue: RDD[(Long, T)] = RddHelpers.zipWithIndex(actualDS.rdd)
+      val resultIndexValue: RDD[(Long, T)] = RddHelpers.zipWithIndex(expectedDS.rdd)
       val unequalRDD = expectedIndexValue
         .join(resultIndexValue)
         .filter {
@@ -118,18 +122,6 @@ Expected DataFrame Row Count: '${expectedCount}'
     } finally {
       actualDS.rdd.unpersist()
       expectedDS.rdd.unpersist()
-    }
-  }
-
-  /**
-   * Zip RDD's with precise indexes. This is used so we can join two DataFrame's
-   * Rows together regardless of if the source is different but still compare based on
-   * the order.
-   */
-  private def zipWithIndex[T](rdd: RDD[T]): RDD[(Long, T)] = {
-    rdd.zipWithIndex().map {
-      case (row, idx) =>
-        (idx, row)
     }
   }
 
