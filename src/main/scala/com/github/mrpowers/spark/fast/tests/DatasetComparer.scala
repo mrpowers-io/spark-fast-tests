@@ -38,9 +38,9 @@ Expected DataFrame Row Count: '${expectedCount}'
     "\n" + a.zip(e).map {
       case (r1, r2) =>
         if (r1.equals(r2)) {
-          ufansi.Color.Red(s"$r1 | $r2")
+          ufansi.Color.Blue(s"$r1 | $r2")
         } else {
-          ufansi.Color.Green(s"$r1 | $r2")
+          ufansi.Color.Red(s"$r1 | $r2")
         }
     }.mkString("\n")
   }

@@ -21,7 +21,7 @@ version := "0.10.0"
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
 
 libraryDependencies += "com.lihaoyi" %% "utest" % "0.6.3" % "test"
-testFrameworks += new TestFramework("utest.runner.Framework")
+testFrameworks += new TestFramework("com.github.mrpowers.spark.fast.tests.CustomFramework")
 
 libraryDependencies += "com.github.mrpowers" % "spark-daria" % sparkDariaVersion % "test"
 
