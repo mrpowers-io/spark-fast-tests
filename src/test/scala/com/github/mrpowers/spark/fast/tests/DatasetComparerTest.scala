@@ -174,25 +174,25 @@ object DatasetComparerTest
       import spark.implicits._
 
       "ignores the nullable flag when making DataFrame comparisons" - {
-        val sourceDF = spark.createDF(
-          List(
-            (1),
-            (5)
-          ), List(
-            ("number", IntegerType, false)
-          )
-        )
+val sourceDF = spark.createDF(
+  List(
+    (1),
+    (5)
+  ), List(
+    ("number", IntegerType, false)
+  )
+)
 
-        val expectedDF = spark.createDF(
-          List(
-            (1),
-            (5)
-          ), List(
-            ("number", IntegerType, true)
-          )
-        )
+val expectedDF = spark.createDF(
+  List(
+    (1),
+    (5)
+  ), List(
+    ("number", IntegerType, true)
+  )
+)
 
-        assertSmallDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
+assertSmallDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
       }
 
       "can performed unordered DataFrame comparisons" - {

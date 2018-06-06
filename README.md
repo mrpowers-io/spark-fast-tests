@@ -111,6 +111,111 @@ assertLargeDatasetEquality(actualDF, expectedDF)
 
 `assertSmallDatasetEquality` is faster for test suites that run on your local machine.  `assertLargeDatasetEquality` should only be used for DataFrames that are split across nodes in a cluster.
 
+### Column Equality
+
+The `assertColumnEquality` method can be used to assess the equality of two columns in a DataFrame.
+
+Suppose you have the following DataFrame with two columns that are not equal.
+
+```
++-------+-------------+
+|   name|expected_name|
++-------+-------------+
+|   phil|         phil|
+| rashid|       rashid|
+|matthew|        mateo|
+|   sami|         sami|
+|     li|         feng|
+|   null|         null|
++-------+-------------+
+```
+
+The following code will throw a `ColumnMismatch` error message:
+
+```scala
+assertColumnEquality(df, "name", "expected_name")
+```
+
+* Add a picture of the error message
+
+Mix in the `ColumnComparer` trait to your test class to access the `assertColumnEquality` method:
+
+```scala
+object ColumnComparerTest
+    extends TestSuite
+    with ColumnComparer
+    with SparkSessionTestWrapper {
+
+    // your tests
+}
+```
+
+### Unordered DataFrame equality comparisons
+
+Suppose you have the following `actualDF`:
+
+```
++------+
+|number|
++------+
+|     1|
+|     5|
++------+
+```
+
+And suppose you have the following `expectedDF`:
+
+```
++------+
+|number|
++------+
+|     5|
+|     1|
++------+
+```
+
+The DataFrames have the same columns and rows, but the order is different.
+
+`assertSmallDataFrameEquality(sourceDF, expectedDF)` will throw a `DatasetContentMismatch` error.
+
+We can set the `orderedComparison` boolean flag to false, so spark-fast-tests automatically sorts the DataFrame before performing the comparison.
+
+`assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)` will not throw an error.
+
+### Equality comparisons ignoring the nullable flag
+
+You might also want to make equality comparisons that ignore the nullable flags for the DataFrame columns.
+
+Here is how to use the `ignoreNullable` flag to compare DataFrames without considering the nullable property of each column.
+
+```scala
+val sourceDF = spark.createDF(
+  List(
+    (1),
+    (5)
+  ), List(
+    ("number", IntegerType, false)
+  )
+)
+
+val expectedDF = spark.createDF(
+  List(
+    (1),
+    (5)
+  ), List(
+    ("number", IntegerType, true)
+  )
+)
+
+assertSmallDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
+```
+
+## Testing Tips
+
+* Don't write code with UDFs
+* Test custom transformations and DataFrame functions
+* Don't write tests that read from files or write files
+
 ## Alternatives
 
 The [spark-testing-base](https://github.com/holdenk/spark-testing-base) project has more features (e.g. streaming support) and is compiled to support a variety of Scala and Spark versions.
