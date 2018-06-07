@@ -46,12 +46,35 @@ If you only need to compare DataFrames, you can use `DataFrameComparer` with the
 
 ## Setup
 
+**Option 1: JitPack**
+
+Update your `build.sbt` file as follows.
+
+```scala
+resolvers += "jitpack" at "https://jitpack.io"
+libraryDependencies += "com.github.mrpowers" % "spark-fast-tests" % "v2.3.0_0.11.0" % "test"
+```
+
+**Option 2: Maven**
+
+Fetch the JAR file from Maven.
+
+```scala
+resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
+
+libraryDependencies += "MrPowers" % "spark-fast-tests" % "2.3.0_0.11.0"
+```
+
+**NOT RECOMMENDED - Option 3: Spark Packages**
+
+Spark Packages does not let you specify `spark-fast-tests` as a test dependency and is not recommended!
+
 Add the [sbt-spark-package plugin](https://github.com/databricks/sbt-spark-package) so you can install Spark Packages.
 
 Then add these lines to your `build.sbt` file to install Spark SQL and spark-fast-tests:
 
 ```scala
-spDependencies += "MrPowers/spark-fast-tests:0.4.0"
+spDependencies += "MrPowers/spark-fast-tests:2.3.0_0.11.0"
 sparkComponents ++= Seq("sql")
 ```
 
