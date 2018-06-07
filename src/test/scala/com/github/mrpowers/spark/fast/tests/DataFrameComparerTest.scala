@@ -142,8 +142,6 @@ object DataFrameComparerTest
             ("number", IntegerType, true)
           )
         )
-        sourceDF.show()
-        expectedDF.show()
         assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
       }
 
