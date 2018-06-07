@@ -136,7 +136,7 @@ The following code will throw a `ColumnMismatch` error message:
 assertColumnEquality(df, "name", "expected_name")
 ```
 
-* Add a picture of the error message
+![assert_column_equality_error_message](https://github.com/MrPowers/spark-fast-tests/blob/master/images/assertColumnEquality_error_message.png)
 
 Mix in the `ColumnComparer` trait to your test class to access the `assertColumnEquality` method:
 
@@ -178,7 +178,7 @@ The DataFrames have the same columns and rows, but the order is different.
 
 `assertSmallDataFrameEquality(sourceDF, expectedDF)` will throw a `DatasetContentMismatch` error.
 
-We can set the `orderedComparison` boolean flag to false, so spark-fast-tests automatically sorts the DataFrame before performing the comparison.
+We can set the `orderedComparison` boolean flag to `false` and spark-fast-tests will sort the DataFrames before performing the comparison.
 
 `assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)` will not throw an error.
 
