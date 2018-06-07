@@ -62,7 +62,7 @@ Fetch the JAR file from Maven.
 ```scala
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
 
-libraryDependencies += "MrPowers" % "spark-fast-tests" % "2.3.0_0.11.0"
+libraryDependencies += "MrPowers" % "spark-fast-tests" % "2.3.0_0.11.0" % "test"
 ```
 
 **NOT RECOMMENDED - Option 3: Spark Packages**
