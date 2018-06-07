@@ -19,7 +19,7 @@ val expectedDF = Seq(
   (5, "word")
 ).toDF("number", "word")
 
-assertSmallDatasetEquality(sourceDF, expectedDF)
+assertSmallDataFrameEquality(sourceDF, expectedDF)
 // throws a DatasetSchemaMismatch exception
 ```
 
@@ -97,6 +97,8 @@ trait SparkSessionTestWrapper {
 The `DatasetComparer` trait defines the `assertSmallDatasetEquality` method.  Extend your spec file with the `SparkSessionTestWrapper` trait to create DataFrames and the `DatasetComparer` trait to make DataFrame comparisons.
 
 ```scala
+import com.github.mrpowers.spark.fast.tests.DatasetComparer
+
 class DatasetSpec extends FunSpec with SparkSessionTestWrapper with DatasetComparer {
 
   import spark.implicits._
@@ -164,7 +166,9 @@ assertColumnEquality(df, "name", "expected_name")
 Mix in the `ColumnComparer` trait to your test class to access the `assertColumnEquality` method:
 
 ```scala
-object ColumnComparerTest
+import com.github.mrpowers.spark.fast.tests.ColumnComparer
+
+object MySpecialClassTest
     extends TestSuite
     with ColumnComparer
     with SparkSessionTestWrapper {
@@ -235,9 +239,34 @@ assertSmallDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
 
 ## Testing Tips
 
-* Don't write code with UDFs
-* Test custom transformations and DataFrame functions
-* Don't write tests that read from files or write files
+* Use column functions instead of UDFs as described in [this blog post](https://medium.com/@mrpowers/spark-user-defined-functions-udfs-6c849e39443b)
+* Try to organize your code as [custom transformations](https://medium.com/@mrpowers/chaining-custom-dataframe-transformations-in-spark-a39e315f903c) so it's easy to test the logic elegantly
+* Don't write tests that read from files or write files.  Dependency injection is a great way to avoid file I/O in you test suite.
+
+## uTest settings to display color output
+
+Create a `CustomFramework` class with overrides that turn off the default uTest color settings.
+
+```scala
+package com.github.mrpowers.spark.fast.tests
+
+class CustomFramework extends utest.runner.Framework {
+  override def formatWrapWidth: Int = 300
+  // turn off the default exception message color, so spark-fast-tests
+  // can send messages with custom colors
+  override def exceptionMsgColor = toggledColor(utest.ufansi.Attrs.Empty)
+  override def exceptionPrefixColor = toggledColor(utest.ufansi.Attrs.Empty)
+  override def exceptionMethodColor = toggledColor(utest.ufansi.Attrs.Empty)
+  override def exceptionPunctuationColor = toggledColor(utest.ufansi.Attrs.Empty)
+  override def exceptionLineNumberColor = toggledColor(utest.ufansi.Attrs.Empty)
+}
+```
+
+Update the `build.sbt` file to use the `CustomFramework` class:
+
+```scala
+testFrameworks += new TestFramework("com.github.mrpowers.spark.fast.tests.CustomFramework")
+```
 
 ## Alternatives
 
@@ -245,6 +274,7 @@ The [spark-testing-base](https://github.com/holdenk/spark-testing-base) project 
 
 You might want to use spark-fast-tests instead of spark-testing-base in these cases:
 
+* You want to use uTest or a testing framework other than scalatest
 * You want to run tests in parallel (you need to set `parallelExecution in Test := false` with spark-testing-base)
 * You don't want to include hive as a project dependency
 * You don't want to restart the SparkSession after each test file executes so the suite runs faster
