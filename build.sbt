@@ -29,10 +29,34 @@ artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
   artifact.name + "_" + sv.binary + "-" + sparkVersion + "_" + module.revision + "." + artifact.extension
 }
 
-// All Spark Packages need a license
-licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
-
 credentials += Credentials(Path.userHome / ".ivy2" / ".sbtcredentials")
 
 fork in Test := true
 javaOptions ++= Seq("-Xms512M", "-Xmx2048M", "-XX:+CMSClassUnloadingEnabled","-Duser.timezone=GMT")
+
+// POM settings for Sonatype
+homepage := Some(url("https://github.com/username/projectname"))
+scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/mrpowers/spark-fast-tests/"),
+    "git@github.com:mrpowers/spark-fast-tests.git"
+  )
+)
+developers := List(
+  Developer(
+    "mrpowers",
+    "Matthew Powers",
+    "matthewkevinpowers@gmail.com",
+    url("https://github.com/mrpowers/spark-fast-tests/")
+  )
+)
+licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
+publishMavenStyle := true
+
+// Add sonatype repository settings
+publishTo := Some(
+  if (isSnapshot.value)
+    Opts.resolver.sonatypeSnapshots
+  else
+    Opts.resolver.sonatypeStaging
+)
