@@ -46,21 +46,21 @@ If you only need to compare DataFrames, you can use `DataFrameComparer` with the
 
 ## Setup
 
-**Option 1: JitPack**
+**Option 1: Maven**
+
+Fetch the JAR file from Maven.
+
+```scala
+libraryDependencies += "com.github.mrpowers" % "spark-fast-tests_2.11" % "0.11.0" % "test"
+```
+
+**Option 2: JitPack**
 
 Update your `build.sbt` file as follows.
 
 ```scala
 resolvers += "jitpack" at "https://jitpack.io"
 libraryDependencies += "com.github.mrpowers" % "spark-fast-tests" % "v2.3.0_0.11.0" % "test"
-```
-
-**Option 2: Maven**
-
-Fetch the JAR file from Maven.
-
-```scala
-libraryDependencies += "com.github.mrpowers" % "spark-fast-tests_2.11" % "0.11.0" % "test"
 ```
 
 ## Usage
