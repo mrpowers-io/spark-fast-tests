@@ -3,22 +3,16 @@ package com.github.mrpowers.spark.fast.tests
 import java.sql.Date
 
 import org.apache.commons.lang3.StringUtils
-import org.apache.spark.sql.{DataFrame, Dataset}
 import org.apache.spark.sql.catalyst.util.DateTimeUtils
 
-object DataFramePrettyPrint {
+object ArrayPrettyPrint {
 
-  def showString(df: DataFrame, _numRows: Int, truncate: Int = 20): String = {
-    val numRows = _numRows.max(0)
-    val takeResult = df.take(numRows + 1)
-    val hasMoreData = takeResult.length > numRows
-    val data = takeResult.take(numRows)
+  def showTwoColumnString(arr: Array[(Any, Any)], truncate: Int = 20): String = {
+    val sb = new StringBuilder
+    val numCols = 2
 
-    // For array values, replace Seq and Array with square brackets
-    // For cells that are beyond `truncate` characters, replace it with the
-    // first `truncate-3` and "..."
-    val rows: Seq[Seq[String]] = df.schema.fieldNames.toSeq +: data.map { row =>
-      row.toSeq.map { cell =>
+    val rows = arr.map { row =>
+      row.productIterator.toList.map { cell =>
         val str = cell match {
           case null => "null"
           case binary: Array[Byte] => binary.map("%02X".format(_)).mkString("[", " ", "]")
@@ -35,11 +29,8 @@ object DataFramePrettyPrint {
         } else {
           str
         }
-      }: Seq[String]
+      }: List[String]
     }
-
-    val sb = new StringBuilder
-    val numCols = df.schema.fieldNames.length
 
     // Initialise the width of each column to a minimum value of '3'
     val colWidths = Array.fill(numCols)(3)
@@ -68,24 +59,24 @@ object DataFramePrettyPrint {
     sb.append(sep)
 
     // data
-    rows.tail.map {
-      _.zipWithIndex.map {
+    rows.tail.map { row =>
+      val color = if (row(0) == row(1)) "blue" else "red"
+      row.zipWithIndex.map {
         case (cell, i) =>
-          if (truncate > 0) {
+          val r = if (truncate > 0) {
             StringUtils.leftPad(cell.toString, colWidths(i))
           } else {
             StringUtils.rightPad(cell.toString, colWidths(i))
+          }
+          if (color == "blue") {
+            ufansi.Color.Blue(r)
+          } else {
+            ufansi.Color.Red(r)
           }
       }.addString(sb, "|", "|", "|\n")
     }
 
     sb.append(sep)
-
-    // For Data that has more than "numRows" records
-    if (hasMoreData) {
-      val rowsString = if (numRows == 1) "row" else "rows"
-      sb.append(s"only showing top $numRows $rowsString\n")
-    }
 
     sb.toString()
   }

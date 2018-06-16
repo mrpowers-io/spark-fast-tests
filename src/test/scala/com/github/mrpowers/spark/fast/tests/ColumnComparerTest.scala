@@ -22,6 +22,7 @@ object ColumnComparerTest
           Row("rashid", "rashid"),
           Row("matthew", "mateo"),
           Row("sami", "sami"),
+          Row("this is something that is super crazy long", "sami"),
           Row("li", "feng"),
           Row(null, null)
         )
