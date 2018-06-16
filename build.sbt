@@ -35,7 +35,7 @@ fork in Test := true
 javaOptions ++= Seq("-Xms512M", "-Xmx2048M", "-XX:+CMSClassUnloadingEnabled","-Duser.timezone=GMT")
 
 // POM settings for Sonatype
-homepage := Some(url("https://github.com/username/projectname"))
+homepage := Some(url("https://github.com/mrpowers/spark-fast-tests/"))
 scmInfo := Some(
   ScmInfo(
     url("https://github.com/mrpowers/spark-fast-tests/"),
@@ -60,3 +60,5 @@ publishTo := Some(
   else
     Opts.resolver.sonatypeStaging
 )
+
+organization := "com.github.mrpowers"
