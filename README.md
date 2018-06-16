@@ -49,7 +49,7 @@ If you only need to compare DataFrames, you can use `DataFrameComparer` with the
 Fetch the JAR file from Maven.
 
 ```scala
-libraryDependencies += "com.github.mrpowers" % "spark-fast-tests_2.11" % "0.11.0" % "test"
+libraryDependencies += "com.github.mrpowers" % "spark-fast-tests_2.11" % "0.12.0" % "test"
 ```
 
 **Option 2: JitPack**
@@ -58,7 +58,7 @@ Update your `build.sbt` file as follows.
 
 ```scala
 resolvers += "jitpack" at "https://jitpack.io"
-libraryDependencies += "com.github.mrpowers" % "spark-fast-tests" % "v2.3.0_0.11.0" % "test"
+libraryDependencies += "com.github.mrpowers" % "spark-fast-tests" % "v2.3.0_0.12.0" % "test"
 ```
 
 ## Usage
@@ -272,6 +272,19 @@ You might want to use spark-fast-tests instead of spark-testing-base in these ca
 ## Spark Versions
 
 spark-fast-tests supports Spark 2.x.  There are no plans to retrofit the project to work with Spark 1.x.
+
+## Publishing
+
+Only project maintainers can publish JAR files.
+
+For JitPack, run the `scripts/multi_spark_releases.sh` script to make a bunch of releases in GitHub that'll be picked up by JitPack.  You need to install [hub](https://github.com/github/hub) and pass in the [spark-daria](https://github.com/MrPowers/spark-daria) `github_release.sh` script as an argument to successfully run this command.
+
+For Maven, follow [this guide](https://leonard.io/blog/2017/01/an-in-depth-guide-to-deploying-to-maven-central/) to setup your computer and then run these commands.
+
+```
+sbt publishSigned
+sbt sonatypeRelease
+```
 
 ## Contributing
 
