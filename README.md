@@ -25,18 +25,23 @@ The `assertSmallDatasetEquality` method can also be used to compare Datasets.
 
 ```scala
 val sourceDS = Seq(
+  Person("juan", 5),
   Person("bob", 1),
+  Person("li", 49),
   Person("alice", 5)
 ).toDS
 
 val expectedDS = Seq(
+  Person("juan", 5),
   Person("frank", 10),
+  Person("li", 49),
   Person("lucy", 5)
 ).toDS
-
-assertLargeDatasetEquality(sourceDS, expectedDS)
-// throws an exception because the Datasets have different data
 ```
+
+![assert_small_dataset_equality_error_message](https://github.com/MrPowers/spark-fast-tests/blob/master/images/assertSmallDatasetEquality_error_message.png)
+
+The colors in the error message make it easy to identify the rows that aren't equal.
 
 The `DatasetComparer` has `assertSmallDatasetEquality` and `assertLargeDatasetEquality` methods to compare either Datasets or DataFrames.
 

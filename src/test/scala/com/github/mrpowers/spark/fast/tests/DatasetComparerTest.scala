@@ -22,6 +22,28 @@ object DatasetComparerTest
     'checkDatasetEquality - {
       import spark.implicits._
 
+      "provides a good README example" - {
+
+        val sourceDS = Seq(
+          Person("juan", 5),
+          Person("bob", 1),
+          Person("li", 49),
+          Person("alice", 5)
+        ).toDS
+
+        val expectedDS = Seq(
+          Person("juan", 5),
+          Person("frank", 10),
+          Person("li", 49),
+          Person("lucy", 5)
+        ).toDS
+
+        val e = intercept[DatasetContentMismatch] {
+          assertSmallDatasetEquality(sourceDS, expectedDS)
+        }
+
+      }
+
       "does nothing if the DataFrames have the same schemas and content" - {
         val sourceDF = spark.createDF(
           List(
