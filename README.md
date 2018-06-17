@@ -1,6 +1,6 @@
 # spark-fast-tests
 
-A fast Apache Spark testing framework with beautifully formatted error messages!
+A fast, test framework independent Apache Spark testing helper library with beautifully formatted error messages!
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ab42211c18984740bee7f87c631a8f42)](https://www.codacy.com/app/MrPowers/spark-fast-tests?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MrPowers/spark-fast-tests&amp;utm_campaign=Badge_Grade)
 
