@@ -66,6 +66,14 @@ resolvers += "jitpack" at "https://jitpack.io"
 libraryDependencies += "com.github.mrpowers" % "spark-fast-tests" % "v2.3.0_0.12.0" % "test"
 ```
 
+## Why is this library fast?
+
+The `assertSmallDataFrameEquality` method runs 31% faster than the `assertLargeDatasetEquality` method as described in [this blog post](https://medium.com/@mrpowers/how-to-cut-the-run-time-of-a-spark-sbt-test-suite-by-40-52d71219773f).
+
+The `assertSmallDataFrameEquality` method uses the Dataset `collect()` method, which is a lot faster than the RDD `zipWithIndex()` method that's used by the other Spark testing libraries (and the `assertLargeDatasetEquality()` method).
+
+spark-fast-tests also provides a `assertColumnEquality()` method that's even faster and easier to use!
+
 ## Usage
 
 The spark-fast-tests project doesn't provide a SparkSession object in your test suite, so you'll need to make one yourself.
