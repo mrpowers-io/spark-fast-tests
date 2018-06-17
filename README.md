@@ -54,7 +54,7 @@ If you only need to compare DataFrames, you can use `DataFrameComparer` with the
 Fetch the JAR file from Maven.
 
 ```scala
-libraryDependencies += "com.github.mrpowers" % "spark-fast-tests_2.11" % "0.12.0" % "test"
+libraryDependencies += "com.github.mrpowers" % "spark-fast-tests_2.11" % "0.11.0" % "test"
 ```
 
 **Option 2: JitPack**
