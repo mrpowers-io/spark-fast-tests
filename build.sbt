@@ -1,6 +1,7 @@
 import scalariform.formatter.preferences._
 import com.typesafe.sbt.SbtScalariform
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
+import sbtrelease.ReleaseStateTransformations._
 
 SbtScalariform.scalariformSettings
 
@@ -15,8 +16,6 @@ name := "spark-fast-tests"
 scalaVersion := "2.11.12"
 val sparkVersion = "2.3.0"
 val sparkDariaVersion = s"v${sparkVersion}_0.21.0"
-
-version := "0.12.0"
 
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
 
@@ -34,31 +33,25 @@ credentials += Credentials(Path.userHome / ".ivy2" / ".sbtcredentials")
 fork in Test := true
 javaOptions ++= Seq("-Xms512M", "-Xmx2048M", "-XX:+CMSClassUnloadingEnabled","-Duser.timezone=GMT")
 
-// POM settings for Sonatype
-homepage := Some(url("https://github.com/mrpowers/spark-fast-tests/"))
-scmInfo := Some(
-  ScmInfo(
-    url("https://github.com/mrpowers/spark-fast-tests/"),
-    "git@github.com:mrpowers/spark-fast-tests.git"
-  )
-)
-developers := List(
-  Developer(
-    "mrpowers",
-    "Matthew Powers",
-    "matthewkevinpowers@gmail.com",
-    url("https://github.com/mrpowers/spark-fast-tests/")
-  )
-)
-licenses += ("MIT", url("http://opensource.org/licenses/MIT"))
-publishMavenStyle := true
-
-// Add sonatype repository settings
-publishTo := Some(
-  if (isSnapshot.value)
-    Opts.resolver.sonatypeSnapshots
-  else
-    Opts.resolver.sonatypeStaging
-)
-
 organization := "com.github.mrpowers"
+
+publishTo := Some(
+  if (isSnapshot.value) { Opts.resolver.sonatypeSnapshots }
+  else { Opts.resolver.sonatypeReleases }
+)
+
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  publishArtifacts,
+  setNextVersion,
+  commitNextVersion,
+  releaseStepCommand("sonatypeReleaseAll"),
+  pushChanges
+)
