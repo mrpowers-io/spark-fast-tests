@@ -582,7 +582,7 @@ object Attrs {
   }
 
   class Multiple private[Attrs] (
-    val resetMask: Long,
+      val resetMask: Long,
       val applyMask: Long,
       val attrs: Attr*
   ) extends Attrs {
