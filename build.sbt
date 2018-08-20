@@ -9,7 +9,7 @@ ScalariformKeys.preferences := ScalariformKeys.preferences.value
   .setPreference(DoubleIndentClassDeclaration, true)
   .setPreference(SpacesAroundMultiImports, false)
 
-resolvers += "jitpack" at "https://jitpack.io"
+resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
 
 name := "spark-fast-tests"
 
@@ -19,10 +19,9 @@ val sparkDariaVersion = s"v${sparkVersion}_0.21.0"
 
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
 
+libraryDependencies += "mrpowers" % "spark-daria" % "2.3.0_0.23.1" % "test"
 libraryDependencies += "com.lihaoyi" %% "utest" % "0.6.3" % "test"
 testFrameworks += new TestFramework("com.github.mrpowers.spark.fast.tests.CustomFramework")
-
-libraryDependencies += "com.github.mrpowers" % "spark-daria" % sparkDariaVersion % "test"
 
 artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
   artifact.name + "_" + sv.binary + "-" + sparkVersion + "_" + module.revision + "." + artifact.extension
