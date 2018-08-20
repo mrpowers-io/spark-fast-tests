@@ -186,6 +186,52 @@ object ColumnComparerTest
 
     }
 
+    'assertDoubleTypeColumnEquality - {
+
+      "doesn't throw an error when two DoubleType columns are equal" - {
+
+        val sourceData = Seq(
+          Row(1.3, 1.3),
+          Row(5.01, 5.0101)
+        )
+
+        val sourceSchema = List(
+          StructField("d1", DoubleType, true),
+          StructField("d2", DoubleType, true)
+        )
+
+        val df = spark.createDataFrame(
+          spark.sparkContext.parallelize(sourceData),
+          StructType(sourceSchema)
+        )
+
+        assertDoubleTypeColumnEquality(df, "d1", "d2", 0.01)
+
+      }
+
+      "throws an error when two DoubleType columns are equal" - {
+
+        val sourceData = Seq(
+          Row(1.3, 1.8),
+          Row(5.01, 5.0101)
+        )
+
+        val sourceSchema = List(
+          StructField("d1", DoubleType, true),
+          StructField("d2", DoubleType, true)
+        )
+
+        val df = spark.createDataFrame(
+          spark.sparkContext.parallelize(sourceData),
+          StructType(sourceSchema)
+        )
+
+        assertDoubleTypeColumnEquality(df, "d1", "d2", 0.01)
+
+      }
+
+    }
+
   }
 
 }
