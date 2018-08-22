@@ -1,8 +1,7 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.apache.spark.sql.types.{IntegerType, StringType}
+import org.apache.spark.sql.types._
 import com.github.mrpowers.spark.daria.sql.SparkSessionExt._
-
 import utest._
 
 object Person {
@@ -11,6 +10,7 @@ object Person {
   }
 }
 case class Person(name: String, age: Int)
+case class PrecisePerson(name: String, age: Double)
 
 object DatasetComparerTest
     extends TestSuite
@@ -20,6 +20,7 @@ object DatasetComparerTest
   val tests = Tests {
 
     'checkDatasetEquality - {
+
       import spark.implicits._
 
       "provides a good README example" - {
@@ -331,6 +332,107 @@ object DatasetComparerTest
 
         assertSmallDatasetEquality(actualDF, expectedDF)
       }
+
+    }
+
+    'assertApproximateDataFrameEquality - {
+
+      "does nothing if the DataFrames have the same schemas and content" - {
+val sourceDF = spark.createDF(
+  List(
+    (1.2),
+    (5.1),
+    (null)
+  ), List(
+    ("number", DoubleType, true)
+  )
+)
+
+val expectedDF = spark.createDF(
+  List(
+    (1.2),
+    (5.1),
+    (null)
+  ), List(
+    ("number", DoubleType, true)
+  )
+)
+
+assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+      }
+
+      "throws an error if the rows are different" - {
+        val sourceDF = spark.createDF(
+          List(
+            (100.9),
+            (5.1)
+          ), List(
+            ("number", DoubleType, true)
+          )
+        )
+
+        val expectedDF = spark.createDF(
+          List(
+            (1.2),
+            (5.1)
+          ), List(
+            ("number", DoubleType, true)
+          )
+        )
+
+        val e = intercept[DatasetContentMismatch] {
+          assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+        }
+      }
+
+      "throws an error DataFrames have a different number of rows" - {
+        val sourceDF = spark.createDF(
+          List(
+            (1.2),
+            (5.1),
+            (8.8)
+          ), List(
+            ("number", DoubleType, true)
+          )
+        )
+
+        val expectedDF = spark.createDF(
+          List(
+            (1.2),
+            (5.1)
+          ), List(
+            ("number", DoubleType, true)
+          )
+        )
+
+        val e = intercept[DatasetCountMismatch] {
+          assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+        }
+      }
+
+//      "works with FloatType columns" - {
+//        val sourceDF = spark.createDF(
+//          List(
+//            (1.2),
+//            (5.1),
+//            (null)
+//          ), List(
+//            ("number", FloatType, true)
+//          )
+//        )
+//
+//        val expectedDF = spark.createDF(
+//          List(
+//            (1.2),
+//            (5.1),
+//            (null)
+//          ), List(
+//            ("number", FloatType, true)
+//          )
+//        )
+//
+//        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+//      }
 
     }
 

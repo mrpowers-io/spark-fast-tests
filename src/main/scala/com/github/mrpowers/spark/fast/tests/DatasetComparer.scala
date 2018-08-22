@@ -2,13 +2,14 @@ package com.github.mrpowers.spark.fast.tests
 
 import com.github.mrpowers.spark.fast.tests.DatasetComparerLike.naiveEquality
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import org.apache.spark.sql.functions._
 
 import scala.reflect.ClassTag
 
 case class DatasetSchemaMismatch(smth: String) extends Exception(smth)
 case class DatasetContentMismatch(smth: String) extends Exception(smth)
+case class DatasetCountMismatch(smth: String) extends Exception(smth)
 
 object DatasetComparerLike {
   def naiveEquality[T](o1: T, o2: T): Boolean = {
@@ -43,6 +44,15 @@ Expected DataFrame Row Count: '${expectedCount}'
           ufansi.Color.Red(s"$r1 | $r2")
         }
     }.mkString("\n")
+  }
+
+  private def basicMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
+    s"""
+Actual DataFrame Content:
+${DataFramePrettyPrint.showString(actualDS.toDF(), 10)}
+Expected DataFrame Content:
+${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
+"""
   }
 
   /**
@@ -122,6 +132,45 @@ Expected DataFrame Row Count: '${expectedCount}'
     } finally {
       actualDS.rdd.unpersist()
       expectedDS.rdd.unpersist()
+    }
+  }
+
+  def assertApproximateDataFrameEquality(
+    actualDF: DataFrame,
+    expectedDF: DataFrame,
+    precision: Double
+  ): Unit = {
+    if (!actualDF.schema.equals(expectedDF.schema)) {
+      throw DatasetSchemaMismatch(schemaMismatchMessage(actualDF, expectedDF))
+    }
+    try {
+      actualDF.rdd.cache
+      expectedDF.rdd.cache
+
+      val actualCount: Long = actualDF.count
+      val expectedCount: Long = expectedDF.count
+      if (actualCount != expectedCount) {
+        throw DatasetCountMismatch(countMismatchMessage(actualCount, expectedCount))
+      }
+
+      val expectedIndexValue = RddHelpers.zipWithIndex(actualDF.rdd)
+      val resultIndexValue = RddHelpers.zipWithIndex(expectedDF.rdd)
+
+      val unequalRDD = expectedIndexValue
+        .join(resultIndexValue)
+        .filter {
+          case (idx, (r1: Row, r2: Row)) =>
+            !(r1.equals(r2) || RowComparer.areRowsEqual(r1, r2, precision))
+        }
+
+      val maxUnequalRowsToShow = 10
+      if (!unequalRDD.isEmpty()) {
+        throw DatasetContentMismatch(basicMismatchMessage(actualDF, expectedDF))
+      }
+      unequalRDD.take(maxUnequalRowsToShow)
+    } finally {
+      actualDF.rdd.unpersist()
+      expectedDF.rdd.unpersist()
     }
   }
 

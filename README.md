@@ -234,6 +234,34 @@ val expectedDF = spark.createDF(
 assertSmallDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
 ```
 
+### Approximate DataFrame Equality
+
+The `assertApproximateDataFrameEquality` function is useful for DataFrames that contain `DoubleType` columns.  The precision threshold must be set when using the `assertApproximateDataFrameEquality` function.
+
+```scala
+val sourceDF = spark.createDF(
+  List(
+    (1.2),
+    (5.1),
+    (null)
+  ), List(
+    ("number", DoubleType, true)
+  )
+)
+
+val expectedDF = spark.createDF(
+  List(
+    (1.2),
+    (5.1),
+    (null)
+  ), List(
+    ("number", DoubleType, true)
+  )
+)
+
+assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+```
+
 ## Testing Tips
 
 * Use column functions instead of UDFs as described in [this blog post](https://medium.com/@mrpowers/spark-user-defined-functions-udfs-6c849e39443b)
