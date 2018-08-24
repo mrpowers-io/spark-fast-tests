@@ -7,9 +7,9 @@ case class ColumnMismatch(smth: String) extends Exception(smth)
 trait ColumnComparer {
 
   def assertColumnEquality(
-    df: DataFrame,
-    colName1: String,
-    colName2: String
+      df: DataFrame,
+      colName1: String,
+      colName2: String
   ): Unit = {
     val elements = df.select(colName1, colName2).collect()
     val colName1Elements = elements.map(_(0))
@@ -23,19 +23,23 @@ trait ColumnComparer {
   }
 
   // ace stands for 'assertColumnEquality'
-  def ace(
-    df: DataFrame,
-    colName1: String,
-    colName2: String
-  ): Unit = {
+  def ace(df: DataFrame, colName1: String, colName2: String): Unit = {
     assertColumnEquality(df, colName1, colName2)
   }
 
-  private def approximatelyEqual(x: Double, y: Double, precision: Double): Boolean = {
+  private def approximatelyEqual(
+      x: Double,
+      y: Double,
+      precision: Double
+  ): Boolean = {
     if ((x - y).abs < precision) true else false
   }
 
-  private def areDoubleArraysEqual(x: Array[Double], y: Array[Double], precision: Double): Boolean = {
+  private def areDoubleArraysEqual(
+      x: Array[Double],
+      y: Array[Double],
+      precision: Double
+  ): Boolean = {
     val zipped: Array[(Double, Double)] = x.zip(y)
     val mapped = zipped.map { t =>
       approximatelyEqual(t._1, t._2, 0.01) == false
@@ -44,10 +48,10 @@ trait ColumnComparer {
   }
 
   def assertDoubleTypeColumnEquality(
-    df: DataFrame,
-    colName1: String,
-    colName2: String,
-    precision: Double = 0.01
+      df: DataFrame,
+      colName1: String,
+      colName2: String,
+      precision: Double = 0.01
   ): Unit = {
     val elements = df.select(colName1, colName2).collect()
     val colName1Elements: Array[Double] = elements.map(_(0).toString().toDouble)

@@ -28,7 +28,7 @@ object RowComparer {
 
             case f1: Float =>
               if (java.lang.Float.isNaN(f1) !=
-                java.lang.Float.isNaN(o2.asInstanceOf[Float])) {
+                    java.lang.Float.isNaN(o2.asInstanceOf[Float])) {
                 return false
               }
               if (abs(f1 - o2.asInstanceOf[Float]) > tol) {
@@ -37,7 +37,7 @@ object RowComparer {
 
             case d1: Double =>
               if (java.lang.Double.isNaN(d1) !=
-                java.lang.Double.isNaN(o2.asInstanceOf[Double])) {
+                    java.lang.Double.isNaN(o2.asInstanceOf[Double])) {
                 return false
               }
               if (abs(d1 - o2.asInstanceOf[Double]) > tol) {

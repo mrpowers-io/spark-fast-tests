@@ -21,9 +21,10 @@ object DataFramePrettyPrint {
       row.toSeq.map { cell =>
         val str = cell match {
           case null => "null"
-          case binary: Array[Byte] => binary.map("%02X".format(_)).mkString("[", " ", "]")
+          case binary: Array[Byte] =>
+            binary.map("%02X".format(_)).mkString("[", " ", "]")
           case array: Array[_] => array.mkString("[", ", ", "]")
-          case seq: Seq[_] => seq.mkString("[", ", ", "]")
+          case seq: Seq[_]     => seq.mkString("[", ", ", "]")
           case d: Date =>
             DateTimeUtils.dateToString(DateTimeUtils.fromJavaDate(d))
           case _ => cell.toString
@@ -52,31 +53,35 @@ object DataFramePrettyPrint {
     }
 
     // Create SeparateLine
-    val sep: String = colWidths.map("-" * _).addString(sb, "+", "+", "+\n").toString()
+    val sep: String =
+      colWidths.map("-" * _).addString(sb, "+", "+", "+\n").toString()
 
     // column names
     val h: Seq[(String, Int)] = rows.head.zipWithIndex
     h.map {
-      case (cell, i) =>
-        if (truncate > 0) {
-          StringUtils.leftPad(cell, colWidths(i))
-        } else {
-          StringUtils.rightPad(cell, colWidths(i))
-        }
-    }.addString(sb, "|", "|", "|\n")
+        case (cell, i) =>
+          if (truncate > 0) {
+            StringUtils.leftPad(cell, colWidths(i))
+          } else {
+            StringUtils.rightPad(cell, colWidths(i))
+          }
+      }
+      .addString(sb, "|", "|", "|\n")
 
     sb.append(sep)
 
     // data
     rows.tail.map {
-      _.zipWithIndex.map {
-        case (cell, i) =>
-          if (truncate > 0) {
-            StringUtils.leftPad(cell.toString, colWidths(i))
-          } else {
-            StringUtils.rightPad(cell.toString, colWidths(i))
-          }
-      }.addString(sb, "|", "|", "|\n")
+      _.zipWithIndex
+        .map {
+          case (cell, i) =>
+            if (truncate > 0) {
+              StringUtils.leftPad(cell.toString, colWidths(i))
+            } else {
+              StringUtils.rightPad(cell.toString, colWidths(i))
+            }
+        }
+        .addString(sb, "|", "|", "|\n")
     }
 
     sb.append(sep)

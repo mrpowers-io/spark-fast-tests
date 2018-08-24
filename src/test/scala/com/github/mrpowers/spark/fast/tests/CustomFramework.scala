@@ -7,6 +7,7 @@ class CustomFramework extends utest.runner.Framework {
   override def exceptionMsgColor = toggledColor(utest.ufansi.Attrs.Empty)
   override def exceptionPrefixColor = toggledColor(utest.ufansi.Attrs.Empty)
   override def exceptionMethodColor = toggledColor(utest.ufansi.Attrs.Empty)
-  override def exceptionPunctuationColor = toggledColor(utest.ufansi.Attrs.Empty)
+  override def exceptionPunctuationColor =
+    toggledColor(utest.ufansi.Attrs.Empty)
   override def exceptionLineNumberColor = toggledColor(utest.ufansi.Attrs.Empty)
 }
