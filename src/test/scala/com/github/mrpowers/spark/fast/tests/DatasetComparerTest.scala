@@ -50,7 +50,8 @@ object DatasetComparerTest
           List(
             (1),
             (5)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
@@ -59,7 +60,8 @@ object DatasetComparerTest
           List(
             (1),
             (5)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
@@ -92,7 +94,8 @@ object DatasetComparerTest
           List(
             (1),
             (5)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
@@ -101,7 +104,8 @@ object DatasetComparerTest
           List(
             (1, "word"),
             (5, "word")
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true),
             ("word", StringType, true)
           )
@@ -170,7 +174,9 @@ object DatasetComparerTest
             Person("Alice", 5)
           )
         )
-        assertLargeDatasetEquality(sourceDS, expectedDS, Person.caseInsensitivePersonEquals)
+        assertLargeDatasetEquality(sourceDS,
+                                   expectedDS,
+                                   Person.caseInsensitivePersonEquals)
       }
 
       "fails if custom comparator for returns false" - {
@@ -187,7 +193,9 @@ object DatasetComparerTest
           )
         )
         val e = intercept[DatasetContentMismatch] {
-          assertLargeDatasetEquality(sourceDS, expectedDS, Person.caseInsensitivePersonEquals)
+          assertLargeDatasetEquality(sourceDS,
+                                     expectedDS,
+                                     Person.caseInsensitivePersonEquals)
         }
       }
 
@@ -201,7 +209,8 @@ object DatasetComparerTest
           List(
             (1),
             (5)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, false)
           )
         )
@@ -210,7 +219,8 @@ object DatasetComparerTest
           List(
             (1),
             (5)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
@@ -223,7 +233,8 @@ object DatasetComparerTest
           List(
             (1),
             (5)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
@@ -232,12 +243,15 @@ object DatasetComparerTest
           List(
             (5),
             (1)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
 
-        assertSmallDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
+        assertSmallDatasetEquality(sourceDF,
+                                   expectedDF,
+                                   orderedComparison = false)
       }
 
       "can performed unordered Dataset comparisons" - {
@@ -253,7 +267,9 @@ object DatasetComparerTest
             Person("bob", 1)
           )
         )
-        assertSmallDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
+        assertSmallDatasetEquality(sourceDS,
+                                   expectedDS,
+                                   orderedComparison = false)
       }
 
       "throws an error for unordered Dataset comparisons that don't match" - {
@@ -273,7 +289,9 @@ object DatasetComparerTest
         )
 
         val e = intercept[DatasetContentMismatch] {
-          assertSmallDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
+          assertSmallDatasetEquality(sourceDS,
+                                     expectedDS,
+                                     orderedComparison = false)
         }
       }
 
@@ -282,7 +300,8 @@ object DatasetComparerTest
           List(
             (1),
             (5)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
@@ -291,13 +310,16 @@ object DatasetComparerTest
             (5),
             (1),
             (10)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
 
         val e = intercept[DatasetContentMismatch] {
-          assertSmallDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
+          assertSmallDatasetEquality(sourceDF,
+                                     expectedDF,
+                                     orderedComparison = false)
         }
       }
 
@@ -311,7 +333,8 @@ object DatasetComparerTest
             (5, "bob"),
             (1, "phil"),
             (5, "anne")
-          ), List(
+          ),
+          List(
             ("fun_level", IntegerType, true),
             ("name", StringType, true)
           )
@@ -324,7 +347,8 @@ object DatasetComparerTest
             (1, "phil"),
             (5, "anne"),
             (5, "bob")
-          ), List(
+          ),
+          List(
             ("fun_level", IntegerType, true),
             ("name", StringType, true)
           )
@@ -338,27 +362,29 @@ object DatasetComparerTest
     'assertApproximateDataFrameEquality - {
 
       "does nothing if the DataFrames have the same schemas and content" - {
-val sourceDF = spark.createDF(
-  List(
-    (1.2),
-    (5.1),
-    (null)
-  ), List(
-    ("number", DoubleType, true)
-  )
-)
+        val sourceDF = spark.createDF(
+          List(
+            (1.2),
+            (5.1),
+            (null)
+          ),
+          List(
+            ("number", DoubleType, true)
+          )
+        )
 
-val expectedDF = spark.createDF(
-  List(
-    (1.2),
-    (5.1),
-    (null)
-  ), List(
-    ("number", DoubleType, true)
-  )
-)
+        val expectedDF = spark.createDF(
+          List(
+            (1.2),
+            (5.1),
+            (null)
+          ),
+          List(
+            ("number", DoubleType, true)
+          )
+        )
 
-assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
       }
 
       "throws an error if the rows are different" - {
@@ -366,7 +392,8 @@ assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
           List(
             (100.9),
             (5.1)
-          ), List(
+          ),
+          List(
             ("number", DoubleType, true)
           )
         )
@@ -375,7 +402,8 @@ assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
           List(
             (1.2),
             (5.1)
-          ), List(
+          ),
+          List(
             ("number", DoubleType, true)
           )
         )
@@ -391,7 +419,8 @@ assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
             (1.2),
             (5.1),
             (8.8)
-          ), List(
+          ),
+          List(
             ("number", DoubleType, true)
           )
         )
@@ -400,7 +429,8 @@ assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
           List(
             (1.2),
             (5.1)
-          ), List(
+          ),
+          List(
             ("number", DoubleType, true)
           )
         )

@@ -17,7 +17,8 @@ object DataFrameComparerTest
         List(
           ("bob", 1, "uk"),
           ("camila", 5, "peru")
-        ), List(
+        ),
+        List(
           ("name", StringType, true),
           ("age", IntegerType, true),
           ("country", StringType, true)
@@ -28,7 +29,8 @@ object DataFrameComparerTest
         List(
           ("bob", 1, "france"),
           ("camila", 5, "peru")
-        ), List(
+        ),
+        List(
           ("name", StringType, true),
           ("age", IntegerType, true),
           ("country", StringType, true)
@@ -48,7 +50,8 @@ object DataFrameComparerTest
           List(
             (1),
             (5)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
@@ -57,7 +60,8 @@ object DataFrameComparerTest
           List(
             (1),
             (5)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
@@ -71,7 +75,8 @@ object DataFrameComparerTest
           List(
             (1),
             (5)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
@@ -80,7 +85,8 @@ object DataFrameComparerTest
           List(
             (1, "word"),
             (5, "word")
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true),
             ("word", StringType, true)
           )
@@ -99,7 +105,8 @@ object DataFrameComparerTest
           List(
             (1),
             (5)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
@@ -108,7 +115,8 @@ object DataFrameComparerTest
           List(
             (10),
             (5)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
@@ -130,7 +138,8 @@ object DataFrameComparerTest
           List(
             (1),
             (5)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
@@ -138,11 +147,14 @@ object DataFrameComparerTest
           List(
             (5),
             (1)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
-        assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
+        assertSmallDataFrameEquality(sourceDF,
+                                     expectedDF,
+                                     orderedComparison = false)
       }
 
       "throws an error for unordered DataFrame comparisons that don't match" - {
@@ -150,7 +162,8 @@ object DataFrameComparerTest
           List(
             (1),
             (5)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
@@ -159,12 +172,15 @@ object DataFrameComparerTest
             (5),
             (1),
             (10)
-          ), List(
+          ),
+          List(
             ("number", IntegerType, true)
           )
         )
         val e = intercept[DatasetContentMismatch] {
-          assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
+          assertSmallDataFrameEquality(sourceDF,
+                                       expectedDF,
+                                       orderedComparison = false)
         }
       }
 

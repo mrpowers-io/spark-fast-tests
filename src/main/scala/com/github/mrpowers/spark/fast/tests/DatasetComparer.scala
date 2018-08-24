@@ -19,7 +19,8 @@ object DatasetComparerLike {
 
 trait DatasetComparer {
 
-  private def schemaMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
+  private def schemaMismatchMessage[T](actualDS: Dataset[T],
+                                       expectedDS: Dataset[T]): String = {
     s"""
 Actual Schema:
 ${actualDS.schema}
@@ -28,25 +29,31 @@ ${expectedDS.schema}
 """
   }
 
-  private def countMismatchMessage(actualCount: Long, expectedCount: Long): String = {
+  private def countMismatchMessage(actualCount: Long,
+                                   expectedCount: Long): String = {
     s"""
 Actual DataFrame Row Count: '${actualCount}'
 Expected DataFrame Row Count: '${expectedCount}'
 """
   }
 
-  private def betterContentMismatchMessage[T](a: Array[T], e: Array[T]): String = {
-    "\n" + a.zip(e).map {
-      case (r1, r2) =>
-        if (r1.equals(r2)) {
-          ufansi.Color.Blue(s"$r1 | $r2")
-        } else {
-          ufansi.Color.Red(s"$r1 | $r2")
-        }
-    }.mkString("\n")
+  private def betterContentMismatchMessage[T](a: Array[T],
+                                              e: Array[T]): String = {
+    "\n" + a
+      .zip(e)
+      .map {
+        case (r1, r2) =>
+          if (r1.equals(r2)) {
+            ufansi.Color.Blue(s"$r1 | $r2")
+          } else {
+            ufansi.Color.Red(s"$r1 | $r2")
+          }
+      }
+      .mkString("\n")
   }
 
-  private def basicMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
+  private def basicMismatchMessage[T](actualDS: Dataset[T],
+                                      expectedDS: Dataset[T]): String = {
     s"""
 Actual DataFrame Content:
 ${DataFramePrettyPrint.showString(actualDS.toDF(), 10)}
@@ -56,16 +63,18 @@ ${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
   }
 
   /**
-   * Raises an error unless `actualDS` and `expectedDS` are equal
-   */
+    * Raises an error unless `actualDS` and `expectedDS` are equal
+    */
   def assertSmallDatasetEquality[T](
-    actualDS: Dataset[T],
-    expectedDS: Dataset[T],
-    ignoreNullable: Boolean = false,
-    orderedComparison: Boolean = true
+      actualDS: Dataset[T],
+      expectedDS: Dataset[T],
+      ignoreNullable: Boolean = false,
+      orderedComparison: Boolean = true
   ): Unit = {
     if (ignoreNullable) {
-      if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable = true)) {
+      if (!SchemaComparer.equals(actualDS.schema,
+                                 expectedDS.schema,
+                                 ignoreNullable = true)) {
         throw DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
       }
     } else {
@@ -95,12 +104,12 @@ ${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
   }
 
   /**
-   * Raises an error unless `actualDS` and `expectedDS` are equal
-   */
+    * Raises an error unless `actualDS` and `expectedDS` are equal
+    */
   def assertLargeDatasetEquality[T: ClassTag](
-    actualDS: Dataset[T],
-    expectedDS: Dataset[T],
-    equals: (T, T) => Boolean = naiveEquality _
+      actualDS: Dataset[T],
+      expectedDS: Dataset[T],
+      equals: (T, T) => Boolean = naiveEquality _
   ): Unit = {
     if (!actualDS.schema.equals(expectedDS.schema)) {
       throw DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
@@ -112,11 +121,14 @@ ${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
       val actualCount = actualDS.rdd.count
       val expectedCount = expectedDS.rdd.count
       if (actualCount != expectedCount) {
-        throw DatasetContentMismatch(countMismatchMessage(actualCount, expectedCount))
+        throw DatasetContentMismatch(
+          countMismatchMessage(actualCount, expectedCount))
       }
 
-      val expectedIndexValue: RDD[(Long, T)] = RddHelpers.zipWithIndex(actualDS.rdd)
-      val resultIndexValue: RDD[(Long, T)] = RddHelpers.zipWithIndex(expectedDS.rdd)
+      val expectedIndexValue: RDD[(Long, T)] =
+        RddHelpers.zipWithIndex(actualDS.rdd)
+      val resultIndexValue: RDD[(Long, T)] =
+        RddHelpers.zipWithIndex(expectedDS.rdd)
       val unequalRDD = expectedIndexValue
         .join(resultIndexValue)
         .filter {
@@ -125,7 +137,8 @@ ${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
         }
       val maxUnequalRowsToShow = 10
       if (!unequalRDD.isEmpty()) {
-        throw DatasetContentMismatch(countMismatchMessage(actualCount, expectedCount))
+        throw DatasetContentMismatch(
+          countMismatchMessage(actualCount, expectedCount))
       }
       unequalRDD.take(maxUnequalRowsToShow)
 
@@ -136,9 +149,9 @@ ${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
   }
 
   def assertApproximateDataFrameEquality(
-    actualDF: DataFrame,
-    expectedDF: DataFrame,
-    precision: Double
+      actualDF: DataFrame,
+      expectedDF: DataFrame,
+      precision: Double
   ): Unit = {
     if (!actualDF.schema.equals(expectedDF.schema)) {
       throw DatasetSchemaMismatch(schemaMismatchMessage(actualDF, expectedDF))
@@ -150,7 +163,8 @@ ${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
       val actualCount: Long = actualDF.count
       val expectedCount: Long = expectedDF.count
       if (actualCount != expectedCount) {
-        throw DatasetCountMismatch(countMismatchMessage(actualCount, expectedCount))
+        throw DatasetCountMismatch(
+          countMismatchMessage(actualCount, expectedCount))
       }
 
       val expectedIndexValue = RddHelpers.zipWithIndex(actualDF.rdd)
@@ -175,4 +189,3 @@ ${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
   }
 
 }
-
