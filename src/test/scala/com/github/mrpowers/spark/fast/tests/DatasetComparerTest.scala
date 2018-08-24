@@ -174,9 +174,11 @@ object DatasetComparerTest
             Person("Alice", 5)
           )
         )
-        assertLargeDatasetEquality(sourceDS,
-                                   expectedDS,
-                                   Person.caseInsensitivePersonEquals)
+        assertLargeDatasetEquality(
+          sourceDS,
+          expectedDS,
+          Person.caseInsensitivePersonEquals
+        )
       }
 
       "fails if custom comparator for returns false" - {
@@ -193,9 +195,11 @@ object DatasetComparerTest
           )
         )
         val e = intercept[DatasetContentMismatch] {
-          assertLargeDatasetEquality(sourceDS,
-                                     expectedDS,
-                                     Person.caseInsensitivePersonEquals)
+          assertLargeDatasetEquality(
+            sourceDS,
+            expectedDS,
+            Person.caseInsensitivePersonEquals
+          )
         }
       }
 
@@ -249,9 +253,11 @@ object DatasetComparerTest
           )
         )
 
-        assertSmallDatasetEquality(sourceDF,
-                                   expectedDF,
-                                   orderedComparison = false)
+        assertSmallDatasetEquality(
+          sourceDF,
+          expectedDF,
+          orderedComparison = false
+        )
       }
 
       "can performed unordered Dataset comparisons" - {
@@ -267,9 +273,11 @@ object DatasetComparerTest
             Person("bob", 1)
           )
         )
-        assertSmallDatasetEquality(sourceDS,
-                                   expectedDS,
-                                   orderedComparison = false)
+        assertSmallDatasetEquality(
+          sourceDS,
+          expectedDS,
+          orderedComparison = false
+        )
       }
 
       "throws an error for unordered Dataset comparisons that don't match" - {
@@ -289,9 +297,11 @@ object DatasetComparerTest
         )
 
         val e = intercept[DatasetContentMismatch] {
-          assertSmallDatasetEquality(sourceDS,
-                                     expectedDS,
-                                     orderedComparison = false)
+          assertSmallDatasetEquality(
+            sourceDS,
+            expectedDS,
+            orderedComparison = false
+          )
         }
       }
 
@@ -317,9 +327,11 @@ object DatasetComparerTest
         )
 
         val e = intercept[DatasetContentMismatch] {
-          assertSmallDatasetEquality(sourceDF,
-                                     expectedDF,
-                                     orderedComparison = false)
+          assertSmallDatasetEquality(
+            sourceDF,
+            expectedDF,
+            orderedComparison = false
+          )
         }
       }
 
@@ -440,29 +452,29 @@ object DatasetComparerTest
         }
       }
 
-//      "works with FloatType columns" - {
-//        val sourceDF = spark.createDF(
-//          List(
-//            (1.2),
-//            (5.1),
-//            (null)
-//          ), List(
-//            ("number", FloatType, true)
-//          )
-//        )
-//
-//        val expectedDF = spark.createDF(
-//          List(
-//            (1.2),
-//            (5.1),
-//            (null)
-//          ), List(
-//            ("number", FloatType, true)
-//          )
-//        )
-//
-//        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
-//      }
+      //      "works with FloatType columns" - {
+      //        val sourceDF = spark.createDF(
+      //          List(
+      //            (1.2),
+      //            (5.1),
+      //            (null)
+      //          ), List(
+      //            ("number", FloatType, true)
+      //          )
+      //        )
+      //
+      //        val expectedDF = spark.createDF(
+      //          List(
+      //            (1.2),
+      //            (5.1),
+      //            (null)
+      //          ), List(
+      //            ("number", FloatType, true)
+      //          )
+      //        )
+      //
+      //        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+      //      }
 
     }
 

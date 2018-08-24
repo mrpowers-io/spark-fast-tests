@@ -30,8 +30,10 @@ object sourcecode {
   * giving 20% (on `++`) to >1000% (on `splitAt`, `subString`
   * and `Str.parse`) speedups
   */
-case class Str private (private val chars: Array[Char],
-                        private val colors: Array[Str.State]) {
+case class Str private (
+    private val chars: Array[Char],
+    private val colors: Array[Str.State]
+) {
   require(chars.length == colors.length)
   override def hashCode() =
     util.Arrays.hashCode(chars) + util.Arrays.hashCode(colors)
@@ -277,8 +279,10 @@ object Str {
     *                  input `CharSequence` contains an Ansi escape not
     *                  recognized by Fansi as a valid color.
     */
-  def apply(raw: CharSequence,
-            errorMode: ErrorMode = ErrorMode.Throw): ufansi.Str = {
+  def apply(
+      raw: CharSequence,
+      errorMode: ErrorMode = ErrorMode.Throw
+  ): ufansi.Str = {
     // Pre-allocate some arrays for us to fill up. They will probably be
     // too big if the input has any ansi codes at all but that's ok, we'll
     // trim them later.
@@ -306,7 +310,8 @@ object Str {
                 sourceIndex += newIndex
                 def isDigit(index: Int) = {
                   index < raw.length && raw.charAt(index) >= '0' && raw.charAt(
-                    index) <= '9'
+                    index
+                  ) <= '9'
                 }
                 def checkChar(index: Int, char: Char) = {
                   index < raw.length && raw.charAt(index) == char
@@ -333,7 +338,8 @@ object Str {
                     sourceIndex += 1
                     val g = getNumber()
                     if (!checkChar(sourceIndex, ';') || !isDigit(
-                          sourceIndex + 1)) fail()
+                          sourceIndex + 1
+                        )) fail()
                     else {
                       sourceIndex += 1
                       val b = getNumber()
@@ -678,7 +684,8 @@ object Attr {
 case class EscapeAttr private[ufansi] (
     escape: String,
     resetMask: Long,
-    applyMask: Long)(implicit sourceName: sourcecode.Name)
+    applyMask: Long
+)(implicit sourceName: sourcecode.Name)
     extends Attr {
   val escapeOpt = Some(escape)
   val name = sourceName.value
@@ -689,8 +696,9 @@ case class EscapeAttr private[ufansi] (
   * An [[Attr]] for which no fansi escape sequence exists
   */
 case class ResetAttr private[ufansi] (resetMask: Long, applyMask: Long)(
-    implicit sourceName: sourcecode.Name)
-    extends Attr {
+    implicit
+    sourceName: sourcecode.Name
+) extends Attr {
   val escapeOpt = None
   val name = sourceName.value
   override def toString = name
@@ -701,7 +709,9 @@ case class ResetAttr private[ufansi] (resetMask: Long, applyMask: Long)(
   * in the state `Int`
   */
 sealed abstract class Category(val offset: Int, val width: Int)(
-    implicit catName: sourcecode.Name) {
+    implicit
+    catName: sourcecode.Name
+) {
   def mask = ((1 << width) - 1) << offset
   val all: Vector[Attr]
 
@@ -725,7 +735,8 @@ sealed abstract class Category(val offset: Int, val width: Int)(
 
   def makeAttr(s: String, applyValue: Long)(implicit name: sourcecode.Name) = {
     new EscapeAttr(s, mask, applyValue << offset)(
-      catName.value + "." + name.value)
+      catName.value + "." + name.value
+    )
   }
 
   def makeNoneAttr(applyValue: Long)(implicit name: sourcecode.Name) = {
@@ -919,8 +930,9 @@ private[this] final class Trie[T](strings: Seq[(String, T)]) {
   * 273 - 16 777 388 : 24 bit colors
   */
 abstract class ColorCategory(offset: Int, width: Int, val colorCode: Int)(
-    implicit catName: sourcecode.Name)
-    extends Category(offset, width)(catName) {
+    implicit
+    catName: sourcecode.Name
+) extends Category(offset, width)(catName) {
 
   /**
     * 256 color [[Attr]]s, for those terminals that support it
@@ -931,7 +943,8 @@ abstract class ColorCategory(offset: Int, width: Int, val colorCode: Int)(
 
   private[this] def True0(r: Int, g: Int, b: Int, index: Int) = {
     makeAttr(trueRgbEscape(r, g, b), 273 + index)(
-      "True(" + r + "," + g + "," + b + ")")
+      "True(" + r + "," + g + "," + b + ")"
+    )
   }
   def trueRgbEscape(r: Int, g: Int, b: Int) = {
     "\u001b[" + colorCode + ";2;" + r + ";" + g + ";" + b + "m"
@@ -959,12 +972,18 @@ abstract class ColorCategory(offset: Int, width: Int, val colorCode: Int)(
   def True(r: Int, g: Int, b: Int) = True0(r, g, b, trueIndex(r, g, b))
 
   def trueIndex(r: Int, g: Int, b: Int) = {
-    require(0 <= r && r < 256,
-            "True parameter `r` must be 0 <= r < 256, not " + r)
-    require(0 <= g && g < 256,
-            "True parameter `g` must be 0 <= r < 256, not " + g)
-    require(0 <= b && b < 256,
-            "True parameter `b` must be 0 <= r < 256, not " + b)
+    require(
+      0 <= r && r < 256,
+      "True parameter `r` must be 0 <= r < 256, not " + r
+    )
+    require(
+      0 <= g && g < 256,
+      "True parameter `g` must be 0 <= r < 256, not " + g
+    )
+    require(
+      0 <= b && b < 256,
+      "True parameter `b` must be 0 <= r < 256, not " + b
+    )
     r << 16 | g << 8 | b
   }
 
@@ -973,9 +992,11 @@ abstract class ColorCategory(offset: Int, width: Int, val colorCode: Int)(
     if (rawIndex < 273) super.lookupEscape(applyState)
     else {
       val index = rawIndex - 273
-      trueRgbEscape(r = index >> 16,
-                    g = (index & 0x00FF00) >> 8,
-                    b = index & 0x0000FF)
+      trueRgbEscape(
+        r = index >> 16,
+        g = (index & 0x00FF00) >> 8,
+        b = index & 0x0000FF
+      )
     }
   }
   override def lookupAttr(applyState: Long): Attr = {

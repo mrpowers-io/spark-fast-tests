@@ -152,9 +152,11 @@ object DataFrameComparerTest
             ("number", IntegerType, true)
           )
         )
-        assertSmallDataFrameEquality(sourceDF,
-                                     expectedDF,
-                                     orderedComparison = false)
+        assertSmallDataFrameEquality(
+          sourceDF,
+          expectedDF,
+          orderedComparison = false
+        )
       }
 
       "throws an error for unordered DataFrame comparisons that don't match" - {
@@ -178,9 +180,11 @@ object DataFrameComparerTest
           )
         )
         val e = intercept[DatasetContentMismatch] {
-          assertSmallDataFrameEquality(sourceDF,
-                                       expectedDF,
-                                       orderedComparison = false)
+          assertSmallDataFrameEquality(
+            sourceDF,
+            expectedDF,
+            orderedComparison = false
+          )
         }
       }
 
