@@ -338,27 +338,27 @@ object DatasetComparerTest
     'assertApproximateDataFrameEquality - {
 
       "does nothing if the DataFrames have the same schemas and content" - {
-val sourceDF = spark.createDF(
-  List(
-    (1.2),
-    (5.1),
-    (null)
-  ), List(
-    ("number", DoubleType, true)
-  )
-)
+        val sourceDF = spark.createDF(
+          List(
+            (1.2),
+            (5.1),
+            (null)
+          ), List(
+            ("number", DoubleType, true)
+          )
+        )
 
-val expectedDF = spark.createDF(
-  List(
-    (1.2),
-    (5.1),
-    (null)
-  ), List(
-    ("number", DoubleType, true)
-  )
-)
+        val expectedDF = spark.createDF(
+          List(
+            (1.2),
+            (5.1),
+            (null)
+          ), List(
+            ("number", DoubleType, true)
+          )
+        )
 
-assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
       }
 
       "throws an error if the rows are different" - {
@@ -410,29 +410,29 @@ assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
         }
       }
 
-//      "works with FloatType columns" - {
-//        val sourceDF = spark.createDF(
-//          List(
-//            (1.2),
-//            (5.1),
-//            (null)
-//          ), List(
-//            ("number", FloatType, true)
-//          )
-//        )
-//
-//        val expectedDF = spark.createDF(
-//          List(
-//            (1.2),
-//            (5.1),
-//            (null)
-//          ), List(
-//            ("number", FloatType, true)
-//          )
-//        )
-//
-//        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
-//      }
+      //      "works with FloatType columns" - {
+      //        val sourceDF = spark.createDF(
+      //          List(
+      //            (1.2),
+      //            (5.1),
+      //            (null)
+      //          ), List(
+      //            ("number", FloatType, true)
+      //          )
+      //        )
+      //
+      //        val expectedDF = spark.createDF(
+      //          List(
+      //            (1.2),
+      //            (5.1),
+      //            (null)
+      //          ), List(
+      //            ("number", FloatType, true)
+      //          )
+      //        )
+      //
+      //        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+      //      }
 
     }
 

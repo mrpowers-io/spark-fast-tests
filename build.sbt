@@ -16,7 +16,7 @@ spName := "MrPowers/spark-fast-tests"
 spShortDescription := "Fast tests with Spark"
 spDescription := "Test your code quickly"
 
-version := "2.3.0_0.13.1"
+version := "2.3.0_0.14.0"
 scalaVersion := "2.11.12"
 sparkVersion := "2.3.0"
 
