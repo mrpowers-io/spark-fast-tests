@@ -131,7 +131,7 @@ ${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
       val actualCount = actualDS.rdd.count
       val expectedCount = expectedDS.rdd.count
       if (actualCount != expectedCount) {
-        throw DatasetContentMismatch(
+        throw DatasetCountMismatch(
           countMismatchMessage(actualCount, expectedCount)
         )
       }
@@ -165,40 +165,13 @@ ${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
       expectedDF: DataFrame,
       precision: Double
   ): Unit = {
-    if (!actualDF.schema.equals(expectedDF.schema)) {
-      throw DatasetSchemaMismatch(schemaMismatchMessage(actualDF, expectedDF))
-    }
-    try {
-      actualDF.rdd.cache
-      expectedDF.rdd.cache
-
-      val actualCount: Long = actualDF.count
-      val expectedCount: Long = expectedDF.count
-      if (actualCount != expectedCount) {
-        throw DatasetCountMismatch(
-          countMismatchMessage(actualCount, expectedCount)
-        )
+    assertLargeDatasetEquality[Row](
+      actualDF,
+      expectedDF,
+      equals = (r1: Row, r2: Row) => {
+        r1.equals(r2) || RowComparer.areRowsEqual(r1, r2, precision)
       }
-
-      val expectedIndexValue = RddHelpers.zipWithIndex(actualDF.rdd)
-      val resultIndexValue = RddHelpers.zipWithIndex(expectedDF.rdd)
-
-      val unequalRDD = expectedIndexValue
-        .join(resultIndexValue)
-        .filter {
-          case (idx, (r1: Row, r2: Row)) =>
-            !(r1.equals(r2) || RowComparer.areRowsEqual(r1, r2, precision))
-        }
-
-      val maxUnequalRowsToShow = 10
-      if (!unequalRDD.isEmpty()) {
-        throw DatasetContentMismatch(basicMismatchMessage(actualDF, expectedDF))
-      }
-      unequalRDD.take(maxUnequalRowsToShow)
-    } finally {
-      actualDF.rdd.unpersist()
-      expectedDF.rdd.unpersist()
-    }
+    )
   }
 
 }
