@@ -7,10 +7,8 @@ import org.apache.spark.sql.catalyst.util.DateTimeUtils
 
 object ArrayPrettyPrint {
 
-  def showTwoColumnString(
-      arr: Array[(Any, Any)],
-      truncate: Int = 20
-  ): String = {
+  def showTwoColumnString(arr: Array[(Any, Any)],
+                          truncate: Int = 20): String = {
     val sb = new StringBuilder
     val numCols = 2
 

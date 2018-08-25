@@ -7,12 +7,10 @@ trait DataFrameComparer extends DatasetComparer {
   /**
     * Raises an error unless `actualDF` and `expectedDF` are equal
     */
-  def assertSmallDataFrameEquality(
-      actualDF: DataFrame,
-      expectedDF: DataFrame,
-      ignoreNullable: Boolean = false,
-      orderedComparison: Boolean = true
-  ): Unit = {
+  def assertSmallDataFrameEquality(actualDF: DataFrame,
+                                   expectedDF: DataFrame,
+                                   ignoreNullable: Boolean = false,
+                                   orderedComparison: Boolean = true): Unit = {
     assertSmallDatasetEquality(
       actualDF,
       expectedDF,
@@ -24,10 +22,8 @@ trait DataFrameComparer extends DatasetComparer {
   /**
     * Raises an error unless `actualDF` and `expectedDF` are equal
     */
-  def assertLargeDataFrameEquality(
-      actualDF: DataFrame,
-      expectedDF: DataFrame
-  ): Unit = {
+  def assertLargeDataFrameEquality(actualDF: DataFrame,
+                                   expectedDF: DataFrame): Unit = {
     assertLargeDatasetEquality(actualDF, expectedDF)
   }
 

@@ -8,10 +8,8 @@ case class RDDContentMismatch(smth: String) extends Exception(smth)
 
 trait RDDComparer {
 
-  def contentMismatchMessage[T: ClassTag](
-      actualRDD: RDD[T],
-      expectedRDD: RDD[T]
-  ): String = {
+  def contentMismatchMessage[T: ClassTag](actualRDD: RDD[T],
+                                          expectedRDD: RDD[T]): String = {
     s"""
 Actual RDD Content:
 ${actualRDD.take(5).mkString("\n")}
@@ -20,12 +18,10 @@ ${expectedRDD.take(5).mkString("\n")}
 """
   }
 
-  def assertSmallRDDEquality[T: ClassTag](
-      actualRDD: RDD[T],
-      expectedRDD: RDD[T]
-  ): Unit = {
+  def assertSmallRDDEquality[T: ClassTag](actualRDD: RDD[T],
+                                          expectedRDD: RDD[T]): Unit = {
     if (!actualRDD.collect().sameElements(expectedRDD.collect())) {
-      throw new RDDContentMismatch(
+      throw RDDContentMismatch(
         contentMismatchMessage(actualRDD, expectedRDD)
       )
     }
