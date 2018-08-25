@@ -4,9 +4,7 @@ import org.apache.spark.sql.types.{StructField, StructType}
 
 object SchemaComparer {
 
-  def equals(s1: StructType,
-             s2: StructType,
-             ignoreNullable: Boolean = false): Boolean = {
+  def equals(s1: StructType, s2: StructType, ignoreNullable: Boolean = false): Boolean = {
     if (s1.length != s2.length) {
       false
     } else {

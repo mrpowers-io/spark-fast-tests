@@ -22,7 +22,10 @@ object RowComparer {
           val o2 = r2.get(idx)
           o1 match {
             case b1: Array[Byte] =>
-              if (!java.util.Arrays.equals(b1, o2.asInstanceOf[Array[Byte]])) {
+              if (!java.util.Arrays.equals(
+                    b1,
+                    o2.asInstanceOf[Array[Byte]]
+                  )) {
                 return false
               }
 

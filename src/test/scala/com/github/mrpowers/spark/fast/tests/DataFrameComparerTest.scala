@@ -4,10 +4,7 @@ import org.apache.spark.sql.types.{IntegerType, StringType}
 import com.github.mrpowers.spark.daria.sql.SparkSessionExt._
 import utest._
 
-object DataFrameComparerTest
-    extends TestSuite
-    with DataFrameComparer
-    with SparkSessionTestWrapper {
+object DataFrameComparerTest extends TestSuite with DataFrameComparer with SparkSessionTestWrapper {
 
   val tests = Tests {
 
@@ -38,7 +35,10 @@ object DataFrameComparerTest
       )
 
       val e = intercept[DatasetContentMismatch] {
-        assertSmallDataFrameEquality(sourceDF, expectedDF)
+        assertSmallDataFrameEquality(
+          sourceDF,
+          expectedDF
+        )
       }
 
     }
@@ -66,8 +66,14 @@ object DataFrameComparerTest
           )
         )
 
-        assertSmallDataFrameEquality(sourceDF, expectedDF)
-        assertLargeDataFrameEquality(sourceDF, expectedDF)
+        assertSmallDataFrameEquality(
+          sourceDF,
+          expectedDF
+        )
+        assertLargeDataFrameEquality(
+          sourceDF,
+          expectedDF
+        )
       }
 
       "throws an error if the DataFrames have different schemas" - {
@@ -93,10 +99,16 @@ object DataFrameComparerTest
         )
 
         val e = intercept[DatasetSchemaMismatch] {
-          assertLargeDataFrameEquality(sourceDF, expectedDF)
+          assertLargeDataFrameEquality(
+            sourceDF,
+            expectedDF
+          )
         }
         val e2 = intercept[DatasetSchemaMismatch] {
-          assertSmallDataFrameEquality(sourceDF, expectedDF)
+          assertSmallDataFrameEquality(
+            sourceDF,
+            expectedDF
+          )
         }
       }
 
@@ -122,10 +134,16 @@ object DataFrameComparerTest
         )
 
         val e = intercept[DatasetContentMismatch] {
-          assertLargeDataFrameEquality(sourceDF, expectedDF)
+          assertLargeDataFrameEquality(
+            sourceDF,
+            expectedDF
+          )
         }
         val e2 = intercept[DatasetContentMismatch] {
-          assertSmallDataFrameEquality(sourceDF, expectedDF)
+          assertSmallDataFrameEquality(
+            sourceDF,
+            expectedDF
+          )
         }
       }
 

@@ -5,6 +5,7 @@ import com.github.mrpowers.spark.daria.sql.SparkSessionExt._
 import utest._
 
 object Person {
+
   def caseInsensitivePersonEquals(some: Person, other: Person): Boolean = {
     some.name.equalsIgnoreCase(other.name) && some.age == other.age
   }
@@ -12,10 +13,7 @@ object Person {
 case class Person(name: String, age: Int)
 case class PrecisePerson(name: String, age: Double)
 
-object DatasetComparerTest
-    extends TestSuite
-    with DatasetComparer
-    with SparkSessionTestWrapper {
+object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSessionTestWrapper {
 
   val tests = Tests {
 
@@ -26,21 +24,48 @@ object DatasetComparerTest
       "provides a good README example" - {
 
         val sourceDS = Seq(
-          Person("juan", 5),
-          Person("bob", 1),
-          Person("li", 49),
-          Person("alice", 5)
+          Person(
+            "juan",
+            5
+          ),
+          Person(
+            "bob",
+            1
+          ),
+          Person(
+            "li",
+            49
+          ),
+          Person(
+            "alice",
+            5
+          )
         ).toDS
 
         val expectedDS = Seq(
-          Person("juan", 5),
-          Person("frank", 10),
-          Person("li", 49),
-          Person("lucy", 5)
+          Person(
+            "juan",
+            5
+          ),
+          Person(
+            "frank",
+            10
+          ),
+          Person(
+            "li",
+            49
+          ),
+          Person(
+            "lucy",
+            5
+          )
         ).toDS
 
         val e = intercept[DatasetContentMismatch] {
-          assertSmallDatasetEquality(sourceDS, expectedDS)
+          assertSmallDatasetEquality(
+            sourceDS,
+            expectedDS
+          )
         }
 
       }
@@ -66,27 +91,51 @@ object DatasetComparerTest
           )
         )
 
-        assertSmallDatasetEquality(sourceDF, expectedDF)
-        assertLargeDatasetEquality(sourceDF, expectedDF)
+        assertSmallDatasetEquality(
+          sourceDF,
+          expectedDF
+        )
+        assertLargeDatasetEquality(
+          sourceDF,
+          expectedDF
+        )
       }
 
       "does nothing if the Datasets have the same schemas and content" - {
         val sourceDS = spark.createDataset[Person](
           Seq(
-            Person("Alice", 12),
-            Person("Bob", 17)
+            Person(
+              "Alice",
+              12
+            ),
+            Person(
+              "Bob",
+              17
+            )
           )
         )
 
         val expectedDS = spark.createDataset[Person](
           Seq(
-            Person("Alice", 12),
-            Person("Bob", 17)
+            Person(
+              "Alice",
+              12
+            ),
+            Person(
+              "Bob",
+              17
+            )
           )
         )
 
-        assertSmallDatasetEquality(sourceDS, expectedDS)
-        assertLargeDatasetEquality(sourceDS, expectedDS)
+        assertSmallDatasetEquality(
+          sourceDS,
+          expectedDS
+        )
+        assertLargeDatasetEquality(
+          sourceDS,
+          expectedDS
+        )
       }
 
       "throws an error if the DataFrames have different schemas" - {
@@ -112,10 +161,16 @@ object DatasetComparerTest
         )
 
         val e = intercept[DatasetSchemaMismatch] {
-          assertLargeDatasetEquality(sourceDF, expectedDF)
+          assertLargeDatasetEquality(
+            sourceDF,
+            expectedDF
+          )
         }
         val e2 = intercept[DatasetSchemaMismatch] {
-          assertSmallDatasetEquality(sourceDF, expectedDF)
+          assertSmallDatasetEquality(
+            sourceDF,
+            expectedDF
+          )
         }
       }
 
@@ -131,47 +186,83 @@ object DatasetComparerTest
         ).toDF("number")
 
         val e = intercept[DatasetContentMismatch] {
-          assertLargeDatasetEquality(sourceDF, expectedDF)
+          assertLargeDatasetEquality(
+            sourceDF,
+            expectedDF
+          )
         }
         val e2 = intercept[DatasetContentMismatch] {
-          assertSmallDatasetEquality(sourceDF, expectedDF)
+          assertSmallDatasetEquality(
+            sourceDF,
+            expectedDF
+          )
         }
       }
 
       "throws an error if the Dataset content is different" - {
         val sourceDS = spark.createDataset[Person](
           Seq(
-            Person("Alice", 12),
-            Person("Bob", 17)
+            Person(
+              "Alice",
+              12
+            ),
+            Person(
+              "Bob",
+              17
+            )
           )
         )
 
         val expectedDS = spark.createDataset[Person](
           Seq(
-            Person("Frank", 10),
-            Person("Lucy", 5)
+            Person(
+              "Frank",
+              10
+            ),
+            Person(
+              "Lucy",
+              5
+            )
           )
         )
 
         val e = intercept[DatasetContentMismatch] {
-          assertLargeDatasetEquality(sourceDS, expectedDS)
+          assertLargeDatasetEquality(
+            sourceDS,
+            expectedDS
+          )
         }
         val e2 = intercept[DatasetContentMismatch] {
-          assertLargeDatasetEquality(sourceDS, expectedDS)
+          assertLargeDatasetEquality(
+            sourceDS,
+            expectedDS
+          )
         }
       }
 
       "succeeds if custom comparator returns true" - {
         val sourceDS = spark.createDataset[Person](
           Seq(
-            Person("bob", 1),
-            Person("alice", 5)
+            Person(
+              "bob",
+              1
+            ),
+            Person(
+              "alice",
+              5
+            )
           )
         )
         val expectedDS = spark.createDataset[Person](
           Seq(
-            Person("Bob", 1),
-            Person("Alice", 5)
+            Person(
+              "Bob",
+              1
+            ),
+            Person(
+              "Alice",
+              5
+            )
           )
         )
         assertLargeDatasetEquality(
@@ -184,14 +275,26 @@ object DatasetComparerTest
       "fails if custom comparator for returns false" - {
         val sourceDS = spark.createDataset[Person](
           Seq(
-            Person("bob", 10),
-            Person("alice", 5)
+            Person(
+              "bob",
+              10
+            ),
+            Person(
+              "alice",
+              5
+            )
           )
         )
         val expectedDS = spark.createDataset[Person](
           Seq(
-            Person("Bob", 1),
-            Person("Alice", 5)
+            Person(
+              "Bob",
+              1
+            ),
+            Person(
+              "Alice",
+              5
+            )
           )
         )
         val e = intercept[DatasetContentMismatch] {
@@ -229,7 +332,11 @@ object DatasetComparerTest
           )
         )
 
-        assertSmallDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
+        assertSmallDatasetEquality(
+          sourceDF,
+          expectedDF,
+          ignoreNullable = true
+        )
       }
 
       "can performed unordered DataFrame comparisons" - {
@@ -263,14 +370,26 @@ object DatasetComparerTest
       "can performed unordered Dataset comparisons" - {
         val sourceDS = spark.createDataset[Person](
           Seq(
-            Person("bob", 1),
-            Person("alice", 5)
+            Person(
+              "bob",
+              1
+            ),
+            Person(
+              "alice",
+              5
+            )
           )
         )
         val expectedDS = spark.createDataset[Person](
           Seq(
-            Person("alice", 5),
-            Person("bob", 1)
+            Person(
+              "alice",
+              5
+            ),
+            Person(
+              "bob",
+              1
+            )
           )
         )
         assertSmallDatasetEquality(
@@ -283,16 +402,31 @@ object DatasetComparerTest
       "throws an error for unordered Dataset comparisons that don't match" - {
         val sourceDS = spark.createDataset[Person](
           Seq(
-            Person("bob", 1),
-            Person("frank", 5)
+            Person(
+              "bob",
+              1
+            ),
+            Person(
+              "frank",
+              5
+            )
           )
         )
 
         val expectedDS = spark.createDataset[Person](
           Seq(
-            Person("frank", 5),
-            Person("bob", 1),
-            Person("sadie", 2)
+            Person(
+              "frank",
+              5
+            ),
+            Person(
+              "bob",
+              1
+            ),
+            Person(
+              "sadie",
+              2
+            )
           )
         )
 
@@ -366,7 +500,10 @@ object DatasetComparerTest
           )
         )
 
-        assertSmallDatasetEquality(actualDF, expectedDF)
+        assertSmallDatasetEquality(
+          actualDF,
+          expectedDF
+        )
       }
 
     }
@@ -396,7 +533,11 @@ object DatasetComparerTest
           )
         )
 
-        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+        assertApproximateDataFrameEquality(
+          sourceDF,
+          expectedDF,
+          0.01
+        )
       }
 
       "throws an error if the rows are different" - {
@@ -421,7 +562,11 @@ object DatasetComparerTest
         )
 
         val e = intercept[DatasetContentMismatch] {
-          assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+          assertApproximateDataFrameEquality(
+            sourceDF,
+            expectedDF,
+            0.01
+          )
         }
       }
 
@@ -448,7 +593,11 @@ object DatasetComparerTest
         )
 
         val e = intercept[DatasetCountMismatch] {
-          assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+          assertApproximateDataFrameEquality(
+            sourceDF,
+            expectedDF,
+            0.01
+          )
         }
       }
 

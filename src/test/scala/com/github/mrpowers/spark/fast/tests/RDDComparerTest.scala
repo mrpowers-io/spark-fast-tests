@@ -2,10 +2,7 @@ package com.github.mrpowers.spark.fast.tests
 
 import utest._
 
-object RDDComparerTest
-    extends TestSuite
-    with RDDComparer
-    with SparkSessionTestWrapper {
+object RDDComparerTest extends TestSuite with RDDComparer with SparkSessionTestWrapper {
 
   val tests = Tests {
 
@@ -39,7 +36,12 @@ can
 pan
 """
 
-        assert(contentMismatchMessage(actualRDD, expectedRDD) == expected)
+        assert(
+          contentMismatchMessage(
+            actualRDD,
+            expectedRDD
+          ) == expected
+        )
       }
 
     }
@@ -63,7 +65,10 @@ pan
 
         val expectedRDD = spark.sparkContext.parallelize(expectedData)
 
-        assertSmallRDDEquality(sourceRDD, expectedRDD)
+        assertSmallRDDEquality(
+          sourceRDD,
+          expectedRDD
+        )
       }
 
       "throws an error if the RDDs have different content" - {
@@ -83,7 +88,10 @@ pan
         val expectedRDD = spark.sparkContext.parallelize(expectedData)
 
         val e = intercept[RDDContentMismatch] {
-          assertSmallRDDEquality(sourceRDD, expectedRDD)
+          assertSmallRDDEquality(
+            sourceRDD,
+            expectedRDD
+          )
         }
       }
 
