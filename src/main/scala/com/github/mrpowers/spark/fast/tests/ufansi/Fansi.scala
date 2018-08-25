@@ -1,5 +1,6 @@
 // Vendored from https://github.com/lihaoyi/fansi
 package com.github.mrpowers.spark.fast.tests
+
 package ufansi
 
 import java.util
@@ -10,92 +11,147 @@ import scala.collection.mutable
 object sourcecode {
 
   case class Name(value: String)
+
   object Name {
     implicit def toName(s: String): Name = Name(s)
   }
 }
 
 /**
-  * Encapsulates a string with associated ANSI colors and text decorations.
-  *
-  * This is your primary data-type when you are dealing with colored fansi
-  * strings.
-  *
-  * Contains some basic string methods, as well as some ansi methods to e.g.
-  * apply particular colors or other decorations to particular sections of
-  * the [[ufansi.Str]]. [[render]] flattens it out into a `java.lang.String`
-  * with all the colors present as ANSI escapes.
-  *
-  * Avoids using Scala collections operations in favor of util.Arrays,
-  * giving 20% (on `++`) to >1000% (on `splitAt`, `subString`
-  * and `Str.parse`) speedups
-  */
-case class Str private (
-    private val chars: Array[Char],
-    private val colors: Array[Str.State]
-) {
+ * Encapsulates a string with associated ANSI colors and text decorations.
+ *
+ * This is your primary data-type when you are dealing with colored fansi
+ * strings.
+ *
+ * Contains some basic string methods, as well as some ansi methods to e.g.
+ * apply particular colors or other decorations to particular sections of
+ * the [[ufansi.Str]]. [[render]] flattens it out into a `java.lang.String`
+ * with all the colors present as ANSI escapes.
+ *
+ * Avoids using Scala collections operations in favor of util.Arrays,
+ * giving 20% (on `++`) to >1000% (on `splitAt`, `subString`
+ * and `Str.parse`) speedups
+ */
+case class Str private (private val chars: Array[Char], private val colors: Array[Str.State]) {
   require(chars.length == colors.length)
   override def hashCode() =
     util.Arrays.hashCode(chars) + util.Arrays.hashCode(colors)
   override def equals(other: Any) = other match {
     case o: ufansi.Str =>
-      util.Arrays.equals(chars, o.chars) && util.Arrays.equals(colors, o.colors)
+      util.Arrays.equals(
+        chars,
+        o.chars
+      ) && util.Arrays.equals(
+        colors,
+        o.colors
+      )
     case _ => false
   }
 
   /**
-    * Concatenates two [[ufansi.Str]]s, preserving the colors in each one and
-    * avoiding any interference between them
-    */
+   * Concatenates two [[ufansi.Str]]s, preserving the colors in each one and
+   * avoiding any interference between them
+   */
   def ++(other: Str) = {
-    val chars2 = new Array[Char](length + other.length)
+    val chars2  = new Array[Char](length + other.length)
     val colors2 = new Array[Str.State](length + other.length)
-    System.arraycopy(chars, 0, chars2, 0, length)
-    System.arraycopy(other.chars, 0, chars2, length, other.length)
-    System.arraycopy(colors, 0, colors2, 0, length)
-    System.arraycopy(other.colors, 0, colors2, length, other.length)
+    System.arraycopy(
+      chars,
+      0,
+      chars2,
+      0,
+      length
+    )
+    System.arraycopy(
+      other.chars,
+      0,
+      chars2,
+      length,
+      other.length
+    )
+    System.arraycopy(
+      colors,
+      0,
+      colors2,
+      0,
+      length
+    )
+    System.arraycopy(
+      other.colors,
+      0,
+      colors2,
+      length,
+      other.length
+    )
 
-    Str(chars2, colors2)
+    Str(
+      chars2,
+      colors2
+    )
   }
 
   def split(c: Char): Array[ufansi.Str] = {
     val output = mutable.Buffer.empty[ufansi.Str]
-    var index = 0
+    var index  = 0
     while (index < length) {
-      val nextIndex = chars.indexOf(c, index) match {
+      val nextIndex = chars.indexOf(
+        c,
+        index
+      ) match {
         case -1 => length
         case n  => n
       }
 
-      output.append(substring(index, nextIndex))
+      output.append(
+        substring(
+          index,
+          nextIndex
+        )
+      )
       index = nextIndex + 1
     }
     output.toArray
   }
 
   /**
-    * Splits an [[ufansi.Str]] into two sub-strings, preserving the colors in
-    * each one.
-    *
-    * @param index the plain-text index of the point within the [[ufansi.Str]]
-    *              you want to use to split it.
-    */
+   * Splits an [[ufansi.Str]] into two sub-strings, preserving the colors in
+   * each one.
+   *
+   * @param index the plain-text index of the point within the [[ufansi.Str]]
+   *              you want to use to split it.
+   */
   def splitAt(index: Int) = (
     new Str(
-      util.Arrays.copyOfRange(chars, 0, index),
-      util.Arrays.copyOfRange(colors, 0, index)
+      util.Arrays.copyOfRange(
+        chars,
+        0,
+        index
+      ),
+      util.Arrays.copyOfRange(
+        colors,
+        0,
+        index
+      )
     ),
     new Str(
-      util.Arrays.copyOfRange(chars, index, length),
-      util.Arrays.copyOfRange(colors, index, length)
+      util.Arrays.copyOfRange(
+        chars,
+        index,
+        length
+      ),
+      util.Arrays.copyOfRange(
+        colors,
+        index,
+        length
+      )
     )
   )
 
   /**
-    * Returns an [[ufansi.Str]] which is a substring of this string,
-    * and has the same colors as the original section of this string
-    * did
-    */
+   * Returns an [[ufansi.Str]] which is a substring of this string,
+   * and has the same colors as the original section of this string
+   * did
+   */
   def substring(start: Int = 0, end: Int = length) = {
     require(
       start >= 0 && start <= length,
@@ -106,55 +162,63 @@ case class Str private (
       s"substring end parameter [$end] must be between start $start and length:$length"
     )
     new Str(
-      util.Arrays.copyOfRange(chars, start, end),
-      util.Arrays.copyOfRange(colors, start, end)
+      util.Arrays.copyOfRange(
+        chars,
+        start,
+        end
+      ),
+      util.Arrays.copyOfRange(
+        colors,
+        start,
+        end
+      )
     )
   }
 
   /**
-    * The plain-text length of this [[ufansi.Str]], in UTF-16 characters (same
-    * as `.length` on a `java.lang.String`). If you want fancy UTF-8 lengths,
-    * use `.plainText`
-    */
+   * The plain-text length of this [[ufansi.Str]], in UTF-16 characters (same
+   * as `.length` on a `java.lang.String`). If you want fancy UTF-8 lengths,
+   * use `.plainText`
+   */
   def length = chars.length
 
   override def toString = render
 
   /**
-    * The plain-text `java.lang.String` represented by this [[ufansi.Str]],
-    * without all the fansi colors or other decorations
-    */
+   * The plain-text `java.lang.String` represented by this [[ufansi.Str]],
+   * without all the fansi colors or other decorations
+   */
   def plainText = new String(chars)
 
   /**
-    * Returns a copy of the colors array backing this `fansi.Str`, in case
-    * you want to use it to
-    */
+   * Returns a copy of the colors array backing this `fansi.Str`, in case
+   * you want to use it to
+   */
   def getColors = colors.clone()
 
   /**
-    * Retrieve the color of this string at the given character index
-    */
+   * Retrieve the color of this string at the given character index
+   */
   def getColor(i: Int) = colors(i)
 
   /**
-    * Returns a copy of the character array backing this `fansi.Str`, in case
-    * you want to use it to
-    */
+   * Returns a copy of the character array backing this `fansi.Str`, in case
+   * you want to use it to
+   */
   def getChars = chars.clone()
 
   /**
-    * Retrieve the character of this string at the given character index
-    */
+   * Retrieve the character of this string at the given character index
+   */
   def getChar(i: Int) = chars(i)
 
   /**
-    * Converts this [[ufansi.Str]] into a `java.lang.String`, including all
-    * the fancy fansi colors or decorations as fansi escapes embedded within
-    * the string. "Terminates" colors at the right-most end of the resultant
-    * `java.lang.String`, making it safe to concat-with or embed-inside other
-    * `java.lang.String` without worrying about fansi colors leaking out of it.
-    */
+   * Converts this [[ufansi.Str]] into a `java.lang.String`, including all
+   * the fancy fansi colors or decorations as fansi escapes embedded within
+   * the string. "Terminates" colors at the right-most end of the resultant
+   * `java.lang.String`, making it safe to concat-with or embed-inside other
+   * `java.lang.String` without worrying about fansi colors leaking out of it.
+   */
   def render = {
     // Pre-size StringBuilder with approximate size (ansi colors tend
     // to be about 5 chars long) to avoid re-allocations during growth
@@ -172,7 +236,12 @@ case class Str private (
       // fast-path optimization to check for integer equality first before
       // going through the whole `enableDiff` rigmarole
       if (colors(i) != currentState) {
-        Attrs.emitAnsiCodes0(currentState, colors(i), output, categoryArray)
+        Attrs.emitAnsiCodes0(
+          currentState,
+          colors(i),
+          output,
+          categoryArray
+        )
         currentState = colors(i)
       }
       output.append(chars(i))
@@ -181,25 +250,30 @@ case class Str private (
 
     // Cap off the left-hand-side of the rendered string with any ansi escape
     // codes necessary to rest the state to 0
-    Attrs.emitAnsiCodes0(currentState, 0, output, categoryArray)
+    Attrs.emitAnsiCodes0(
+      currentState,
+      0,
+      output,
+      categoryArray
+    )
 
     output.toString
   }
 
   /**
-    * Overlays the desired color over the specified range of the [[ufansi.Str]].
-    */
+   * Overlays the desired color over the specified range of the [[ufansi.Str]].
+   */
   def overlay(attrs: Attrs, start: Int = 0, end: Int = length) = {
     overlayAll(Seq((attrs, start, end)))
   }
 
   /**
-    * Batch version of [[overlay]], letting you apply a bunch of [[Attrs]] onto
-    * various parts of the same string in one operation, avoiding the unnecessary
-    * copying that would happen if you applied them with [[overlay]] one by one.
-    *
-    * The input sequence of overlay-tuples is applied from left to right
-    */
+   * Batch version of [[overlay]], letting you apply a bunch of [[Attrs]] onto
+   * various parts of the same string in one operation, avoiding the unnecessary
+   * copying that would happen if you applied them with [[overlay]] one by one.
+   *
+   * The input sequence of overlay-tuples is applied from left to right
+   */
   def overlayAll(overlays: Seq[(Attrs, Int, Int)]) = {
     val colorsOut = colors.clone()
     for ((attrs, start, end) <- overlays) {
@@ -207,7 +281,10 @@ case class Str private (
         end >= start,
         s"end:$end must be greater than start:$end in fansiStr#overlay call"
       )
-      require(start >= 0, s"start:$start must be greater than or equal to 0")
+      require(
+        start >= 0,
+        s"start:$start must be greater than or equal to 0"
+      )
       require(
         end <= colors.length,
         s"end:$end must be less than or equal to length:${colors.length}"
@@ -221,84 +298,91 @@ case class Str private (
         }
       }
     }
-    new Str(chars, colorsOut)
+    new Str(
+      chars,
+      colorsOut
+    )
   }
 }
 
 object Str {
 
   /**
-    * An [[ufansi.Str]]'s `color`s array is filled with Long, each representing
-    * the ANSI state of one character encoded in its bits. Each [[Attr]] belongs
-    * to a [[Category]] that occupies a range of bits within each long:
-    *
-    * 61... 55 54  53 52 51 .... 31 30 29 28  27 26 25 ..... 6  5  4  3  2  1  0
-    *  |--------|  |-----------------------|  |-----------------------|  |  |  |bold
-    *           |                          |                          |  |  |reversed
-    *           |                          |                          |  |underlined
-    *           |                          |                          |foreground-color
-    *           |                          |background-color
-    *           |unused
-    *
-    *
-    * The `0000 0000 0000 0000` long corresponds to plain text with no decoration
-    *
-    */
+   * An [[ufansi.Str]]'s `color`s array is filled with Long, each representing
+   * the ANSI state of one character encoded in its bits. Each [[Attr]] belongs
+   * to a [[Category]] that occupies a range of bits within each long:
+   *
+   * 61... 55 54  53 52 51 .... 31 30 29 28  27 26 25 ..... 6  5  4  3  2  1  0
+   *  |--------|  |-----------------------|  |-----------------------|  |  |  |bold
+   *           |                          |                          |  |  |reversed
+   *           |                          |                          |  |underlined
+   *           |                          |                          |foreground-color
+   *           |                          |background-color
+   *           |unused
+   *
+   *
+   * The `0000 0000 0000 0000` long corresponds to plain text with no decoration
+   *
+   */
   type State = Long
 
   /**
-    * Make the construction of [[ufansi.Str]]s from `String`s and other
-    * `CharSequence`s automatic
-    */
+   * Make the construction of [[ufansi.Str]]s from `String`s and other
+   * `CharSequence`s automatic
+   */
   implicit def implicitApply(raw: CharSequence): ufansi.Str = apply(raw)
 
   /**
-    * Regex that can be used to identify Ansi escape patterns in a string.
-    *
-    *
-    *
-    * Found from: http://stackoverflow.com/a/33925425/871202
-    *
-    * Which references:
-    *
-    * http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-048.pdf
-    *
-    * Section 5.4: Control Sequences
-    */
+   * Regex that can be used to identify Ansi escape patterns in a string.
+   *
+   *
+   *
+   * Found from: http://stackoverflow.com/a/33925425/871202
+   *
+   * Which references:
+   *
+   * http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-048.pdf
+   *
+   * Section 5.4: Control Sequences
+   */
   val ansiRegex = "(\u009b|\u001b\\[)[0-?]*[ -\\/]*[@-~]".r.pattern
 
   /**
-    * Creates an [[ufansi.Str]] from a non-fansi `java.lang.String` or other
-    * `CharSequence`.
-    *
-    * Note that this method is implicit, meaning you can pass in a
-    * `java.lang.String` anywhere an `fansi.Str` is required and it will be
-    * automatically parsed and converted for you.
-    *
-    * @param errorMode Used to control what kind of behavior you get if the
-    *                  input `CharSequence` contains an Ansi escape not
-    *                  recognized by Fansi as a valid color.
-    */
-  def apply(
-      raw: CharSequence,
-      errorMode: ErrorMode = ErrorMode.Throw
-  ): ufansi.Str = {
+   * Creates an [[ufansi.Str]] from a non-fansi `java.lang.String` or other
+   * `CharSequence`.
+   *
+   * Note that this method is implicit, meaning you can pass in a
+   * `java.lang.String` anywhere an `fansi.Str` is required and it will be
+   * automatically parsed and converted for you.
+   *
+   * @param errorMode Used to control what kind of behavior you get if the
+   *                  input `CharSequence` contains an Ansi escape not
+   *                  recognized by Fansi as a valid color.
+   */
+  def apply(raw: CharSequence, errorMode: ErrorMode = ErrorMode.Throw): ufansi.Str = {
     // Pre-allocate some arrays for us to fill up. They will probably be
     // too big if the input has any ansi codes at all but that's ok, we'll
     // trim them later.
-    val chars = new Array[Char](raw.length)
+    val chars  = new Array[Char](raw.length)
     val colors = new Array[Str.State](raw.length)
 
     var currentColor = 0l
-    var sourceIndex = 0
-    var destIndex = 0
-    val length = raw.length
+    var sourceIndex  = 0
+    var destIndex    = 0
+    val length       = raw.length
     while (sourceIndex < length) {
       val char = raw.charAt(sourceIndex)
       if (char == '\u001b' || char == '\u009b') {
         val escapeStartSourceIndex = sourceIndex
-        ParseMap.query(raw, escapeStartSourceIndex) match {
-          case None => sourceIndex = errorMode.handle(sourceIndex, raw)
+        ParseMap.query(
+          raw,
+          escapeStartSourceIndex
+        ) match {
+          case None =>
+            sourceIndex = errorMode.handle(
+              sourceIndex,
+              raw
+            )
           case Some(tuple) =>
             tuple match {
               case (newIndex, Left(color)) =>
@@ -317,7 +401,10 @@ object Str {
                   index < raw.length && raw.charAt(index) == char
                 }
                 def fail() = {
-                  sourceIndex = errorMode.handle(escapeStartSourceIndex, raw)
+                  sourceIndex = errorMode.handle(
+                    escapeStartSourceIndex,
+                    raw
+                  )
                 }
                 def getNumber() = {
                   var value = 0
@@ -332,18 +419,27 @@ object Str {
                 if (!isDigit(sourceIndex)) fail()
                 else {
                   val r = getNumber()
-                  if (!checkChar(sourceIndex, ';') || !isDigit(sourceIndex + 1))
+                  if (!checkChar(
+                        sourceIndex,
+                        ';'
+                      ) || !isDigit(sourceIndex + 1))
                     fail()
                   else {
                     sourceIndex += 1
                     val g = getNumber()
-                    if (!checkChar(sourceIndex, ';') || !isDigit(
+                    if (!checkChar(
+                          sourceIndex,
+                          ';'
+                        ) || !isDigit(
                           sourceIndex + 1
                         )) fail()
                     else {
                       sourceIndex += 1
                       val b = getNumber()
-                      if (!checkChar(sourceIndex, 'm')) fail()
+                      if (!checkChar(
+                            sourceIndex,
+                            'm'
+                          )) fail()
                       else {
                         sourceIndex += 1
                         // Manually perform the `transform` for perf to avoid
@@ -353,7 +449,11 @@ object Str {
                         else {
                           currentColor = {
                             (currentColor & ~category.mask) |
-                              ((273L + category.trueIndex(r, g, b)) << category.offset)
+                            ((273L + category.trueIndex(
+                              r,
+                              g,
+                              b
+                            )) << category.offset)
                           }
                         }
                       }
@@ -371,29 +471,40 @@ object Str {
     }
 
     Str(
-      util.Arrays.copyOfRange(chars, 0, destIndex),
-      util.Arrays.copyOfRange(colors, 0, destIndex)
+      util.Arrays.copyOfRange(
+        chars,
+        0,
+        destIndex
+      ),
+      util.Arrays.copyOfRange(
+        colors,
+        0,
+        destIndex
+      )
     )
   }
 
   /**
-    * Constructs a [[ufansi.Str]] from an array of characters and an array
-    * of colors. Performs a defensive copy of the arrays, and validates that
-    * they both have the same length
-    *
-    * Useful together with `getChars` and `getColors` if you want to do manual
-    * work on the two mutable arrays before stitching them back together into
-    * one immutable [[ufansi.Str]]
-    */
+   * Constructs a [[ufansi.Str]] from an array of characters and an array
+   * of colors. Performs a defensive copy of the arrays, and validates that
+   * they both have the same length
+   *
+   * Useful together with `getChars` and `getColors` if you want to do manual
+   * work on the two mutable arrays before stitching them back together into
+   * one immutable [[ufansi.Str]]
+   */
   def fromArrays(chars: Array[Char], colors: Array[Str.State]) = {
-    new ufansi.Str(chars.clone(), colors.clone())
+    new ufansi.Str(
+      chars.clone(),
+      colors.clone()
+    )
   }
 
   def join(args: Str*) = {
     val length = args.iterator.map(_.length).sum
-    val chars = new Array[Char](length)
+    val chars  = new Array[Char](length)
     val colors = new Array[State](length)
-    var j = 0
+    var j      = 0
     for (arg <- args) {
       var i = 0
       while (i < arg.length) {
@@ -403,13 +514,16 @@ object Str {
         j += 1
       }
     }
-    fromArrays(chars, colors)
+    fromArrays(
+      chars,
+      colors
+    )
   }
   private[this] val ParseMap = {
     val pairs = for {
-      cat <- Attr.categories
+      cat   <- Attr.categories
       color <- cat.all
-      str <- color.escapeOpt
+      str   <- color.escapeOpt
     } yield (str, Left(color))
     val reset = Seq(
       Console.RESET -> Left(Attr.Reset)
@@ -423,56 +537,63 @@ object Str {
 }
 
 /**
-  * Used to control what kind of behavior you get if the a `CharSequence` you
-  * are trying to parse into a [[ufansi.Str]] contains an Ansi escape not
-  * recognized by Fansi as a valid color.
-  */
+ * Used to control what kind of behavior you get if the a `CharSequence` you
+ * are trying to parse into a [[ufansi.Str]] contains an Ansi escape not
+ * recognized by Fansi as a valid color.
+ */
 sealed trait ErrorMode {
 
   /**
-    * Given an unknown Ansi escape was found at `sourceIndex` inside your
-    * `raw: CharSequence`, what index should you resume parsing at?
-    */
+   * Given an unknown Ansi escape was found at `sourceIndex` inside your
+   * `raw: CharSequence`, what index should you resume parsing at?
+   */
   def handle(sourceIndex: Int, raw: CharSequence): Int
 }
+
 object ErrorMode {
 
   /**
-    * Throw an exception and abort the parse
-    */
+   * Throw an exception and abort the parse
+   */
   case object Throw extends ErrorMode {
+
     def handle(sourceIndex: Int, raw: CharSequence) = {
       val matcher = Str.ansiRegex.matcher(raw)
       val detail =
         if (!matcher.find(sourceIndex)) ""
         else {
           val end = matcher.end()
-          " " + raw.subSequence(sourceIndex + 1, end)
+          " " + raw.subSequence(
+            sourceIndex + 1,
+            end
+          )
         }
 
       throw new IllegalArgumentException(
         s"Unknown ansi-escape$detail at index $sourceIndex " +
-          "inside string cannot be parsed into an fansi.Str"
+        "inside string cannot be parsed into an fansi.Str"
       )
     }
   }
 
   /**
-    * Skip the `\u001b` that kicks off the unknown Ansi escape but leave
-    * subsequent characters in place, so the end-user can see that an Ansi
-    * escape was entered e.g. via the [A[B[A[C that appears in the result
-    */
+   * Skip the `\u001b` that kicks off the unknown Ansi escape but leave
+   * subsequent characters in place, so the end-user can see that an Ansi
+   * escape was entered e.g. via the [A[B[A[C that appears in the result
+   */
   case object Sanitize extends ErrorMode {
+
     def handle(sourceIndex: Int, raw: CharSequence) = {
       sourceIndex + 1
     }
   }
 
   /**
-    * Find the end of the unknown Ansi escape and skip over it's characters
-    * entirely, so no trace of them appear in the parsed fansi.Str.
-    */
+   * Find the end of the unknown Ansi escape and skip over it's characters
+   * entirely, so no trace of them appear in the parsed fansi.Str.
+   */
   case object Strip extends ErrorMode {
+
     def handle(sourceIndex: Int, raw: CharSequence) = {
       val matcher = Str.ansiRegex.matcher(raw)
       matcher.find(sourceIndex)
@@ -482,45 +603,50 @@ object ErrorMode {
 }
 
 /**
-  * Represents one or more [[ufansi.Attr]]s, that can be passed around
-  * as a set or combined with other sets of [[ufansi.Attr]]s.
-  *
-  * Note that a single [[Attr]] is a subclass of [[Attrs]]. If you want to
-  * know if this contains multiple [[Attr]]s, you should check for
-  * [[Attrs.Multiple]].
-  */
+ * Represents one or more [[ufansi.Attr]]s, that can be passed around
+ * as a set or combined with other sets of [[ufansi.Attr]]s.
+ *
+ * Note that a single [[Attr]] is a subclass of [[Attrs]]. If you want to
+ * know if this contains multiple [[Attr]]s, you should check for
+ * [[Attrs.Multiple]].
+ */
 sealed trait Attrs {
 
   /**
-    * Apply these [[Attrs]] to the given [[ufansi.Str]], making it take effect
-    * across the entire length of that string.
-    */
-  def apply(s: ufansi.Str) = s.overlay(this, 0, s.length)
+   * Apply these [[Attrs]] to the given [[ufansi.Str]], making it take effect
+   * across the entire length of that string.
+   */
+  def apply(s: ufansi.Str) =
+    s.overlay(
+      this,
+      0,
+      s.length
+    )
 
   /**
-    * Which bits of the [[Str.State]] integer these [[Attrs]] will
-    * override when it is applied
-    */
+   * Which bits of the [[Str.State]] integer these [[Attrs]] will
+   * override when it is applied
+   */
   def resetMask: Long
 
   /**
-    * Which bits of the [[Str.State]] integer these [[Attrs]] will
-    * set to `1` when it is applied
-    */
+   * Which bits of the [[Str.State]] integer these [[Attrs]] will
+   * set to `1` when it is applied
+   */
   def applyMask: Long
 
   /**
-    * Apply the current [[Attrs]] to the [[Str.State]] integer,
-    * modifying it to represent the state after all changes have taken
-    * effect
-    */
+   * Apply the current [[Attrs]] to the [[Str.State]] integer,
+   * modifying it to represent the state after all changes have taken
+   * effect
+   */
   def transform(state: Str.State) = (state & ~resetMask) | applyMask
 
   /**
-    * Combine this [[ufansi.Attrs]] with other [[ufansi.Attrs]]s, returning one
-    * which when applied is equivalent to applying this one and then the `other`
-    * one in series.
-    */
+   * Combine this [[ufansi.Attrs]] with other [[ufansi.Attrs]]s, returning one
+   * which when applied is equivalent to applying this one and then the `other`
+   * one in series.
+   */
   def ++(other: ufansi.Attrs): ufansi.Attrs
 
 }
@@ -530,26 +656,31 @@ object Attrs {
   val Empty = Attrs()
 
   /**
-    * Emit the ansi escapes necessary to transition
-    * between two states, if necessary, as a `java.lang.String`
-    */
+   * Emit the ansi escapes necessary to transition
+   * between two states, if necessary, as a `java.lang.String`
+   */
   def emitAnsiCodes(currentState: Str.State, nextState: Str.State) = {
-    val output = new StringBuilder
+    val output        = new StringBuilder
     val categoryArray = Attr.categories.toArray
-    emitAnsiCodes0(currentState, nextState, output, categoryArray)
+    emitAnsiCodes0(
+      currentState,
+      nextState,
+      output,
+      categoryArray
+    )
     output.toString
   }
 
   /**
-    * Messy-but-fast version of [[emitAnsiCodes]] that avoids allocating things
-    * unnecessarily. Reads it's category listing from a fast Array version of
-    * Attrs.categories and writes it's output to a mutable `StringBuilder`
-    */
+   * Messy-but-fast version of [[emitAnsiCodes]] that avoids allocating things
+   * unnecessarily. Reads it's category listing from a fast Array version of
+   * Attrs.categories and writes it's output to a mutable `StringBuilder`
+   */
   def emitAnsiCodes0(
-      currentState: Str.State,
-      nextState: Str.State,
-      output: StringBuilder,
-      categoryArray: Array[Category]
+    currentState: Str.State,
+    nextState: Str.State,
+    output: StringBuilder,
+    categoryArray: Array[Category]
   ) = {
     if (currentState != nextState) {
 
@@ -579,7 +710,7 @@ object Attrs {
   }
 
   def apply(attrs: Attr*): Attrs = {
-    var output = List.empty[Attr]
+    var output    = List.empty[Attr]
     var resetMask = 0l
     var applyMask = 0l
     // Walk the list of attributes backwards, and aggregate only those whose
@@ -599,14 +730,15 @@ object Attrs {
     }
 
     if (output.length == 1) output.head
-    else new Multiple(resetMask, applyMask, output.toArray.reverse: _*)
+    else
+      new Multiple(
+        resetMask,
+        applyMask,
+        output.toArray.reverse: _*
+      )
   }
 
-  class Multiple private[Attrs] (
-      val resetMask: Long,
-      val applyMask: Long,
-      val attrs: Attr*
-  ) extends Attrs {
+  class Multiple private[Attrs] (val resetMask: Long, val applyMask: Long, val attrs: Attr*) extends Attrs {
     Predef.assert(attrs.length != 1)
     override def hashCode() = attrs.hashCode()
     override def equals(other: Any) = (this, other) match {
@@ -623,6 +755,7 @@ object Attrs {
 
     def ++(other: ufansi.Attrs) = Attrs(attrs ++ toSeq(other): _*)
   }
+
   def toSeq(attrs: Attrs) = attrs match {
     case m: Multiple => m.attrs
     case a: Attr     => Seq(a)
@@ -630,45 +763,50 @@ object Attrs {
 }
 
 /**
-  * Represents a single, atomic ANSI escape sequence that results in a
-  * color, background or decoration being added to the output. May or may not
-  * have an escape sequence (`escapeOpt`), as some attributes (e.g. [[Bold.Off]])
-  * are not widely/directly supported by terminals and so fansi.Str supports them
-  * by rendering a hard [[Attr.Reset]] and then re-rendering other [[Attr]]s that are
-  * active.
-  *
-  * Many of the codes were stolen shamelessly from
-  *
-  * http://misc.flogisoft.com/bash/tip_colors_and_formatting
-  */
+ * Represents a single, atomic ANSI escape sequence that results in a
+ * color, background or decoration being added to the output. May or may not
+ * have an escape sequence (`escapeOpt`), as some attributes (e.g. [[Bold.Off]])
+ * are not widely/directly supported by terminals and so fansi.Str supports them
+ * by rendering a hard [[Attr.Reset]] and then re-rendering other [[Attr]]s that are
+ * active.
+ *
+ * Many of the codes were stolen shamelessly from
+ *
+ * http://misc.flogisoft.com/bash/tip_colors_and_formatting
+ */
 sealed trait Attr extends Attrs {
   def attrs = Seq(this)
 
   /**
-    * escapeOpt the actual ANSI escape sequence corresponding to this Attr
-    */
+   * escapeOpt the actual ANSI escape sequence corresponding to this Attr
+   */
   def escapeOpt: Option[String]
 
   def name: String
 
   /**
-    * Combine this [[ufansi.Attr]] with one or more other [[ufansi.Attr]]s
-    * so they can be passed around together
-    */
+   * Combine this [[ufansi.Attr]] with one or more other [[ufansi.Attr]]s
+   * so they can be passed around together
+   */
   def ++(other: ufansi.Attrs): Attrs =
     Attrs(Array(this) ++ Attrs.toSeq(other): _*)
 }
+
 object Attr {
 
   /**
-    * Represents the removal of all ansi text decoration. Doesn't fit into any
-    * convenient category, since it applies to them all.
-    */
-  val Reset = new EscapeAttr(Console.RESET, Int.MaxValue, 0)("Reset")
+   * Represents the removal of all ansi text decoration. Doesn't fit into any
+   * convenient category, since it applies to them all.
+   */
+  val Reset = new EscapeAttr(
+    Console.RESET,
+    Int.MaxValue,
+    0
+  )("Reset")
 
   /**
-    * A list of possible categories
-    */
+   * A list of possible categories
+   */
   val categories = Vector[Category](
     Color,
     Back,
@@ -679,39 +817,34 @@ object Attr {
 }
 
 /**
-  * An [[Attr]] represented by an fansi escape sequence
-  */
+ * An [[Attr]] represented by an fansi escape sequence
+ */
 case class EscapeAttr private[ufansi] (
-    escape: String,
-    resetMask: Long,
-    applyMask: Long
+  escape: String,
+  resetMask: Long,
+  applyMask: Long
 )(implicit sourceName: sourcecode.Name)
     extends Attr {
-  val escapeOpt = Some(escape)
-  val name = sourceName.value
+  val escapeOpt         = Some(escape)
+  val name              = sourceName.value
   override def toString = escape + name + Console.RESET
 }
 
 /**
-  * An [[Attr]] for which no fansi escape sequence exists
-  */
-case class ResetAttr private[ufansi] (resetMask: Long, applyMask: Long)(
-    implicit
-    sourceName: sourcecode.Name
-) extends Attr {
-  val escapeOpt = None
-  val name = sourceName.value
+ * An [[Attr]] for which no fansi escape sequence exists
+ */
+case class ResetAttr private[ufansi] (resetMask: Long, applyMask: Long)(implicit sourceName: sourcecode.Name)
+    extends Attr {
+  val escapeOpt         = None
+  val name              = sourceName.value
   override def toString = name
 }
 
 /**
-  * Represents a set of [[ufansi.Attr]]s all occupying the same bit-space
-  * in the state `Int`
-  */
-sealed abstract class Category(val offset: Int, val width: Int)(
-    implicit
-    catName: sourcecode.Name
-) {
+ * Represents a set of [[ufansi.Attr]]s all occupying the same bit-space
+ * in the state `Int`
+ */
+sealed abstract class Category(val offset: Int, val width: Int)(implicit catName: sourcecode.Name) {
   def mask = ((1 << width) - 1) << offset
   val all: Vector[Attr]
 
@@ -734,68 +867,195 @@ sealed abstract class Category(val offset: Int, val width: Int)(
   }
 
   def makeAttr(s: String, applyValue: Long)(implicit name: sourcecode.Name) = {
-    new EscapeAttr(s, mask, applyValue << offset)(
+    new EscapeAttr(
+      s,
+      mask,
+      applyValue << offset
+    )(
       catName.value + "." + name.value
     )
   }
 
   def makeNoneAttr(applyValue: Long)(implicit name: sourcecode.Name) = {
-    new ResetAttr(mask, applyValue << offset)(catName.value + "." + name.value)
+    new ResetAttr(
+      mask,
+      applyValue << offset
+    )(catName.value + "." + name.value)
   }
 }
 
 /**
-  * [[Attr]]s to turn text bold/bright or disable it
-  */
-object Bold extends Category(offset = 0, width = 2)("Bold") {
-  val Faint = makeAttr("\u001b[2m", 2)("Faint")
-  val On = makeAttr(Console.BOLD, 1)("On")
+ * [[Attr]]s to turn text bold/bright or disable it
+ */
+object Bold
+    extends Category(
+      offset = 0,
+      width = 2
+    )("Bold") {
+
+  val Faint = makeAttr(
+    "\u001b[2m",
+    2
+  )("Faint")
+
+  val On = makeAttr(
+    Console.BOLD,
+    1
+  )("On")
   val Off = makeNoneAttr(0)("Off")
-  val all: Vector[Attr] = Vector(On, Off, Faint)
+
+  val all: Vector[Attr] = Vector(
+    On,
+    Off,
+    Faint
+  )
 }
 
 /**
-  * [[Attr]]s to reverse the background/foreground colors of your text,
-  * or un-reverse them
-  */
-object Reversed extends Category(offset = 2, width = 1)("Reversed") {
-  val On = makeAttr(Console.REVERSED, 1)("On")
-  val Off = makeAttr("\u001b[27m", 0)("Off")
-  val all: Vector[Attr] = Vector(On, Off)
+ * [[Attr]]s to reverse the background/foreground colors of your text,
+ * or un-reverse them
+ */
+object Reversed
+    extends Category(
+      offset = 2,
+      width = 1
+    )("Reversed") {
+
+  val On = makeAttr(
+    Console.REVERSED,
+    1
+  )("On")
+
+  val Off = makeAttr(
+    "\u001b[27m",
+    0
+  )("Off")
+
+  val all: Vector[Attr] = Vector(
+    On,
+    Off
+  )
 }
 
 /**
-  * [[Attr]]s to enable or disable underlined text
-  */
-object Underlined extends Category(offset = 3, width = 1)("Underlined") {
-  val On = makeAttr(Console.UNDERLINED, 1)("On")
-  val Off = makeAttr("\u001b[24m", 0)("Off")
-  val all: Vector[Attr] = Vector(On, Off)
+ * [[Attr]]s to enable or disable underlined text
+ */
+object Underlined
+    extends Category(
+      offset = 3,
+      width = 1
+    )("Underlined") {
+
+  val On = makeAttr(
+    Console.UNDERLINED,
+    1
+  )("On")
+
+  val Off = makeAttr(
+    "\u001b[24m",
+    0
+  )("Off")
+
+  val all: Vector[Attr] = Vector(
+    On,
+    Off
+  )
 }
 
 /**
-  * [[Attr]]s to set or reset the color of your foreground text
-  */
+ * [[Attr]]s to set or reset the color of your foreground text
+ */
 object Color
-    extends ColorCategory(offset = 4, width = 25, colorCode = 38)("Color") {
+    extends ColorCategory(
+      offset = 4,
+      width = 25,
+      colorCode = 38
+    )("Color") {
 
-  val Reset = makeAttr("\u001b[39m", 0)("Reset")
-  val Black = makeAttr(Console.BLACK, 1)("Black")
-  val Red = makeAttr(Console.RED, 2)("Red")
-  val Green = makeAttr(Console.GREEN, 3)("Green")
-  val Yellow = makeAttr(Console.YELLOW, 4)("Yellow")
-  val Blue = makeAttr(Console.BLUE, 5)("Blue")
-  val Magenta = makeAttr(Console.MAGENTA, 6)("Magenta")
-  val Cyan = makeAttr(Console.CYAN, 7)("Cyan")
-  val LightGray = makeAttr("\u001b[37m", 8)("LightGray")
-  val DarkGray = makeAttr("\u001b[90m", 9)("DarkGray")
-  val LightRed = makeAttr("\u001b[91m", 10)("LightRed")
-  val LightGreen = makeAttr("\u001b[92m", 11)("LightGreen")
-  val LightYellow = makeAttr("\u001b[93m", 12)("LightYellow")
-  val LightBlue = makeAttr("\u001b[94m", 13)("LightBlue")
-  val LightMagenta = makeAttr("\u001b[95m", 14)("LightMagenta")
-  val LightCyan = makeAttr("\u001b[96m", 15)("LightCyan")
-  val White = makeAttr("\u001b[97m", 16)("White")
+  val Reset = makeAttr(
+    "\u001b[39m",
+    0
+  )("Reset")
+
+  val Black = makeAttr(
+    Console.BLACK,
+    1
+  )("Black")
+
+  val Red = makeAttr(
+    Console.RED,
+    2
+  )("Red")
+
+  val Green = makeAttr(
+    Console.GREEN,
+    3
+  )("Green")
+
+  val Yellow = makeAttr(
+    Console.YELLOW,
+    4
+  )("Yellow")
+
+  val Blue = makeAttr(
+    Console.BLUE,
+    5
+  )("Blue")
+
+  val Magenta = makeAttr(
+    Console.MAGENTA,
+    6
+  )("Magenta")
+
+  val Cyan = makeAttr(
+    Console.CYAN,
+    7
+  )("Cyan")
+
+  val LightGray = makeAttr(
+    "\u001b[37m",
+    8
+  )("LightGray")
+
+  val DarkGray = makeAttr(
+    "\u001b[90m",
+    9
+  )("DarkGray")
+
+  val LightRed = makeAttr(
+    "\u001b[91m",
+    10
+  )("LightRed")
+
+  val LightGreen = makeAttr(
+    "\u001b[92m",
+    11
+  )("LightGreen")
+
+  val LightYellow = makeAttr(
+    "\u001b[93m",
+    12
+  )("LightYellow")
+
+  val LightBlue = makeAttr(
+    "\u001b[94m",
+    13
+  )("LightBlue")
+
+  val LightMagenta = makeAttr(
+    "\u001b[95m",
+    14
+  )("LightMagenta")
+
+  val LightCyan = makeAttr(
+    "\u001b[96m",
+    15
+  )("LightCyan")
+
+  val White = makeAttr(
+    "\u001b[97m",
+    16
+  )("White")
 
   val all: Vector[Attr] = Vector(
     Reset,
@@ -820,28 +1080,99 @@ object Color
 }
 
 /**
-  * [[Attr]]s to set or reset the color of your background
-  */
+ * [[Attr]]s to set or reset the color of your background
+ */
 object Back
-    extends ColorCategory(offset = 29, width = 25, colorCode = 48)("Back") {
+    extends ColorCategory(
+      offset = 29,
+      width = 25,
+      colorCode = 48
+    )("Back") {
 
-  val Reset = makeAttr("\u001b[49m", 0)("Reset")
-  val Black = makeAttr(Console.BLACK_B, 1)("Black")
-  val Red = makeAttr(Console.RED_B, 2)("Red")
-  val Green = makeAttr(Console.GREEN_B, 3)("Green")
-  val Yellow = makeAttr(Console.YELLOW_B, 4)("Yellow")
-  val Blue = makeAttr(Console.BLUE_B, 5)("Blue")
-  val Magenta = makeAttr(Console.MAGENTA_B, 6)("Magenta")
-  val Cyan = makeAttr(Console.CYAN_B, 7)("Cyan")
-  val LightGray = makeAttr("\u001b[47m", 8)("LightGray")
-  val DarkGray = makeAttr("\u001b[100m", 9)("DarkGray")
-  val LightRed = makeAttr("\u001b[101m", 10)("LightRed")
-  val LightGreen = makeAttr("\u001b[102m", 11)("LightGreen")
-  val LightYellow = makeAttr("\u001b[103m", 12)("LightYellow")
-  val LightBlue = makeAttr("\u001b[104m", 13)("LightBlue")
-  val LightMagenta = makeAttr("\u001b[105m", 14)("LightMagenta")
-  val LightCyan = makeAttr("\u001b[106m", 15)("LightCyan")
-  val White = makeAttr("\u001b[107m", 16)("White")
+  val Reset = makeAttr(
+    "\u001b[49m",
+    0
+  )("Reset")
+
+  val Black = makeAttr(
+    Console.BLACK_B,
+    1
+  )("Black")
+
+  val Red = makeAttr(
+    Console.RED_B,
+    2
+  )("Red")
+
+  val Green = makeAttr(
+    Console.GREEN_B,
+    3
+  )("Green")
+
+  val Yellow = makeAttr(
+    Console.YELLOW_B,
+    4
+  )("Yellow")
+
+  val Blue = makeAttr(
+    Console.BLUE_B,
+    5
+  )("Blue")
+
+  val Magenta = makeAttr(
+    Console.MAGENTA_B,
+    6
+  )("Magenta")
+
+  val Cyan = makeAttr(
+    Console.CYAN_B,
+    7
+  )("Cyan")
+
+  val LightGray = makeAttr(
+    "\u001b[47m",
+    8
+  )("LightGray")
+
+  val DarkGray = makeAttr(
+    "\u001b[100m",
+    9
+  )("DarkGray")
+
+  val LightRed = makeAttr(
+    "\u001b[101m",
+    10
+  )("LightRed")
+
+  val LightGreen = makeAttr(
+    "\u001b[102m",
+    11
+  )("LightGreen")
+
+  val LightYellow = makeAttr(
+    "\u001b[103m",
+    12
+  )("LightYellow")
+
+  val LightBlue = makeAttr(
+    "\u001b[104m",
+    13
+  )("LightBlue")
+
+  val LightMagenta = makeAttr(
+    "\u001b[105m",
+    14
+  )("LightMagenta")
+
+  val LightCyan = makeAttr(
+    "\u001b[106m",
+    15
+  )("LightCyan")
+
+  val White = makeAttr(
+    "\u001b[107m",
+    16
+  )("White")
 
   val all: Vector[Attr] = Vector(
     Reset,
@@ -865,17 +1196,17 @@ object Back
 }
 
 /**
-  * An string trie for quickly looking up values of type [[T]]
-  * using string-keys. Used to speed up
-  */
+ * An string trie for quickly looking up values of type [[T]]
+ * using string-keys. Used to speed up
+ */
 private[this] final class Trie[T](strings: Seq[(String, T)]) {
 
   val (min, max, arr, value) = {
     strings.partition(_._1.isEmpty) match {
       case (Nil, continuations) =>
         val allChildChars = continuations.map(_._1(0))
-        val min = allChildChars.min
-        val max = allChildChars.max
+        val min           = allChildChars.min
+        val max           = allChildChars.max
 
         val arr = new Array[Trie[T]](max - min + 1)
         for ((char, ss) <- continuations.groupBy(_._1(0))) {
@@ -902,8 +1233,8 @@ private[this] final class Trie[T](strings: Seq[(String, T)]) {
   }
 
   /**
-    * Returns the length of the matching string, or -1 if not found
-    */
+   * Returns the length of the matching string, or -1 if not found
+   */
   def query(input: CharSequence, index: Int): Option[(Int, T)] = {
 
     @tailrec def rec(offset: Int, currentNode: Trie[T]): Option[(Int, T)] = {
@@ -915,45 +1246,65 @@ private[this] final class Trie[T](strings: Seq[(String, T)]) {
         val char = input.charAt(offset)
         val next = currentNode(char)
         if (next == null) None
-        else rec(offset + 1, next)
+        else
+          rec(
+            offset + 1,
+            next
+          )
       }
     }
-    rec(index, this)
+    rec(
+      index,
+      this
+    )
   }
 }
 
 /**
-  * * Color a encoded on 25 bit as follow :
-  * 0 : reset value
-  * 1 - 16 : 3 bit colors
-  * 17 - 272 : 8 bit colors
-  * 273 - 16 777 388 : 24 bit colors
-  */
-abstract class ColorCategory(offset: Int, width: Int, val colorCode: Int)(
-    implicit
-    catName: sourcecode.Name
-) extends Category(offset, width)(catName) {
+ * * Color a encoded on 25 bit as follow :
+ * 0 : reset value
+ * 1 - 16 : 3 bit colors
+ * 17 - 272 : 8 bit colors
+ * 273 - 16 777 388 : 24 bit colors
+ */
+abstract class ColorCategory(offset: Int, width: Int, val colorCode: Int)(implicit catName: sourcecode.Name)
+    extends Category(
+      offset,
+      width
+    )(catName) {
 
   /**
-    * 256 color [[Attr]]s, for those terminals that support it
-    */
+   * 256 color [[Attr]]s, for those terminals that support it
+   */
   val Full =
     for (x <- 0 until 256)
-      yield makeAttr(s"\u001b[$colorCode;5;${x}m", 17 + x)(s"Full($x)")
+      yield
+        makeAttr(
+          s"\u001b[$colorCode;5;${x}m",
+          17 + x
+        )(s"Full($x)")
 
   private[this] def True0(r: Int, g: Int, b: Int, index: Int) = {
-    makeAttr(trueRgbEscape(r, g, b), 273 + index)(
+    makeAttr(
+      trueRgbEscape(
+        r,
+        g,
+        b
+      ),
+      273 + index
+    )(
       "True(" + r + "," + g + "," + b + ")"
     )
   }
+
   def trueRgbEscape(r: Int, g: Int, b: Int) = {
     "\u001b[" + colorCode + ";2;" + r + ";" + g + ";" + b + "m"
   }
 
   /**
-    * Create a TrueColor color, from a given index within the 16-million-color
-    * TrueColor range
-    */
+   * Create a TrueColor color, from a given index within the 16-million-color
+   * TrueColor range
+   */
   def True(index: Int) = {
     require(
       0 <= index && index <= (1 << 24),
@@ -962,14 +1313,29 @@ abstract class ColorCategory(offset: Int, width: Int, val colorCode: Int)(
     val r = index >> 16
     val g = (index & 0x00FF00) >> 8
     val b = index & 0x0000FF
-    True0(r, g, b, index)
+    True0(
+      r,
+      g,
+      b,
+      index
+    )
   }
 
   /**
-    * Create a TrueColor color, from a given (r, g, b) within the 16-million-color
-    * TrueColor range
-    */
-  def True(r: Int, g: Int, b: Int) = True0(r, g, b, trueIndex(r, g, b))
+   * Create a TrueColor color, from a given (r, g, b) within the 16-million-color
+   * TrueColor range
+   */
+  def True(r: Int, g: Int, b: Int) =
+    True0(
+      r,
+      g,
+      b,
+      trueIndex(
+        r,
+        g,
+        b
+      )
+    )
 
   def trueIndex(r: Int, g: Int, b: Int) = {
     require(

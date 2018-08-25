@@ -7,11 +7,12 @@ import org.apache.spark.sql.functions._
 
 import scala.reflect.ClassTag
 
-case class DatasetSchemaMismatch(smth: String) extends Exception(smth)
+case class DatasetSchemaMismatch(smth: String)  extends Exception(smth)
 case class DatasetContentMismatch(smth: String) extends Exception(smth)
-case class DatasetCountMismatch(smth: String) extends Exception(smth)
+case class DatasetCountMismatch(smth: String)   extends Exception(smth)
 
 object DatasetComparerLike {
+
   def naiveEquality[T](o1: T, o2: T): Boolean = {
     o1.equals(o2)
   }
@@ -19,10 +20,7 @@ object DatasetComparerLike {
 
 trait DatasetComparer {
 
-  private def schemaMismatchMessage[T](
-      actualDS: Dataset[T],
-      expectedDS: Dataset[T]
-  ): String = {
+  private def schemaMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
     s"""
 Actual Schema:
 ${actualDS.schema}
@@ -31,20 +29,14 @@ ${expectedDS.schema}
 """
   }
 
-  private def countMismatchMessage(
-      actualCount: Long,
-      expectedCount: Long
-  ): String = {
+  private def countMismatchMessage(actualCount: Long, expectedCount: Long): String = {
     s"""
 Actual DataFrame Row Count: '${actualCount}'
 Expected DataFrame Row Count: '${expectedCount}'
 """
   }
 
-  private def betterContentMismatchMessage[T](
-      a: Array[T],
-      e: Array[T]
-  ): String = {
+  private def betterContentMismatchMessage[T](a: Array[T], e: Array[T]): String = {
     "\n" + a
       .zip(e)
       .map {
@@ -58,26 +50,29 @@ Expected DataFrame Row Count: '${expectedCount}'
       .mkString("\n")
   }
 
-  private def basicMismatchMessage[T](
-      actualDS: Dataset[T],
-      expectedDS: Dataset[T]
-  ): String = {
+  private def basicMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
     s"""
 Actual DataFrame Content:
-${DataFramePrettyPrint.showString(actualDS.toDF(), 10)}
+${DataFramePrettyPrint.showString(
+      actualDS.toDF(),
+      10
+    )}
 Expected DataFrame Content:
-${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
+${DataFramePrettyPrint.showString(
+      expectedDS.toDF(),
+      10
+    )}
 """
   }
 
   /**
-    * Raises an error unless `actualDS` and `expectedDS` are equal
-    */
+   * Raises an error unless `actualDS` and `expectedDS` are equal
+   */
   def assertSmallDatasetEquality[T](
-      actualDS: Dataset[T],
-      expectedDS: Dataset[T],
-      ignoreNullable: Boolean = false,
-      orderedComparison: Boolean = true
+    actualDS: Dataset[T],
+    expectedDS: Dataset[T],
+    ignoreNullable: Boolean = false,
+    orderedComparison: Boolean = true
   ): Unit = {
     if (ignoreNullable) {
       if (!SchemaComparer.equals(
@@ -85,54 +80,82 @@ ${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
             expectedDS.schema,
             ignoreNullable = true
           )) {
-        throw DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
+        throw DatasetSchemaMismatch(
+          schemaMismatchMessage(
+            actualDS,
+            expectedDS
+          )
+        )
       }
     } else {
       if (!actualDS.schema.equals(expectedDS.schema)) {
-        throw DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
+        throw DatasetSchemaMismatch(
+          schemaMismatchMessage(
+            actualDS,
+            expectedDS
+          )
+        )
       }
     }
     if (orderedComparison) {
       val a = actualDS.collect()
       val e = expectedDS.collect()
       if (!a.sameElements(e)) {
-        throw DatasetContentMismatch(betterContentMismatchMessage(a, e))
+        throw DatasetContentMismatch(
+          betterContentMismatchMessage(
+            a,
+            e
+          )
+        )
       }
     } else {
       val a = defaultSortDataset(actualDS).collect()
       val e = defaultSortDataset(expectedDS).collect()
       if (!a.sameElements(e)) {
-        throw DatasetContentMismatch(betterContentMismatchMessage(a, e))
+        throw DatasetContentMismatch(
+          betterContentMismatchMessage(
+            a,
+            e
+          )
+        )
       }
     }
   }
 
   def defaultSortDataset[T](ds: Dataset[T]): Dataset[T] = {
     val colNames = ds.columns.sorted
-    val cols = colNames.map(col)
+    val cols     = colNames.map(col)
     ds.sort(cols: _*)
   }
 
   /**
-    * Raises an error unless `actualDS` and `expectedDS` are equal
-    */
+   * Raises an error unless `actualDS` and `expectedDS` are equal
+   */
   def assertLargeDatasetEquality[T: ClassTag](
-      actualDS: Dataset[T],
-      expectedDS: Dataset[T],
-      equals: (T, T) => Boolean = naiveEquality _
+    actualDS: Dataset[T],
+    expectedDS: Dataset[T],
+    equals: (T, T) => Boolean = naiveEquality _
   ): Unit = {
     if (!actualDS.schema.equals(expectedDS.schema)) {
-      throw DatasetSchemaMismatch(schemaMismatchMessage(actualDS, expectedDS))
+      throw DatasetSchemaMismatch(
+        schemaMismatchMessage(
+          actualDS,
+          expectedDS
+        )
+      )
     }
     try {
       actualDS.rdd.cache
       expectedDS.rdd.cache
 
-      val actualCount = actualDS.rdd.count
+      val actualCount   = actualDS.rdd.count
       val expectedCount = expectedDS.rdd.count
       if (actualCount != expectedCount) {
         throw DatasetCountMismatch(
-          countMismatchMessage(actualCount, expectedCount)
+          countMismatchMessage(
+            actualCount,
+            expectedCount
+          )
         )
       }
 
@@ -144,12 +167,18 @@ ${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
         .join(resultIndexValue)
         .filter {
           case (idx, (o1, o2)) =>
-            !equals(o1, o2)
+            !equals(
+              o1,
+              o2
+            )
         }
       val maxUnequalRowsToShow = 10
       if (!unequalRDD.isEmpty()) {
         throw DatasetContentMismatch(
-          countMismatchMessage(actualCount, expectedCount)
+          countMismatchMessage(
+            actualCount,
+            expectedCount
+          )
         )
       }
       unequalRDD.take(maxUnequalRowsToShow)
@@ -160,16 +189,16 @@ ${DataFramePrettyPrint.showString(expectedDS.toDF(), 10)}
     }
   }
 
-  def assertApproximateDataFrameEquality(
-      actualDF: DataFrame,
-      expectedDF: DataFrame,
-      precision: Double
-  ): Unit = {
+  def assertApproximateDataFrameEquality(actualDF: DataFrame, expectedDF: DataFrame, precision: Double): Unit = {
     assertLargeDatasetEquality[Row](
       actualDF,
       expectedDF,
       equals = (r1: Row, r2: Row) => {
-        r1.equals(r2) || RowComparer.areRowsEqual(r1, r2, precision)
+        r1.equals(r2) || RowComparer.areRowsEqual(
+          r1,
+          r2,
+          precision
+        )
       }
     )
   }
