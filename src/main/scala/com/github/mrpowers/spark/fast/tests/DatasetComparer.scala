@@ -134,15 +134,18 @@ ${DataFramePrettyPrint.showString(
   def assertLargeDatasetEquality[T: ClassTag](
     actualDS: Dataset[T],
     expectedDS: Dataset[T],
-    equals: (T, T) => Boolean = naiveEquality _
+    equals: (T, T) => Boolean = naiveEquality _,
+    ignoreSchemaCheck: Boolean = false
   ): Unit = {
-    if (!actualDS.schema.equals(expectedDS.schema)) {
-      throw DatasetSchemaMismatch(
-        schemaMismatchMessage(
-          actualDS,
-          expectedDS
+    if (!ignoreSchemaCheck) {
+      if (!actualDS.schema.equals(expectedDS.schema)) {
+        throw DatasetSchemaMismatch(
+          schemaMismatchMessage(
+            actualDS,
+            expectedDS
+          )
         )
-      )
+      }
     }
     try {
       actualDS.rdd.cache

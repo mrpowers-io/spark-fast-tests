@@ -2,25 +2,25 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.DataFrame
 
+import scala.util.Try
+
 case class ColumnMismatch(smth: String) extends Exception(smth)
 
-trait ColumnComparer {
+trait ColumnComparer extends DatasetComparer {
 
   def assertColumnEquality(df: DataFrame, colName1: String, colName2: String): Unit = {
-    val elements = df
-      .select(
-        colName1,
-        colName2
+    val x = df.select(colName1)
+    val y = df.select(colName2)
+    val z = Try {
+      assertLargeDatasetEquality(
+        x,
+        y,
+        DatasetComparerLike.naiveEquality,
+        ignoreSchemaCheck = true
       )
-      .collect()
-    val colName1Elements = elements.map(_(0))
-    val colName2Elements = elements.map(_(1))
-    if (!colName1Elements.sameElements(colName2Elements)) {
-      val mismatchMessage = "\n" + ArrayPrettyPrint.showTwoColumnString(
-        Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements)
-      )
-      throw ColumnMismatch(mismatchMessage)
     }
+    if (z.isFailure)
+      throw ColumnMismatch("some error message")
   }
 
   // ace stands for 'assertColumnEquality'
