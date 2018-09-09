@@ -1,30 +1,46 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 case class ColumnMismatch(smth: String) extends Exception(smth)
 
 trait ColumnComparer extends DatasetComparer {
 
-  def assertColumnEquality(df: DataFrame, colName1: String, colName2: String): Unit = {
+  private def assertColumn[T](
+    df: Dataset[T],
+    colName1: String,
+    colName2: String,
+    equals: (Row, Row) => Boolean
+  ): Unit = {
     val x = df.select(colName1)
     val y = df.select(colName2)
     val z = Try {
-      assertLargeDatasetEquality(
+      collectAndAssert(
         x,
         y,
-        DatasetComparerLike.naiveEquality,
-        ignoreSchemaCheck = true
+        equals
       )
     }
-    if (z.isFailure)
-      throw ColumnMismatch("some error message")
+
+    z match {
+      case Failure(exception) => throw ColumnMismatch(exception.getMessage)
+      case Success(_)         =>
+    }
+  }
+
+  def assertColumnEquality[T](df: Dataset[T], colName1: String, colName2: String): Unit = {
+    assertColumn(
+      df,
+      colName1,
+      colName2,
+      DatasetComparerLike.naiveEquality
+    )
   }
 
   // ace stands for 'assertColumnEquality'
-  def ace(df: DataFrame, colName1: String, colName2: String): Unit = {
+  def ace[T](df: Dataset[T], colName1: String, colName2: String): Unit = {
     assertColumnEquality(
       df,
       colName1,
@@ -32,46 +48,23 @@ trait ColumnComparer extends DatasetComparer {
     )
   }
 
-  private def approximatelyEqual(x: Double, y: Double, precision: Double): Boolean = {
-    if ((x - y).abs < precision) true else false
-  }
-
-  private def areDoubleArraysEqual(x: Array[Double], y: Array[Double], precision: Double): Boolean = {
-    val zipped: Array[(Double, Double)] = x.zip(y)
-    val mapped = zipped.map { t =>
-      !approximatelyEqual(
-        t._1,
-        t._2,
-        0.01
-      )
-    }
-    mapped.contains(false)
-  }
-
-  def assertDoubleTypeColumnEquality(
-    df: DataFrame,
+  def assertDoubleTypeColumnEquality[T](
+    df: Dataset[T],
     colName1: String,
     colName2: String,
     precision: Double = 0.01
   ): Unit = {
-    val elements = df
-      .select(
-        colName1,
-        colName2
-      )
-      .collect()
-    val colName1Elements: Array[Double] = elements.map(_(0).toString().toDouble)
-    val colName2Elements: Array[Double] = elements.map(_(1).toString().toDouble)
-    if (!areDoubleArraysEqual(
-          colName1Elements,
-          colName2Elements,
+    assertColumn(
+      df,
+      colName1,
+      colName2,
+      equals = (r1: Row, r2: Row) => {
+        r1.equals(r2) || RowComparer.areRowsEqual(
+          r1,
+          r2,
           precision
-        )) {
-      val mismatchMessage = "\n" + ArrayPrettyPrint.showTwoColumnString(
-        Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements)
-      )
-      throw ColumnMismatch(mismatchMessage)
-    }
+        )
+      }
+    )
   }
-
 }

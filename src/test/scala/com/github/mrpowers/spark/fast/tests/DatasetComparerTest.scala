@@ -67,7 +67,6 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             expectedDS
           )
         }
-
       }
 
       "does nothing if the DataFrames have the same schemas and content" - {

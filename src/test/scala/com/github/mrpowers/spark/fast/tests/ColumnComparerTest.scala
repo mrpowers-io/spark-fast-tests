@@ -3,7 +3,6 @@ package com.github.mrpowers.spark.fast.tests
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
-
 import utest._
 
 object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessionTestWrapper {
@@ -70,7 +69,6 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
             "expected_name"
           )
         }
-
       }
 
       "doesn't thrown an error when the columns are equal" - {
@@ -420,7 +418,7 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
 
       }
 
-      "throws an error when two DoubleType columns are equal" - {
+      "throws an error when two DoubleType columns are not equal" - {
 
         val sourceData = Seq(
           Row(
@@ -451,11 +449,13 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           StructType(sourceSchema)
         )
 
-        assertDoubleTypeColumnEquality(
-          df,
-          "d1",
-          "d2",
-          0.01
+        val e = intercept[ColumnMismatch](
+          assertDoubleTypeColumnEquality(
+            df,
+            "d1",
+            "d2",
+            0.01
+          )
         )
 
       }

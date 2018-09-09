@@ -2,8 +2,8 @@ package com.github.mrpowers.spark.fast.tests
 
 import com.github.mrpowers.spark.fast.tests.DatasetComparerLike.naiveEquality
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
 
 import scala.reflect.ClassTag
 
@@ -33,35 +33,6 @@ ${expectedDS.schema}
     s"""
 Actual DataFrame Row Count: '${actualCount}'
 Expected DataFrame Row Count: '${expectedCount}'
-"""
-  }
-
-  private def betterContentMismatchMessage[T](a: Array[T], e: Array[T]): String = {
-    "\n" + a
-      .zip(e)
-      .map {
-        case (r1, r2) =>
-          if (r1.equals(r2)) {
-            ufansi.Color.Blue(s"$r1 | $r2")
-          } else {
-            ufansi.Color.Red(s"$r1 | $r2")
-          }
-      }
-      .mkString("\n")
-  }
-
-  private def basicMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
-    s"""
-Actual DataFrame Content:
-${DataFramePrettyPrint.showString(
-      actualDS.toDF(),
-      10
-    )}
-Expected DataFrame Content:
-${DataFramePrettyPrint.showString(
-      expectedDS.toDF(),
-      10
-    )}
 """
   }
 
@@ -98,27 +69,49 @@ ${DataFramePrettyPrint.showString(
       }
     }
     if (orderedComparison) {
-      val a = actualDS.collect()
-      val e = expectedDS.collect()
-      if (!a.sameElements(e)) {
-        throw DatasetContentMismatch(
-          betterContentMismatchMessage(
-            a,
-            e
-          )
-        )
-      }
+      collectAndAssert(
+        actualDS,
+        expectedDS,
+        naiveEquality
+      )
     } else {
-      val a = defaultSortDataset(actualDS).collect()
-      val e = defaultSortDataset(expectedDS).collect()
-      if (!a.sameElements(e)) {
-        throw DatasetContentMismatch(
-          betterContentMismatchMessage(
-            a,
-            e
-          )
+      collectAndAssert(
+        defaultSortDataset(actualDS),
+        defaultSortDataset(expectedDS),
+        naiveEquality
+      )
+    }
+  }
+
+  protected def collectAndAssert[T](actualDS: Dataset[T], expectedDS: Dataset[T], equals: (T, T) => Boolean): Unit = {
+    val a = actualDS.collect()
+    val e = expectedDS.collect()
+    if (a.length != e.length) {
+      throw DatasetContentMismatch(
+        "Dataset have varying size " + countMismatchMessage(
+          a.length,
+          e.length
         )
+      )
+    }
+    val tuples = a.zip(e)
+    val matchResults = tuples
+      .map(
+        x => {
+          equals(
+            x._1,
+            x._2
+          )
+        }
+      )
+    if (matchResults.contains(false)) {
+      val messages = matchResults.zip(tuples).map {
+        case (true, tuple) =>
+          ufansi.Color.Blue(s"${tuple._1} | ${tuple._2}")
+        case (false, tuple) =>
+          ufansi.Color.Red(s"${tuple._1} | ${tuple._2}")
       }
+      throw DatasetContentMismatch("\n" + messages.mkString("\n"))
     }
   }
 
