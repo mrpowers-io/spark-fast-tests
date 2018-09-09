@@ -7,14 +7,24 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row}
 
 import scala.reflect.ClassTag
 
-case class DatasetSchemaMismatch(smth: String)  extends Exception(smth)
+case class DatasetSchemaMismatch(smth: String) extends Exception(smth)
+
 case class DatasetContentMismatch(smth: String) extends Exception(smth)
-case class DatasetCountMismatch(smth: String)   extends Exception(smth)
+
+case class DatasetCountMismatch(smth: String) extends Exception(smth)
 
 object DatasetComparerLike {
 
   def naiveEquality[T](o1: T, o2: T): Boolean = {
     o1.equals(o2)
+  }
+
+  def precisionEquality(o1: Row, o2: Row, precision: Double): Boolean = {
+    o1.equals(o2) || RowComparer.areRowsEqual(
+      o1,
+      o2,
+      precision
+    )
   }
 }
 
@@ -189,13 +199,11 @@ Expected DataFrame Row Count: '${expectedCount}'
     assertLargeDatasetEquality[Row](
       actualDF,
       expectedDF,
-      equals = (r1: Row, r2: Row) => {
-        r1.equals(r2) || RowComparer.areRowsEqual(
-          r1,
-          r2,
-          precision
-        )
-      }
+      DatasetComparerLike.precisionEquality(
+        _,
+        _,
+        precision
+      )
     )
   }
 

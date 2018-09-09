@@ -58,13 +58,11 @@ trait ColumnComparer extends DatasetComparer {
       df,
       colName1,
       colName2,
-      equals = (r1: Row, r2: Row) => {
-        r1.equals(r2) || RowComparer.areRowsEqual(
-          r1,
-          r2,
-          precision
-        )
-      }
+      DatasetComparerLike.precisionEquality(
+        _,
+        _,
+        precision
+      )
     )
   }
 }
