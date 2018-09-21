@@ -20,9 +20,9 @@ spDescription := "Test your code quickly"
 
 version := "2.3.0_0.14.0"
 scalaVersion := "2.11.12"
-sparkVersion := "2.3.0"
+sparkVersion := "2.3.1"
 
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.3.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.3.1" % "provided"
 
 libraryDependencies += "mrpowers" % "spark-daria" % "2.3.0_0.23.1" % "test"
 libraryDependencies += "com.lihaoyi" %% "utest" % "0.6.3" % "test"
