@@ -1,6 +1,8 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.apache.spark.sql.types.{IntegerType, StringType}
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.Row
+import org.apache.spark.sql.functions._
 import com.github.mrpowers.spark.daria.sql.SparkSessionExt._
 import utest._
 
@@ -204,6 +206,116 @@ object DataFrameComparerTest extends TestSuite with DataFrameComparer with Spark
             orderedComparison = false
           )
         }
+      }
+
+      "works with DataFrames that have StructType columns" - {
+
+        val df1Data = Seq(
+          Row(
+            "darla",
+            7,
+            8,
+            struct("hi")
+          ),
+          Row(
+            "max",
+            42,
+            8,
+            struct("bye")
+          )
+        )
+
+        val df1Schema = Array(
+          StructField(
+            "name",
+            StringType,
+            true
+          ),
+          StructField(
+            "age",
+            IntegerType,
+            true
+          ),
+          StructField(
+            "some_number",
+            IntegerType,
+            true
+          ),
+          StructField(
+            "something",
+            StructType(
+              Array(
+                StructField(
+                  "word",
+                  StringType,
+                  true
+                )
+              )
+            )
+          )
+        )
+
+        val df1 = spark.createDataFrame(
+          spark.sparkContext.parallelize(df1Data),
+          StructType(df1Schema)
+        )
+
+        val df2Data = Seq(
+          Row(
+            "darla",
+            7,
+            8,
+            struct("hi")
+          ),
+          Row(
+            "max",
+            42,
+            8,
+            struct("bye")
+          )
+        )
+
+        val df2Schema = Array(
+          StructField(
+            "name",
+            StringType,
+            true
+          ),
+          StructField(
+            "age",
+            IntegerType,
+            true
+          ),
+          StructField(
+            "some_number",
+            IntegerType,
+            true
+          ),
+          StructField(
+            "something",
+            StructType(
+              Array(
+                StructField(
+                  "word",
+                  StringType,
+                  true
+                )
+              )
+            )
+          )
+        )
+
+        val df2 = spark.createDataFrame(
+          spark.sparkContext.parallelize(df1Data),
+          StructType(df1Schema)
+        )
+
+        assertSmallDataFrameEquality(
+          df1,
+          df2,
+          orderedComparison = false
+        )
+
       }
 
     }
