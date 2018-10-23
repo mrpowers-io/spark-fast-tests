@@ -24,7 +24,7 @@ sparkVersion := "2.3.1"
 
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.3.1" % "provided"
 
-libraryDependencies += "mrpowers" % "spark-daria" % "2.3.0_0.23.1" % "test"
+libraryDependencies += "mrpowers" % "spark-daria" % "0.26.0" % "test"
 libraryDependencies += "com.lihaoyi" %% "utest" % "0.6.3" % "test"
 testFrameworks += new TestFramework("com.github.mrpowers.spark.fast.tests.CustomFramework")
 
