@@ -67,6 +67,16 @@ resolvers += "jitpack" at "https://jitpack.io"
 libraryDependencies += "com.github.mrpowers" % "spark-fast-tests" % "v2.3.0_0.12.0" % "test"
 ```
 
+**Spark version compatibility by spark-fast-tests version**
+
+|       | 0.16.0             |
+|-------|--------------------|
+| 2.0.0 | :white_check_mark: |
+| 2.1.0 | :white_check_mark: |
+| 2.2.2 | :white_check_mark: |
+| 2.3.0 | :white_check_mark: |
+| 2.3.1 | :white_check_mark: |
+
 ## Why is this library fast?
 
 The `assertSmallDataFrameEquality` method runs 31% faster than the `assertLargeDatasetEquality` method as described in [this blog post](https://medium.com/@mrpowers/how-to-cut-the-run-time-of-a-spark-sbt-test-suite-by-40-52d71219773f).
