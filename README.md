@@ -55,7 +55,7 @@ Fetch the JAR file from Maven.
 
 ```scala
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
-libraryDependencies += "MrPowers" % "spark-fast-tests" % "2.3.0_0.13.1"
+libraryDependencies += "MrPowers" % "spark-fast-tests" % "0.16.0" % "test"
 ```
 
 **Option 2: JitPack**
@@ -64,7 +64,7 @@ Update your `build.sbt` file as follows.
 
 ```scala
 resolvers += "jitpack" at "https://jitpack.io"
-libraryDependencies += "com.github.mrpowers" % "spark-fast-tests" % "v2.3.0_0.12.0" % "test"
+libraryDependencies += "com.github.mrpowers" % "spark-fast-tests" % "v0.16.0" % "test"
 ```
 
 **Spark version compatibility by spark-fast-tests version**
