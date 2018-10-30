@@ -58,6 +58,8 @@ resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/mave
 libraryDependencies += "MrPowers" % "spark-fast-tests" % "0.16.0" % "test"
 ```
 
+[Here's a link to all the JAR files in Maven](https://mvnrepository.com/artifact/MrPowers/spark-fast-tests?repo=spark-packages).
+
 **Option 2: JitPack**
 
 Update your `build.sbt` file as follows.
