@@ -128,6 +128,48 @@ object SchemaComparerTest extends TestSuite {
 
       }
 
+      "can ignore the column names flag when determining equality" - {
+
+        val s1 = StructType(
+          Seq(
+            StructField(
+              "these",
+              StringType,
+              true
+            ),
+            StructField(
+              "are",
+              StringType,
+              true
+            )
+          )
+        )
+
+        val s2 = StructType(
+          Seq(
+            StructField(
+              "very",
+              StringType,
+              true
+            ),
+            StructField(
+              "different",
+              StringType,
+              true
+            )
+          )
+        )
+
+        assert(
+          SchemaComparer.equals(
+            s1,
+            s2,
+            ignoreColumnNames = true
+          ) == true
+        )
+
+      }
+
     }
 
   }

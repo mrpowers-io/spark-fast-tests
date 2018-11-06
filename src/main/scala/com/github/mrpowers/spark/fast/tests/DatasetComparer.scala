@@ -72,12 +72,14 @@ ${DataFramePrettyPrint.showString(
     actualDS: Dataset[T],
     expectedDS: Dataset[T],
     ignoreNullable: Boolean = false,
+    ignoreColumnNames: Boolean = false,
     orderedComparison: Boolean = true
   ): Unit = {
     if (!SchemaComparer.equals(
           actualDS.schema,
           expectedDS.schema,
-          ignoreNullable
+          ignoreNullable,
+          ignoreColumnNames
         )) {
       throw DatasetSchemaMismatch(
         schemaMismatchMessage(
