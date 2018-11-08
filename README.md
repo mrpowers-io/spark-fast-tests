@@ -47,6 +47,9 @@ The `DatasetComparer` has `assertSmallDatasetEquality` and `assertLargeDatasetEq
 
 If you only need to compare DataFrames, you can use `DataFrameComparer` with the associated `assertSmallDataFrameEquality` and `assertLargeDataFrameEquality` methods.  Under the hood, `DataFrameComparer` uses the `assertSmallDatasetEquality` and `assertLargeDatasetEquality`.
 
+*Note : comparing Datasets can be tricky since some column names might be given by spark when applying transformations. 
+Would this happen, use the `ignoreColumnNames` boolean to skip name verification.*
+
 ## Setup
 
 **Option 1: Maven**

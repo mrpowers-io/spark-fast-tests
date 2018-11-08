@@ -72,30 +72,21 @@ ${DataFramePrettyPrint.showString(
     actualDS: Dataset[T],
     expectedDS: Dataset[T],
     ignoreNullable: Boolean = false,
+    ignoreColumnNames: Boolean = false,
     orderedComparison: Boolean = true
   ): Unit = {
-    if (ignoreNullable) {
-      if (!SchemaComparer.equals(
-            actualDS.schema,
-            expectedDS.schema,
-            ignoreNullable = true
-          )) {
-        throw DatasetSchemaMismatch(
-          schemaMismatchMessage(
-            actualDS,
-            expectedDS
-          )
+    if (!SchemaComparer.equals(
+          actualDS.schema,
+          expectedDS.schema,
+          ignoreNullable,
+          ignoreColumnNames
+        )) {
+      throw DatasetSchemaMismatch(
+        schemaMismatchMessage(
+          actualDS,
+          expectedDS
         )
-      }
-    } else {
-      if (!actualDS.schema.equals(expectedDS.schema)) {
-        throw DatasetSchemaMismatch(
-          schemaMismatchMessage(
-            actualDS,
-            expectedDS
-          )
-        )
-      }
+      )
     }
     if (orderedComparison) {
       val a = actualDS.collect()

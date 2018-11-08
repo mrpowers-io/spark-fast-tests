@@ -11,12 +11,14 @@ trait DataFrameComparer extends DatasetComparer {
     actualDF: DataFrame,
     expectedDF: DataFrame,
     ignoreNullable: Boolean = false,
+    ignoreColumnNames: Boolean = false,
     orderedComparison: Boolean = true
   ): Unit = {
     assertSmallDatasetEquality(
       actualDF,
       expectedDF,
       ignoreNullable,
+      ignoreColumnNames,
       orderedComparison
     )
   }
