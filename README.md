@@ -81,6 +81,7 @@ libraryDependencies += "com.github.mrpowers" % "spark-fast-tests" % "v0.16.0" % 
 | 2.2.2 | :white_check_mark: | :white_check_mark: |
 | 2.3.0 | :white_check_mark: | :white_check_mark: |
 | 2.3.1 | :white_check_mark: | :white_check_mark: |
+| 2.4.0 | :white_check_mark: | :white_check_mark: |
 
 ## Why is this library fast?
 
