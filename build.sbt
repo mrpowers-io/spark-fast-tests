@@ -12,19 +12,21 @@ scalafmtOnCompile in Compile := true
 
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
 
+organization := "mrpowers"
 name := "spark-fast-tests"
 spName := "MrPowers/spark-fast-tests"
 
 spShortDescription := "Fast tests with Spark"
 spDescription := "Test your code quickly"
 
-version := "0.17.0"
+version := "0.17.1"
+crossScalaVersions := Seq("2.11.12", "2.12.7")
 scalaVersion := "2.11.12"
 sparkVersion := "2.4.0"
 
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.0" % "provided"
 
-libraryDependencies += "mrpowers" % "spark-daria" % "0.26.0" % "test"
+libraryDependencies += "mrpowers" %% "spark-daria" % "0.26.1" % "test"
 libraryDependencies += "com.lihaoyi" %% "utest" % "0.6.3" % "test"
 testFrameworks += new TestFramework("com.github.mrpowers.spark.fast.tests.CustomFramework")
 
@@ -38,3 +40,5 @@ fork in Test := true
 javaOptions ++= Seq("-Xms512M", "-Xmx2048M", "-XX:+CMSClassUnloadingEnabled","-Duser.timezone=GMT")
 
 licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
+
+updateOptions := updateOptions.value.withLatestSnapshots(false)

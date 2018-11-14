@@ -120,32 +120,33 @@ case class Str private (private val chars: Array[Char], private val colors: Arra
    * @param index the plain-text index of the point within the [[ufansi.Str]]
    *              you want to use to split it.
    */
-  def splitAt(index: Int) = (
-    new Str(
-      util.Arrays.copyOfRange(
-        chars,
-        0,
-        index
+  def splitAt(index: Int) =
+    (
+      new Str(
+        util.Arrays.copyOfRange(
+          chars,
+          0,
+          index
+        ),
+        util.Arrays.copyOfRange(
+          colors,
+          0,
+          index
+        )
       ),
-      util.Arrays.copyOfRange(
-        colors,
-        0,
-        index
-      )
-    ),
-    new Str(
-      util.Arrays.copyOfRange(
-        chars,
-        index,
-        length
-      ),
-      util.Arrays.copyOfRange(
-        colors,
-        index,
-        length
+      new Str(
+        util.Arrays.copyOfRange(
+          chars,
+          index,
+          length
+        ),
+        util.Arrays.copyOfRange(
+          colors,
+          index,
+          length
+        )
       )
     )
-  )
 
   /**
    * Returns an [[ufansi.Str]] which is a substring of this string,
@@ -393,9 +394,7 @@ object Str {
                 // of the True-color escape, to maximize performance
                 sourceIndex += newIndex
                 def isDigit(index: Int) = {
-                  index < raw.length && raw.charAt(index) >= '0' && raw.charAt(
-                    index
-                  ) <= '9'
+                  index < raw.length && raw.charAt(index) >= '0' && raw.charAt(index) <= '9'
                 }
                 def checkChar(index: Int, char: Char) = {
                   index < raw.length && raw.charAt(index) == char
@@ -430,9 +429,7 @@ object Str {
                     if (!checkChar(
                           sourceIndex,
                           ';'
-                        ) || !isDigit(
-                          sourceIndex + 1
-                        )) fail()
+                        ) || !isDigit(sourceIndex + 1)) fail()
                     else {
                       sourceIndex += 1
                       val b = getNumber()
@@ -525,9 +522,7 @@ object Str {
       color <- cat.all
       str   <- color.escapeOpt
     } yield (str, Left(color))
-    val reset = Seq(
-      Console.RESET -> Left(Attr.Reset)
-    )
+    val reset = Seq(Console.RESET -> Left(Attr.Reset))
     val trueColors = Seq(
       "\u001b[38;2;" -> Right(Color),
       "\u001b[48;2;" -> Right(Back)
@@ -871,9 +866,7 @@ sealed abstract class Category(val offset: Int, val width: Int)(implicit catName
       s,
       mask,
       applyValue << offset
-    )(
-      catName.value + "." + name.value
-    )
+    )(catName.value + "." + name.value)
   }
 
   def makeNoneAttr(applyValue: Long)(implicit name: sourcecode.Name) = {
@@ -1216,12 +1209,7 @@ private[this] final class Trie[T](strings: Seq[(String, T)]) {
         (min, max, arr, None)
 
       case (Seq((_, terminalValue)), Nil) =>
-        (
-          0.toChar,
-          0.toChar,
-          new Array[Trie[T]](0),
-          Some(terminalValue)
-        )
+        (0.toChar, 0.toChar, new Array[Trie[T]](0), Some(terminalValue))
 
       case _ => ???
     }
@@ -1292,9 +1280,7 @@ abstract class ColorCategory(offset: Int, width: Int, val colorCode: Int)(implic
         b
       ),
       273 + index
-    )(
-      "True(" + r + "," + g + "," + b + ")"
-    )
+    )("True(" + r + "," + g + "," + b + ")")
   }
 
   def trueRgbEscape(r: Int, g: Int, b: Int) = {
