@@ -76,9 +76,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (1),
             (5)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
 
         val expectedDF = spark.createDF(
@@ -86,9 +84,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (1),
             (5)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
 
         assertSmallDatasetEquality(
@@ -144,9 +140,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (1),
             (5)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
 
         val expectedDF = spark.createDF(
@@ -317,9 +311,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (1),
             (5)
           ),
-          List(
-            ("number", IntegerType, false)
-          )
+          List(("number", IntegerType, false))
         )
 
         val expectedDF = spark.createDF(
@@ -327,9 +319,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (1),
             (5)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
 
         assertSmallDatasetEquality(
@@ -345,9 +335,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (1),
             (5)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
 
         val expectedDF = spark.createDF(
@@ -355,9 +343,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (5),
             (1)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
 
         assertSmallDatasetEquality(
@@ -445,9 +431,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (1),
             (5)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
         val expectedDF = spark.createDF(
           List(
@@ -455,9 +439,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (1),
             (10)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
 
         val e = intercept[DatasetContentMismatch] {
@@ -517,9 +499,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (5.1),
             (null)
           ),
-          List(
-            ("number", DoubleType, true)
-          )
+          List(("number", DoubleType, true))
         )
 
         val expectedDF = spark.createDF(
@@ -528,9 +508,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (5.1),
             (null)
           ),
-          List(
-            ("number", DoubleType, true)
-          )
+          List(("number", DoubleType, true))
         )
 
         assertApproximateDataFrameEquality(
@@ -546,9 +524,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (100.9),
             (5.1)
           ),
-          List(
-            ("number", DoubleType, true)
-          )
+          List(("number", DoubleType, true))
         )
 
         val expectedDF = spark.createDF(
@@ -556,9 +532,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (1.2),
             (5.1)
           ),
-          List(
-            ("number", DoubleType, true)
-          )
+          List(("number", DoubleType, true))
         )
 
         val e = intercept[DatasetContentMismatch] {
@@ -577,9 +551,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (5.1),
             (8.8)
           ),
-          List(
-            ("number", DoubleType, true)
-          )
+          List(("number", DoubleType, true))
         )
 
         val expectedDF = spark.createDF(
@@ -587,9 +559,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (1.2),
             (5.1)
           ),
-          List(
-            ("number", DoubleType, true)
-          )
+          List(("number", DoubleType, true))
         )
 
         val e = intercept[DatasetCountMismatch] {

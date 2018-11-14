@@ -51,9 +51,7 @@ object DataFrameComparerTest extends TestSuite with DataFrameComparer with Spark
             (1),
             (5)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
 
         val expectedDF = spark.createDF(
@@ -61,9 +59,7 @@ object DataFrameComparerTest extends TestSuite with DataFrameComparer with Spark
             (1),
             (5)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
 
         assertSmallDataFrameEquality(
@@ -82,9 +78,7 @@ object DataFrameComparerTest extends TestSuite with DataFrameComparer with Spark
             (1),
             (5)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
 
         val expectedDF = spark.createDF(
@@ -118,9 +112,7 @@ object DataFrameComparerTest extends TestSuite with DataFrameComparer with Spark
             (1),
             (5)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
 
         val expectedDF = spark.createDF(
@@ -128,9 +120,7 @@ object DataFrameComparerTest extends TestSuite with DataFrameComparer with Spark
             (10),
             (5)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
 
         val e = intercept[DatasetContentMismatch] {
@@ -157,18 +147,14 @@ object DataFrameComparerTest extends TestSuite with DataFrameComparer with Spark
             (1),
             (5)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
         val expectedDF = spark.createDF(
           List(
             (5),
             (1)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
         assertSmallDataFrameEquality(
           sourceDF,
@@ -183,9 +169,7 @@ object DataFrameComparerTest extends TestSuite with DataFrameComparer with Spark
             (1),
             (5)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
         val expectedDF = spark.createDF(
           List(
@@ -193,9 +177,7 @@ object DataFrameComparerTest extends TestSuite with DataFrameComparer with Spark
             (1),
             (10)
           ),
-          List(
-            ("number", IntegerType, true)
-          )
+          List(("number", IntegerType, true))
         )
         val e = intercept[DatasetContentMismatch] {
           assertSmallDataFrameEquality(
