@@ -12,7 +12,7 @@ scalafmtOnCompile in Compile := true
 
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
 
-organization := "mrpowers"
+organization := "com.github.mrpowers"
 name := "spark-fast-tests"
 spName := "MrPowers/spark-fast-tests"
 
