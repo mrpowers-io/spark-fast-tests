@@ -320,6 +320,14 @@ You might want to use spark-fast-tests instead of spark-testing-base in these ca
 * You don't want to include hive as a project dependency
 * You don't want to restart the SparkSession after each test file executes so the suite runs faster
 
+## Deploy
+
+Build the JAR / POM files with `sbt +spDist` as described in [this GitHub issue](https://github.com/databricks/sbt-spark-package/issues/18#issuecomment-184107369).
+
+Manually upload the zip files to [Spark Packages](https://spark-packages.org/).
+
+Make a GitHub release so the code is available via JitPack.
+
 ## Additional Goals
 
 * Use memory efficiently so Spark test runs don't crash
