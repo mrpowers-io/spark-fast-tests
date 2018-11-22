@@ -58,7 +58,12 @@ Fetch the JAR file from Maven.
 
 ```scala
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
-libraryDependencies += "MrPowers" % "spark-fast-tests" % "0.16.0" % "test"
+
+// Scala 2.11
+libraryDependencies += "MrPowers" % "spark-fast-tests" % "0.17.1-s_2.11"
+
+// Scala 2.12, Spark 2.4+
+libraryDependencies += "MrPowers" % "spark-fast-tests" % "0.17.1-s_2.12"
 ```
 
 [Here's a link to all the JAR files in Maven](https://mvnrepository.com/artifact/MrPowers/spark-fast-tests?repo=spark-packages).
@@ -82,6 +87,8 @@ libraryDependencies += "com.github.mrpowers" % "spark-fast-tests" % "v0.16.0" % 
 | 2.3.0 | :white_check_mark: | :white_check_mark: |
 | 2.3.1 | :white_check_mark: | :white_check_mark: |
 | 2.4.0 | :white_check_mark: | :white_check_mark: |
+
+Scala 2.12 support is only for Spark 2.4+.
 
 ## Why is this library fast?
 
@@ -320,7 +327,7 @@ You might want to use spark-fast-tests instead of spark-testing-base in these ca
 * You don't want to include hive as a project dependency
 * You don't want to restart the SparkSession after each test file executes so the suite runs faster
 
-## Deploy
+## Publishing
 
 Build the JAR / POM files with `sbt +spDist` as described in [this GitHub issue](https://github.com/databricks/sbt-spark-package/issues/18#issuecomment-184107369).
 
@@ -334,23 +341,6 @@ Make a GitHub release so the code is available via JitPack.
 * Provide readable error messages
 * Easy to use in conjunction with other test suites
 * Give the user control of the SparkSession
-
-## Spark Versions
-
-spark-fast-tests supports Spark 2.x.  There are no plans to retrofit the project to work with Spark 1.x.
-
-## Publishing
-
-Only project maintainers can publish JAR files.
-
-For JitPack, run the `scripts/multi_spark_releases.sh` script to make a bunch of releases in GitHub that'll be picked up by JitPack.  You need to install [hub](https://github.com/github/hub) and pass in the [spark-daria](https://github.com/MrPowers/spark-daria) `github_release.sh` script as an argument to successfully run this command.
-
-For Maven, follow [this guide](https://leonard.io/blog/2017/01/an-in-depth-guide-to-deploying-to-maven-central/) to setup your computer and then run these commands.
-
-```
-sbt publishSigned
-sbt sonatypeRelease
-```
 
 ## Contributing
 
