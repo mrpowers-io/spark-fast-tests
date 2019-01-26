@@ -48,12 +48,7 @@ trait ColumnComparer {
     mapped.contains(false)
   }
 
-  def assertDoubleTypeColumnEquality(
-    df: DataFrame,
-    colName1: String,
-    colName2: String,
-    precision: Double = 0.01
-  ): Unit = {
+  def assertDoubleTypeColumnEquality(df: DataFrame, colName1: String, colName2: String, precision: Double = 0.01): Unit = {
     val elements = df
       .select(
         colName1,

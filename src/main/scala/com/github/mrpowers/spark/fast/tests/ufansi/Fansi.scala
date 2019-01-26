@@ -671,12 +671,7 @@ object Attrs {
    * unnecessarily. Reads it's category listing from a fast Array version of
    * Attrs.categories and writes it's output to a mutable `StringBuilder`
    */
-  def emitAnsiCodes0(
-    currentState: Str.State,
-    nextState: Str.State,
-    output: StringBuilder,
-    categoryArray: Array[Category]
-  ) = {
+  def emitAnsiCodes0(currentState: Str.State, nextState: Str.State, output: StringBuilder, categoryArray: Array[Category]) = {
     if (currentState != nextState) {
 
       val hardOffMask = Bold.mask
@@ -814,12 +809,7 @@ object Attr {
 /**
  * An [[Attr]] represented by an fansi escape sequence
  */
-case class EscapeAttr private[ufansi] (
-  escape: String,
-  resetMask: Long,
-  applyMask: Long
-)(implicit sourceName: sourcecode.Name)
-    extends Attr {
+case class EscapeAttr private[ufansi] (escape: String, resetMask: Long, applyMask: Long)(implicit sourceName: sourcecode.Name) extends Attr {
   val escapeOpt         = Some(escape)
   val name              = sourceName.value
   override def toString = escape + name + Console.RESET
@@ -828,8 +818,7 @@ case class EscapeAttr private[ufansi] (
 /**
  * An [[Attr]] for which no fansi escape sequence exists
  */
-case class ResetAttr private[ufansi] (resetMask: Long, applyMask: Long)(implicit sourceName: sourcecode.Name)
-    extends Attr {
+case class ResetAttr private[ufansi] (resetMask: Long, applyMask: Long)(implicit sourceName: sourcecode.Name) extends Attr {
   val escapeOpt         = None
   val name              = sourceName.value
   override def toString = name

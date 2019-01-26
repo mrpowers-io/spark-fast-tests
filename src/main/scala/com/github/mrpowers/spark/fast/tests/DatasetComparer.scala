@@ -68,13 +68,7 @@ ${DataFramePrettyPrint.showString(
   /**
    * Raises an error unless `actualDS` and `expectedDS` are equal
    */
-  def assertSmallDatasetEquality[T](
-    actualDS: Dataset[T],
-    expectedDS: Dataset[T],
-    ignoreNullable: Boolean = false,
-    ignoreColumnNames: Boolean = false,
-    orderedComparison: Boolean = true
-  ): Unit = {
+  def assertSmallDatasetEquality[T](actualDS: Dataset[T], expectedDS: Dataset[T], ignoreNullable: Boolean = false, ignoreColumnNames: Boolean = false, orderedComparison: Boolean = true): Unit = {
     if (!SchemaComparer.equals(
           actualDS.schema,
           expectedDS.schema,
@@ -122,11 +116,7 @@ ${DataFramePrettyPrint.showString(
   /**
    * Raises an error unless `actualDS` and `expectedDS` are equal
    */
-  def assertLargeDatasetEquality[T: ClassTag](
-    actualDS: Dataset[T],
-    expectedDS: Dataset[T],
-    equals: (T, T) => Boolean = naiveEquality _
-  ): Unit = {
+  def assertLargeDatasetEquality[T: ClassTag](actualDS: Dataset[T], expectedDS: Dataset[T], equals: (T, T) => Boolean = naiveEquality _): Unit = {
     if (!actualDS.schema.equals(expectedDS.schema)) {
       throw DatasetSchemaMismatch(
         schemaMismatchMessage(
