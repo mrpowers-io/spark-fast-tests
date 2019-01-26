@@ -38,7 +38,11 @@ Expected DataFrame Row Count: '${expectedCount}'
 
   private def betterContentMismatchMessage[T](a: Array[T], e: Array[T]): String = {
     "\n" + a
-      .zip(e)
+      .zipAll(
+        e,
+        "",
+        ""
+      )
       .map {
         case (r1, r2) =>
           if (r1.equals(r2)) {
