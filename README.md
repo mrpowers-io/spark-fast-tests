@@ -117,34 +117,34 @@ trait SparkSessionTestWrapper {
 The `DatasetComparer` trait defines the `assertSmallDatasetEquality` method.  Extend your spec file with the `SparkSessionTestWrapper` trait to create DataFrames and the `DatasetComparer` trait to make DataFrame comparisons.
 
 ```scala
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.Row
+import org.apache.spark.sql.functions._
 import com.github.mrpowers.spark.fast.tests.DatasetComparer
 
 class DatasetSpec extends FunSpec with SparkSessionTestWrapper with DatasetComparer {
 
   import spark.implicits._
 
-    it("aliases a DataFrame") {
+  it("aliases a DataFrame") {
 
-      val sourceDF = Seq(
-        ("jose"),
-        ("li"),
-        ("luisa")
-      ).toDF("name")
+    val sourceDF = Seq(
+      ("jose"),
+      ("li"),
+      ("luisa")
+    ).toDF("name")
 
-      val actualDF = sourceDF.select(col("name").alias("student"))
+    val actualDF = sourceDF.select(col("name").alias("student"))
 
-      val expectedDF = Seq(
-        ("jose"),
-        ("li"),
-        ("luisa")
-      ).toDF("student")
+    val expectedDF = Seq(
+      ("jose"),
+      ("li"),
+      ("luisa")
+    ).toDF("student")
 
-      assertSmallDatasetEquality(actualDF, expectedDF)
-
-    }
+    assertSmallDatasetEquality(actualDF, expectedDF)
 
   }
-
 }
 ```
 
