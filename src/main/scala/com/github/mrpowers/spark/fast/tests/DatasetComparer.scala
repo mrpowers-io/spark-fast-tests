@@ -16,6 +16,7 @@ object DatasetComparerLike {
   def naiveEquality[T](o1: T, o2: T): Boolean = {
     o1.equals(o2)
   }
+
 }
 
 trait DatasetComparer {
@@ -27,6 +28,24 @@ ${actualDS.schema}
 Expected Schema:
 ${expectedDS.schema}
 """
+  }
+
+  private def betterSchemaMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
+    "\n" + actualDS.schema
+      .zipAll(
+        expectedDS.schema,
+        "",
+        ""
+      )
+      .map {
+        case (sf1, sf2) =>
+          if (sf1.equals(sf2)) {
+            ufansi.Color.Blue(s"$sf1 | $sf2")
+          } else {
+            ufansi.Color.Red(s"$sf1 | $sf2")
+          }
+      }
+      .mkString("\n")
   }
 
   private def countMismatchMessage(actualCount: Long, expectedCount: Long): String = {
@@ -80,7 +99,7 @@ ${DataFramePrettyPrint.showString(
           ignoreColumnNames
         )) {
       throw DatasetSchemaMismatch(
-        schemaMismatchMessage(
+        betterSchemaMismatchMessage(
           actualDS,
           expectedDS
         )
@@ -123,7 +142,7 @@ ${DataFramePrettyPrint.showString(
   def assertLargeDatasetEquality[T: ClassTag](actualDS: Dataset[T], expectedDS: Dataset[T], equals: (T, T) => Boolean = naiveEquality _): Unit = {
     if (!actualDS.schema.equals(expectedDS.schema)) {
       throw DatasetSchemaMismatch(
-        schemaMismatchMessage(
+        betterSchemaMismatchMessage(
           actualDS,
           expectedDS
         )

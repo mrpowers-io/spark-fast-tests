@@ -1,10 +1,10 @@
 # spark-fast-tests
 
-A fast, test framework independent Apache Spark testing helper library with beautifully formatted error messages!
+A fast Apache Spark testing helper library with beautifully formatted error messages!  Works with scalatest and uTest.
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ab42211c18984740bee7f87c631a8f42)](https://www.codacy.com/app/MrPowers/spark-fast-tests?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MrPowers/spark-fast-tests&amp;utm_campaign=Badge_Grade)
 
-For example, the `assertSmallDatasetEquality` method can be used to compare two Datasets (or two DataFrames).
+The `assertSmallDatasetEquality` method can be used to compare two Datasets (or two DataFrames).
 
 ```scala
 val sourceDF = Seq(
@@ -47,8 +47,8 @@ The `DatasetComparer` has `assertSmallDatasetEquality` and `assertLargeDatasetEq
 
 If you only need to compare DataFrames, you can use `DataFrameComparer` with the associated `assertSmallDataFrameEquality` and `assertLargeDataFrameEquality` methods.  Under the hood, `DataFrameComparer` uses the `assertSmallDatasetEquality` and `assertLargeDatasetEquality`.
 
-*Note : comparing Datasets can be tricky since some column names might be given by spark when applying transformations. 
-Would this happen, use the `ignoreColumnNames` boolean to skip name verification.*
+*Note : comparing Datasets can be tricky since some column names might be given by Spark when applying transformations. 
+Use the `ignoreColumnNames` boolean to skip name verification.*
 
 ## Setup
 

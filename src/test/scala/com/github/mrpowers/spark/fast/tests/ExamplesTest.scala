@@ -37,6 +37,37 @@
 //
 //      }
 //
+//      "error when schemas don't match" - {
+//
+//        val sourceDF = spark.createDF(
+//          List(
+//            (1, "a"),
+//            (5, "b")
+//          ),
+//          List(
+//            ("number", IntegerType, true),
+//            ("letter", StringType, true)
+//          )
+//        )
+//
+//        val expectedDF = spark.createDF(
+//          List(
+//            (1, "a"),
+//            (5, "b")
+//          ),
+//          List(
+//            ("num", IntegerType, true),
+//            ("letter", StringType, true)
+//          )
+//        )
+//
+//        assertSmallDatasetEquality(
+//          sourceDF,
+//          expectedDF
+//        )
+//
+//      }
+//
 //    }
 //
 //  }
