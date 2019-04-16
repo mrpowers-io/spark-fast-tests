@@ -595,6 +595,59 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             0.01
           )
         }
+
+        "can ignore the nullable property" - {
+          val sourceDF = spark.createDF(
+            List(
+              (1.2),
+              (5.1)
+            ),
+            List(("number", DoubleType, false))
+          )
+
+          val expectedDF = spark.createDF(
+            List(
+              (1.2),
+              (5.1)
+            ),
+            List(("number", DoubleType, true))
+          )
+
+          assertApproximateDataFrameEquality(
+            sourceDF,
+            expectedDF,
+            0.01,
+            ignoreNullable = true
+          )
+        }
+
+        "can ignore the column names" - {
+          val sourceDF = spark.createDF(
+            List(
+              (1.2),
+              (5.1),
+              (null)
+            ),
+            List(("BLAHBLBH", DoubleType, true))
+          )
+
+          val expectedDF = spark.createDF(
+            List(
+              (1.2),
+              (5.1),
+              (null)
+            ),
+            List(("number", DoubleType, true))
+          )
+
+          assertApproximateDataFrameEquality(
+            sourceDF,
+            expectedDF,
+            0.01,
+            ignoreColumnNames = true
+          )
+        }
+
       }
 
       //      "works with FloatType columns" - {

@@ -50,6 +50,38 @@ object SchemaComparerTest extends TestSuite {
 
       }
 
+      "works for single column schemas" - {
+
+        val s1 = StructType(
+          Seq(
+            StructField(
+              "something",
+              StringType,
+              true
+            )
+          )
+        )
+
+        val s2 = StructType(
+          Seq(
+            StructField(
+              "something",
+              StringType,
+              false
+            )
+          )
+        )
+
+        assert(
+          SchemaComparer.equals(
+            s1,
+            s2,
+            true
+          ) == true
+        )
+
+      }
+
       "returns false if the schemas aren't equal" - {
 
         val s1 = StructType(

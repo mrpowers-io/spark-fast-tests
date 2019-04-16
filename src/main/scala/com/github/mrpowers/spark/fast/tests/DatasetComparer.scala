@@ -139,8 +139,19 @@ ${DataFramePrettyPrint.showString(
   /**
    * Raises an error unless `actualDS` and `expectedDS` are equal
    */
-  def assertLargeDatasetEquality[T: ClassTag](actualDS: Dataset[T], expectedDS: Dataset[T], equals: (T, T) => Boolean = naiveEquality _): Unit = {
-    if (!actualDS.schema.equals(expectedDS.schema)) {
+  def assertLargeDatasetEquality[T: ClassTag](
+    actualDS: Dataset[T],
+    expectedDS: Dataset[T],
+    equals: (T, T) => Boolean = naiveEquality _,
+    ignoreNullable: Boolean = false,
+    ignoreColumnNames: Boolean = false
+  ): Unit = {
+    if (!SchemaComparer.equals(
+          actualDS.schema,
+          expectedDS.schema,
+          ignoreNullable,
+          ignoreColumnNames
+        )) {
       throw DatasetSchemaMismatch(
         betterSchemaMismatchMessage(
           actualDS,
@@ -193,17 +204,20 @@ ${DataFramePrettyPrint.showString(
     }
   }
 
-  def assertApproximateDataFrameEquality(actualDF: DataFrame, expectedDF: DataFrame, precision: Double): Unit = {
+  def assertApproximateDataFrameEquality(actualDF: DataFrame, expectedDF: DataFrame, precision: Double, ignoreNullable: Boolean = false, ignoreColumnNames: Boolean = false): Unit = {
+    val e = (r1: Row, r2: Row) => {
+      r1.equals(r2) || RowComparer.areRowsEqual(
+        r1,
+        r2,
+        precision
+      )
+    }
     assertLargeDatasetEquality[Row](
       actualDF,
       expectedDF,
-      equals = (r1: Row, r2: Row) => {
-        r1.equals(r2) || RowComparer.areRowsEqual(
-          r1,
-          r2,
-          precision
-        )
-      }
+      equals = e,
+      ignoreNullable,
+      ignoreColumnNames
     )
   }
 
