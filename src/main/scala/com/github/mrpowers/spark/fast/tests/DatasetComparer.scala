@@ -144,8 +144,10 @@ ${DataFramePrettyPrint.showString(
     expectedDS: Dataset[T],
     equals: (T, T) => Boolean = naiveEquality _,
     ignoreNullable: Boolean = false,
-    ignoreColumnNames: Boolean = false
+    ignoreColumnNames: Boolean = false,
+    orderedComparison: Boolean = true
   ): Unit = {
+    // first check if the schemas are equal
     if (!SchemaComparer.equals(
           actualDS.schema,
           expectedDS.schema,
@@ -159,48 +161,64 @@ ${DataFramePrettyPrint.showString(
         )
       )
     }
-    try {
-      actualDS.rdd.cache
-      expectedDS.rdd.cache
+    // then check if the DataFrames have the same content
+    def throwIfDatasetsAreUnequal(ds1: Dataset[T], ds2: Dataset[T]) = {
+      try {
+        ds1.rdd.cache
+        ds2.rdd.cache
 
-      val actualCount   = actualDS.rdd.count
-      val expectedCount = expectedDS.rdd.count
-      if (actualCount != expectedCount) {
-        throw DatasetCountMismatch(
-          countMismatchMessage(
-            actualCount,
-            expectedCount
-          )
-        )
-      }
+        val actualCount   = ds1.rdd.count
+        val expectedCount = ds2.rdd.count
 
-      val expectedIndexValue: RDD[(Long, T)] =
-        RddHelpers.zipWithIndex(actualDS.rdd)
-      val resultIndexValue: RDD[(Long, T)] =
-        RddHelpers.zipWithIndex(expectedDS.rdd)
-      val unequalRDD = expectedIndexValue
-        .join(resultIndexValue)
-        .filter {
-          case (idx, (o1, o2)) =>
-            !equals(
-              o1,
-              o2
+        if (actualCount != expectedCount) {
+          throw DatasetCountMismatch(
+            countMismatchMessage(
+              actualCount,
+              expectedCount
             )
-        }
-      val maxUnequalRowsToShow = 10
-      if (!unequalRDD.isEmpty()) {
-        throw DatasetContentMismatch(
-          countMismatchMessage(
-            actualCount,
-            expectedCount
           )
-        )
-      }
-      unequalRDD.take(maxUnequalRowsToShow)
+        }
 
-    } finally {
-      actualDS.rdd.unpersist()
-      expectedDS.rdd.unpersist()
+        val expectedIndexValue: RDD[(Long, T)] =
+          RddHelpers.zipWithIndex(ds1.rdd)
+        val resultIndexValue: RDD[(Long, T)] =
+          RddHelpers.zipWithIndex(ds2.rdd)
+        val unequalRDD = expectedIndexValue
+          .join(resultIndexValue)
+          .filter {
+            case (idx, (o1, o2)) =>
+              !equals(
+                o1,
+                o2
+              )
+          }
+        val maxUnequalRowsToShow = 10
+        if (!unequalRDD.isEmpty()) {
+          throw DatasetContentMismatch(
+            countMismatchMessage(
+              actualCount,
+              expectedCount
+            )
+          )
+        }
+        unequalRDD.take(maxUnequalRowsToShow)
+
+      } finally {
+        ds1.rdd.unpersist()
+        ds2.rdd.unpersist()
+      }
+    }
+
+    if (orderedComparison) {
+      throwIfDatasetsAreUnequal(
+        actualDS,
+        expectedDS
+      )
+    } else {
+      throwIfDatasetsAreUnequal(
+        defaultSortDataset(actualDS),
+        defaultSortDataset(expectedDS)
+      )
     }
   }
 
