@@ -302,6 +302,155 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
 
     }
 
+    'assertLargeDatasetEquality - {
+      import spark.implicits._
+
+      "ignores the nullable flag when making DataFrame comparisons" - {
+        val sourceDF = spark.createDF(
+          List(
+            (1),
+            (5)
+          ),
+          List(("number", IntegerType, false))
+        )
+
+        val expectedDF = spark.createDF(
+          List(
+            (1),
+            (5)
+          ),
+          List(("number", IntegerType, true))
+        )
+
+        assertLargeDatasetEquality(
+          sourceDF,
+          expectedDF,
+          ignoreNullable = true
+        )
+      }
+
+      "can performed unordered DataFrame comparisons" - {
+        val sourceDF = spark.createDF(
+          List(
+            (1),
+            (5)
+          ),
+          List(("number", IntegerType, true))
+        )
+
+        val expectedDF = spark.createDF(
+          List(
+            (5),
+            (1)
+          ),
+          List(("number", IntegerType, true))
+        )
+
+        assertLargeDatasetEquality(
+          sourceDF,
+          expectedDF,
+          orderedComparison = false
+        )
+        assertSmallDatasetEquality(
+          sourceDF,
+          expectedDF,
+          orderedComparison = false
+        )
+      }
+
+      "throws an error for unordered Dataset comparisons that don't match" - {
+        val sourceDS = spark.createDataset[Person](
+          Seq(
+            Person(
+              "bob",
+              1
+            ),
+            Person(
+              "frank",
+              5
+            )
+          )
+        )
+
+        val expectedDS = spark.createDataset[Person](
+          Seq(
+            Person(
+              "frank",
+              5
+            ),
+            Person(
+              "bob",
+              1
+            ),
+            Person(
+              "sadie",
+              2
+            )
+          )
+        )
+
+        val e = intercept[DatasetCountMismatch] {
+          assertLargeDatasetEquality(
+            sourceDS,
+            expectedDS,
+            orderedComparison = false
+          )
+        }
+      }
+
+      "throws an error for unordered DataFrame comparisons that don't match" - {
+        val sourceDF = spark.createDF(
+          List(
+            (1),
+            (5)
+          ),
+          List(("number", IntegerType, true))
+        )
+        val expectedDF = spark.createDF(
+          List(
+            (5),
+            (1),
+            (10)
+          ),
+          List(("number", IntegerType, true))
+        )
+
+        val e = intercept[DatasetCountMismatch] {
+          assertLargeDatasetEquality(
+            sourceDF,
+            expectedDF,
+            orderedComparison = false
+          )
+        }
+      }
+
+      "throws an error DataFrames have a different number of rows" - {
+        val sourceDF = spark.createDF(
+          List(
+            (1),
+            (5)
+          ),
+          List(("number", IntegerType, true))
+        )
+        val expectedDF = spark.createDF(
+          List(
+            (1),
+            (5),
+            (10)
+          ),
+          List(("number", IntegerType, true))
+        )
+
+        val e = intercept[DatasetCountMismatch] {
+          assertLargeDatasetEquality(
+            sourceDF,
+            expectedDF
+          )
+        }
+      }
+
+    }
+
     'assertSmallDatasetEquality - {
       import spark.implicits._
 
