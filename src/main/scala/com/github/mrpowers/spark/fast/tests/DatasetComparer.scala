@@ -222,7 +222,14 @@ ${DataFramePrettyPrint.showString(
     }
   }
 
-  def assertApproximateDataFrameEquality(actualDF: DataFrame, expectedDF: DataFrame, precision: Double, ignoreNullable: Boolean = false, ignoreColumnNames: Boolean = false): Unit = {
+  def assertApproximateDataFrameEquality(
+    actualDF: DataFrame,
+    expectedDF: DataFrame,
+    precision: Double,
+    ignoreNullable: Boolean = false,
+    ignoreColumnNames: Boolean = false,
+    orderedComparison: Boolean = true
+  ): Unit = {
     val e = (r1: Row, r2: Row) => {
       r1.equals(r2) || RowComparer.areRowsEqual(
         r1,
@@ -235,7 +242,8 @@ ${DataFramePrettyPrint.showString(
       expectedDF,
       equals = e,
       ignoreNullable,
-      ignoreColumnNames
+      ignoreColumnNames,
+      orderedComparison
     )
   }
 
