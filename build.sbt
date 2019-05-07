@@ -10,11 +10,11 @@ spDescription := "Test your code quickly"
 version := "0.19.1"
 crossScalaVersions := Seq("2.11.12", "2.12.7")
 scalaVersion := "2.11.12"
-sparkVersion := "2.4.0"
+sparkVersion := "2.4.2"
 
 spAppendScalaVersion := true
 
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.2" % "provided"
 
 libraryDependencies += "com.lihaoyi" %% "utest" % "0.6.3" % "test"
 testFrameworks += new TestFramework("com.github.mrpowers.spark.fast.tests.CustomFramework")
