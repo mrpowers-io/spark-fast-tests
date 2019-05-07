@@ -7,7 +7,7 @@ spName := "MrPowers/spark-fast-tests"
 spShortDescription := "Fast tests with Spark"
 spDescription := "Test your code quickly"
 
-version := "0.19.1"
+version := "0.19.2"
 crossScalaVersions := Seq("2.11.12", "2.12.7")
 scalaVersion := "2.11.12"
 sparkVersion := "2.4.2"
