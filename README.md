@@ -108,11 +108,20 @@ import org.apache.spark.sql.SparkSession
 trait SparkSessionTestWrapper {
 
   lazy val spark: SparkSession = {
-    SparkSession.builder().master("local").appName("spark session").getOrCreate()
+    SparkSession
+      .builder()
+      .master("local")
+      .appName("spark session")
+      .config("spark.sql.shuffle.partitions", "1")
+      .getOrCreate()
   }
 
 }
 ```
+
+It's typically best set the number of shuffle partitions to one in your test suite.  This configuration can make your tests run up to 70% faster.  You can remove this configuration option or adjust it if you're working with big DataFrames in your test suite.
+
+Make sure to only use the `SparkSessionTestWrapper` trait in your test suite.  You don't want to use test specific configuration (like one shuffle partition) when running production code.
 
 The `DatasetComparer` trait defines the `assertSmallDatasetEquality` method.  Extend your spec file with the `SparkSessionTestWrapper` trait to create DataFrames and the `DatasetComparer` trait to make DataFrame comparisons.
 
