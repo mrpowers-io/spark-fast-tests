@@ -275,19 +275,19 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
 
       "doesn't throw an error when two FloatType columns are equal" - {
         val sourceData = Seq(
-          Row(1.3.toFloat, 1.3.toFloat),
-          Row(5.01.toFloat, 5.0101.toFloat)
+          Row(1.3f, 1.3f),
+          Row(5.01f, 5.0101f)
         )
         val sourceSchema = List(
-          StructField("d1", FloatType, true),
-          StructField("d2", FloatType, true)
+          StructField("num1", FloatType, true),
+          StructField("num2", FloatType, true)
         )
         val df = spark.createDataFrame(
           spark.sparkContext.parallelize(sourceData),
           StructType(sourceSchema)
         )
-        val p: Float = 0.01.toFloat
-        assertFloatTypeColumnEquality(df, "d1", "d2", p)
+        val p: Float = 0.01f
+        assertFloatTypeColumnEquality(df, "num1", "num2", p)
       }
 
     }
