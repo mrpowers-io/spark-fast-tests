@@ -24,48 +24,21 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
       "provides a good README example" - {
 
         val sourceDS = Seq(
-          Person(
-            "juan",
-            5
-          ),
-          Person(
-            "bob",
-            1
-          ),
-          Person(
-            "li",
-            49
-          ),
-          Person(
-            "alice",
-            5
-          )
+          Person("juan", 5),
+          Person("bob", 1),
+          Person("li", 49),
+          Person("alice", 5)
         ).toDS
 
         val expectedDS = Seq(
-          Person(
-            "juan",
-            5
-          ),
-          Person(
-            "frank",
-            10
-          ),
-          Person(
-            "li",
-            49
-          ),
-          Person(
-            "lucy",
-            5
-          )
+          Person("juan", 5),
+          Person("frank", 10),
+          Person("li", 49),
+          Person("lucy", 5)
         ).toDS
 
         val e = intercept[DatasetContentMismatch] {
-          assertSmallDatasetEquality(
-            sourceDS,
-            expectedDS
-          )
+          assertSmallDatasetEquality(sourceDS, expectedDS)
         }
 
       }
@@ -100,38 +73,20 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
       "does nothing if the Datasets have the same schemas and content" - {
         val sourceDS = spark.createDataset[Person](
           Seq(
-            Person(
-              "Alice",
-              12
-            ),
-            Person(
-              "Bob",
-              17
-            )
+            Person("Alice", 12),
+            Person("Bob", 17)
           )
         )
 
         val expectedDS = spark.createDataset[Person](
           Seq(
-            Person(
-              "Alice",
-              12
-            ),
-            Person(
-              "Bob",
-              17
-            )
+            Person("Alice", 12),
+            Person("Bob", 17)
           )
         )
 
-        assertSmallDatasetEquality(
-          sourceDS,
-          expectedDS
-        )
-        assertLargeDatasetEquality(
-          sourceDS,
-          expectedDS
-        )
+        assertSmallDatasetEquality(sourceDS, expectedDS)
+        assertLargeDatasetEquality(sourceDS, expectedDS)
       }
 
       "throws an error if the DataFrames have different schemas" - {
@@ -155,16 +110,10 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
         )
 
         val e = intercept[DatasetSchemaMismatch] {
-          assertLargeDatasetEquality(
-            sourceDF,
-            expectedDF
-          )
+          assertLargeDatasetEquality(sourceDF, expectedDF)
         }
         val e2 = intercept[DatasetSchemaMismatch] {
-          assertSmallDatasetEquality(
-            sourceDF,
-            expectedDF
-          )
+          assertSmallDatasetEquality(sourceDF, expectedDF)
         }
       }
 
@@ -180,57 +129,33 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
         ).toDF("number")
 
         val e = intercept[DatasetContentMismatch] {
-          assertLargeDatasetEquality(
-            sourceDF,
-            expectedDF
-          )
+          assertLargeDatasetEquality(sourceDF, expectedDF)
         }
         val e2 = intercept[DatasetContentMismatch] {
-          assertSmallDatasetEquality(
-            sourceDF,
-            expectedDF
-          )
+          assertSmallDatasetEquality(sourceDF, expectedDF)
         }
       }
 
       "throws an error if the Dataset content is different" - {
         val sourceDS = spark.createDataset[Person](
           Seq(
-            Person(
-              "Alice",
-              12
-            ),
-            Person(
-              "Bob",
-              17
-            )
+            Person("Alice", 12),
+            Person("Bob", 17)
           )
         )
 
         val expectedDS = spark.createDataset[Person](
           Seq(
-            Person(
-              "Frank",
-              10
-            ),
-            Person(
-              "Lucy",
-              5
-            )
+            Person("Frank", 10),
+            Person("Lucy", 5)
           )
         )
 
         val e = intercept[DatasetContentMismatch] {
-          assertLargeDatasetEquality(
-            sourceDS,
-            expectedDS
-          )
+          assertLargeDatasetEquality(sourceDS, expectedDS)
         }
         val e2 = intercept[DatasetContentMismatch] {
-          assertLargeDatasetEquality(
-            sourceDS,
-            expectedDS
-          )
+          assertLargeDatasetEquality(sourceDS, expectedDS)
         }
       }
 
@@ -259,44 +184,21 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             )
           )
         )
-        assertLargeDatasetEquality(
-          sourceDS,
-          expectedDS,
-          Person.caseInsensitivePersonEquals
-        )
+        assertLargeDatasetEquality(sourceDS, expectedDS, Person.caseInsensitivePersonEquals)
       }
 
       "fails if custom comparator for returns false" - {
         val sourceDS = spark.createDataset[Person](
-          Seq(
-            Person(
-              "bob",
-              10
-            ),
-            Person(
-              "alice",
-              5
-            )
-          )
+          Seq(Person("bob", 10), Person("alice", 5))
         )
         val expectedDS = spark.createDataset[Person](
           Seq(
-            Person(
-              "Bob",
-              1
-            ),
-            Person(
-              "Alice",
-              5
-            )
+            Person("Bob", 1),
+            Person("Alice", 5)
           )
         )
         val e = intercept[DatasetContentMismatch] {
-          assertLargeDatasetEquality(
-            sourceDS,
-            expectedDS,
-            Person.caseInsensitivePersonEquals
-          )
+          assertLargeDatasetEquality(sourceDS, expectedDS, Person.caseInsensitivePersonEquals)
         }
       }
 
@@ -322,11 +224,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
           List(("number", IntegerType, true))
         )
 
-        assertLargeDatasetEquality(
-          sourceDF,
-          expectedDF,
-          ignoreNullable = true
-        )
+        assertLargeDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
       }
 
       "can performed unordered DataFrame comparisons" - {
@@ -346,55 +244,28 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
           List(("number", IntegerType, true))
         )
 
-        assertLargeDatasetEquality(
-          sourceDF,
-          expectedDF,
-          orderedComparison = false
-        )
-        assertSmallDatasetEquality(
-          sourceDF,
-          expectedDF,
-          orderedComparison = false
-        )
+        assertLargeDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
+        assertSmallDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
       }
 
       "throws an error for unordered Dataset comparisons that don't match" - {
         val sourceDS = spark.createDataset[Person](
           Seq(
-            Person(
-              "bob",
-              1
-            ),
-            Person(
-              "frank",
-              5
-            )
+            Person("bob", 1),
+            Person("frank", 5)
           )
         )
 
         val expectedDS = spark.createDataset[Person](
           Seq(
-            Person(
-              "frank",
-              5
-            ),
-            Person(
-              "bob",
-              1
-            ),
-            Person(
-              "sadie",
-              2
-            )
+            Person("frank", 5),
+            Person("bob", 1),
+            Person("sadie", 2)
           )
         )
 
         val e = intercept[DatasetCountMismatch] {
-          assertLargeDatasetEquality(
-            sourceDS,
-            expectedDS,
-            orderedComparison = false
-          )
+          assertLargeDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
         }
       }
 
@@ -510,78 +381,39 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
       "can performed unordered Dataset comparisons" - {
         val sourceDS = spark.createDataset[Person](
           Seq(
-            Person(
-              "bob",
-              1
-            ),
-            Person(
-              "alice",
-              5
-            )
+            Person("bob", 1),
+            Person("alice", 5)
           )
         )
         val expectedDS = spark.createDataset[Person](
           Seq(
-            Person(
-              "alice",
-              5
-            ),
-            Person(
-              "bob",
-              1
-            )
+            Person("alice", 5),
+            Person("bob", 1)
           )
         )
 
-        assertLargeDatasetEquality(
-          sourceDS,
-          expectedDS,
-          orderedComparison = false
-        )
-        assertSmallDatasetEquality(
-          sourceDS,
-          expectedDS,
-          orderedComparison = false
-        )
+        assertLargeDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
+        assertSmallDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
       }
 
       "throws an error for unordered Dataset comparisons that don't match" - {
         val sourceDS = spark.createDataset[Person](
           Seq(
-            Person(
-              "bob",
-              1
-            ),
-            Person(
-              "frank",
-              5
-            )
+            Person("bob", 1),
+            Person("frank", 5)
           )
         )
 
         val expectedDS = spark.createDataset[Person](
           Seq(
-            Person(
-              "frank",
-              5
-            ),
-            Person(
-              "bob",
-              1
-            ),
-            Person(
-              "sadie",
-              2
-            )
+            Person("frank", 5),
+            Person("bob", 1),
+            Person("sadie", 2)
           )
         )
 
         val e = intercept[DatasetContentMismatch] {
-          assertSmallDatasetEquality(
-            sourceDS,
-            expectedDS,
-            orderedComparison = false
-          )
+          assertSmallDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
         }
       }
 
@@ -603,11 +435,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
         )
 
         val e = intercept[DatasetContentMismatch] {
-          assertSmallDatasetEquality(
-            sourceDF,
-            expectedDF,
-            orderedComparison = false
-          )
+          assertSmallDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
         }
       }
 
@@ -629,10 +457,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
         )
 
         val e = intercept[DatasetContentMismatch] {
-          assertSmallDatasetEquality(
-            sourceDF,
-            expectedDF
-          )
+          assertSmallDatasetEquality(sourceDF, expectedDF)
         }
         assert(e.smth.count(_ == '\n') == 3)
       }
@@ -668,10 +493,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
           )
         )
 
-        assertSmallDatasetEquality(
-          actualDF,
-          expectedDF
-        )
+        assertSmallDatasetEquality(actualDF, expectedDF)
       }
 
     }
@@ -697,11 +519,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
           List(("number", DoubleType, true))
         )
 
-        assertApproximateDataFrameEquality(
-          sourceDF,
-          expectedDF,
-          0.01
-        )
+        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
       }
 
       "throws an error if the rows are different" - {
@@ -722,11 +540,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
         )
 
         val e = intercept[DatasetContentMismatch] {
-          assertApproximateDataFrameEquality(
-            sourceDF,
-            expectedDF,
-            0.01
-          )
+          assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
         }
       }
 
@@ -749,11 +563,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
         )
 
         val e = intercept[DatasetCountMismatch] {
-          assertApproximateDataFrameEquality(
-            sourceDF,
-            expectedDF,
-            0.01
-          )
+          assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
         }
 
         "can ignore the nullable property" - {
@@ -773,12 +583,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             List(("number", DoubleType, true))
           )
 
-          assertApproximateDataFrameEquality(
-            sourceDF,
-            expectedDF,
-            0.01,
-            ignoreNullable = true
-          )
+          assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, ignoreNullable = true)
         }
 
         "can ignore the column names" - {

@@ -13,39 +13,20 @@ object SchemaComparerTest extends TestSuite {
 
         val s1 = StructType(
           Seq(
-            StructField(
-              "something",
-              StringType,
-              true
-            ),
-            StructField(
-              "mood",
-              StringType,
-              true
-            )
+            StructField("something", StringType, true),
+            StructField("mood", StringType, true)
           )
         )
 
         val s2 = StructType(
           Seq(
-            StructField(
-              "something",
-              StringType,
-              true
-            ),
-            StructField(
-              "mood",
-              StringType,
-              true
-            )
+            StructField("something", StringType, true),
+            StructField("mood", StringType, true)
           )
         )
 
         assert(
-          SchemaComparer.equals(
-            s1,
-            s2
-          ) == true
+          SchemaComparer.equals(s1, s2) == true
         )
 
       }
@@ -54,30 +35,18 @@ object SchemaComparerTest extends TestSuite {
 
         val s1 = StructType(
           Seq(
-            StructField(
-              "something",
-              StringType,
-              true
-            )
+            StructField("something", StringType, true)
           )
         )
 
         val s2 = StructType(
           Seq(
-            StructField(
-              "something",
-              StringType,
-              false
-            )
+            StructField("something", StringType, false)
           )
         )
 
         assert(
-          SchemaComparer.equals(
-            s1,
-            s2,
-            true
-          ) == true
+          SchemaComparer.equals(s1, s2, true) == true
         )
 
       }
@@ -86,34 +55,19 @@ object SchemaComparerTest extends TestSuite {
 
         val s1 = StructType(
           Seq(
-            StructField(
-              "something",
-              StringType,
-              true
-            )
+            StructField("something", StringType, true)
           )
         )
 
         val s2 = StructType(
           Seq(
-            StructField(
-              "something",
-              StringType,
-              true
-            ),
-            StructField(
-              "mood",
-              StringType,
-              true
-            )
+            StructField("something", StringType, true),
+            StructField("mood", StringType, true)
           )
         )
 
         assert(
-          SchemaComparer.equals(
-            s1,
-            s2
-          ) == false
+          SchemaComparer.equals(s1, s2) == false
         )
 
       }
@@ -122,40 +76,20 @@ object SchemaComparerTest extends TestSuite {
 
         val s1 = StructType(
           Seq(
-            StructField(
-              "something",
-              StringType,
-              true
-            ),
-            StructField(
-              "mood",
-              StringType,
-              true
-            )
+            StructField("something", StringType, true),
+            StructField("mood", StringType, true)
           )
         )
 
         val s2 = StructType(
           Seq(
-            StructField(
-              "something",
-              StringType,
-              false
-            ),
-            StructField(
-              "mood",
-              StringType,
-              true
-            )
+            StructField("something", StringType, false),
+            StructField("mood", StringType, true)
           )
         )
 
         assert(
-          SchemaComparer.equals(
-            s1,
-            s2,
-            ignoreNullable = true
-          ) == true
+          SchemaComparer.equals(s1, s2, ignoreNullable = true) == true
         )
 
       }
@@ -164,40 +98,20 @@ object SchemaComparerTest extends TestSuite {
 
         val s1 = StructType(
           Seq(
-            StructField(
-              "these",
-              StringType,
-              true
-            ),
-            StructField(
-              "are",
-              StringType,
-              true
-            )
+            StructField("these", StringType, true),
+            StructField("are", StringType, true)
           )
         )
 
         val s2 = StructType(
           Seq(
-            StructField(
-              "very",
-              StringType,
-              true
-            ),
-            StructField(
-              "different",
-              StringType,
-              true
-            )
+            StructField("very", StringType, true),
+            StructField("different", StringType, true)
           )
         )
 
         assert(
-          SchemaComparer.equals(
-            s1,
-            s2,
-            ignoreColumnNames = true
-          ) == true
+          SchemaComparer.equals(s1, s2, ignoreColumnNames = true) == true
         )
 
       }

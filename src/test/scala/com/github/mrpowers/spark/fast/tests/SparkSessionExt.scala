@@ -19,11 +19,7 @@ object SparkSessionExt {
       fields.map {
         case x: StructField => x.asInstanceOf[StructField]
         case (name: String, dataType: DataType, nullable: Boolean) =>
-          StructField(
-            name,
-            dataType,
-            nullable
-          )
+          StructField(name, dataType, nullable)
       }
     }
 
