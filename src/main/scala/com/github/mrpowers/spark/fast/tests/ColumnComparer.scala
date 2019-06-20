@@ -25,16 +25,14 @@ trait ColumnComparer {
     assertColumnEquality(df, colName1, colName2)
   }
 
-  private def approximatelyEqual(x: Double, y: Double, precision: Double): Boolean = {
-    if ((x - y).abs < precision) true else false
+  private def approximatelyEqualDouble(x: Double, y: Double, precision: Double): Boolean = {
+    (x - y).abs < precision
   }
 
   private def areDoubleArraysEqual(x: Array[Double], y: Array[Double], precision: Double): Boolean = {
-    val zipped: Array[(Double, Double)] = x.zip(y)
-    val mapped = zipped.map { t =>
-      !approximatelyEqual(t._1, t._2, precision)
+    x.zip(y).forall { t =>
+      approximatelyEqualDouble(t._1, t._2, precision)
     }
-    mapped.contains(false)
   }
 
   def assertDoubleTypeColumnEquality(df: DataFrame, colName1: String, colName2: String, precision: Double = 0.01): Unit = {
@@ -51,12 +49,14 @@ trait ColumnComparer {
     }
   }
 
+  private def approximatelyEqualFloat(x: Float, y: Float, precision: Float): Boolean = {
+    (x - y).abs < precision
+  }
+
   private def areFloatArraysEqual(x: Array[Float], y: Array[Float], precision: Float): Boolean = {
-    val zipped: Array[(Float, Float)] = x.zip(y)
-    val mapped = zipped.map { t =>
-      !((t._1 - t._2).abs < precision)
+    x.zip(y).forall { t=>
+      approximatelyEqualFloat(t._1, t._2, precision)
     }
-    mapped.contains(false)
   }
 
   def assertFloatTypeColumnEquality(df: DataFrame, colName1: String, colName2: String, precision: Float): Unit = {

@@ -227,7 +227,9 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           StructType(sourceSchema)
         )
 
-        assertDoubleTypeColumnEquality(df, "d1", "d2", 0.01)
+        val e = intercept[ColumnMismatch] {
+          assertDoubleTypeColumnEquality(df, "d1", "d2", 0.01)
+        }
 
       }
 
