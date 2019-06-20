@@ -267,23 +267,6 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
         }
       }
 
-//      "works when BinaryType columns are equal" - {
-//        val sourceData = Seq(
-//          Row(Array(10.toByte, 15.toByte), Array(10.toByte, 15.toByte)),
-//          Row(Array(4.toByte, 33.toByte), Array(4.toByte, 33.toByte)),
-//          Row(null, null)
-//        )
-//        val sourceSchema = List(
-//          StructField("b1", BinaryType, true),
-//          StructField("b2", BinaryType, true)
-//        )
-//        val sourceDF = spark.createDataFrame(
-//          spark.sparkContext.parallelize(sourceData),
-//          StructType(sourceSchema)
-//        )
-//        assertColumnEquality(sourceDF, "b1", "b2")
-//      }
-
     }
 
     'assertDoubleTypeColumnEquality - {
@@ -291,7 +274,8 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
       "doesn't throw an error when two DoubleType columns are equal" - {
         val sourceData = Seq(
           Row(1.3, 1.3),
-          Row(5.01, 5.0101)
+          Row(5.01, 5.0101),
+          Row(null, null)
         )
         val sourceSchema = List(
           StructField("d1", DoubleType, true),
@@ -307,7 +291,9 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
       "throws an error when two DoubleType columns are not equal" - {
         val sourceData = Seq(
           Row(1.3, 1.8),
-          Row(5.01, 5.0101)
+          Row(5.01, 5.0101),
+          Row(null, 10.0),
+          Row(3.4, null)
         )
         val sourceSchema = List(
           StructField("d1", DoubleType, true),
