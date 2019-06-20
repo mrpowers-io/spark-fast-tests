@@ -39,8 +39,8 @@ trait ColumnComparer {
     val elements = df
       .select(colName1, colName2)
       .collect()
-    val colName1Elements: Array[Double] = elements.map(_(0).toString().toDouble)
-    val colName2Elements: Array[Double] = elements.map(_(1).toString().toDouble)
+    val colName1Elements: Array[Double] = elements.map(_(0).toString.toDouble)
+    val colName2Elements: Array[Double] = elements.map(_(1).toString.toDouble)
     if (!areDoubleArraysEqual(colName1Elements, colName2Elements, precision)) {
       val mismatchMessage = "\n" + ArrayPrettyPrint.showTwoColumnString(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements)
@@ -63,8 +63,8 @@ trait ColumnComparer {
     val elements = df
       .select(colName1, colName2)
       .collect()
-    val colName1Elements: Array[Float] = elements.map(_(0).toString().toFloat)
-    val colName2Elements: Array[Float] = elements.map(_(1).toString().toFloat)
+    val colName1Elements: Array[Float] = elements.map(_(0).toString.toFloat)
+    val colName2Elements: Array[Float] = elements.map(_(1).toString.toFloat)
     if (!areFloatArraysEqual(colName1Elements, colName2Elements, precision)) {
       val mismatchMessage = "\n" + ArrayPrettyPrint.showTwoColumnString(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements)
