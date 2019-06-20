@@ -231,6 +231,59 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
         }
       }
 
+      "works when ByteType columns are equal" - {
+        val sourceData = Seq(
+          Row(10.toByte, 10.toByte),
+          Row(33.toByte, 33.toByte),
+          Row(null, null)
+        )
+        val sourceSchema = List(
+          StructField("b1", ByteType, true),
+          StructField("b2", ByteType, true)
+        )
+        val sourceDF = spark.createDataFrame(
+          spark.sparkContext.parallelize(sourceData),
+          StructType(sourceSchema)
+        )
+        assertColumnEquality(sourceDF, "b1", "b2")
+      }
+
+      "throws an error when ByteType columns are not equal" - {
+        val sourceData = Seq(
+          Row(8.toByte, 10.toByte),
+          Row(33.toByte, 33.toByte),
+          Row(null, null)
+        )
+        val sourceSchema = List(
+          StructField("b1", ByteType, true),
+          StructField("b2", ByteType, true)
+        )
+        val sourceDF = spark.createDataFrame(
+          spark.sparkContext.parallelize(sourceData),
+          StructType(sourceSchema)
+        )
+        val e = intercept[ColumnMismatch] {
+          assertColumnEquality(sourceDF, "b1", "b2")
+        }
+      }
+
+//      "works when BinaryType columns are equal" - {
+//        val sourceData = Seq(
+//          Row(Array(10.toByte, 15.toByte), Array(10.toByte, 15.toByte)),
+//          Row(Array(4.toByte, 33.toByte), Array(4.toByte, 33.toByte)),
+//          Row(null, null)
+//        )
+//        val sourceSchema = List(
+//          StructField("b1", BinaryType, true),
+//          StructField("b2", BinaryType, true)
+//        )
+//        val sourceDF = spark.createDataFrame(
+//          spark.sparkContext.parallelize(sourceData),
+//          StructType(sourceSchema)
+//        )
+//        assertColumnEquality(sourceDF, "b1", "b2")
+//      }
+
     }
 
     'assertDoubleTypeColumnEquality - {
