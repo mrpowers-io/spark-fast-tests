@@ -800,12 +800,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             List(("number", DoubleType, true))
           )
 
-          assertApproximateDataFrameEquality(
-            sourceDF,
-            expectedDF,
-            0.01,
-            ignoreColumnNames = true
-          )
+          assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, ignoreColumnNames = true)
         }
 
       }

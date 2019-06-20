@@ -135,22 +135,8 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
         )
 
         val sourceSchema = List(
-          StructField(
-            "l1",
-            ArrayType(
-              StringType,
-              true
-            ),
-            true
-          ),
-          StructField(
-            "l2",
-            ArrayType(
-              StringType,
-              true
-            ),
-            true
-          )
+          StructField("l1", ArrayType(StringType, true), true),
+          StructField("l2", ArrayType(StringType, true), true)
         )
 
         val sourceDF = spark.createDataFrame(
@@ -158,49 +144,19 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           StructType(sourceSchema)
         )
 
-        assertColumnEquality(
-          sourceDF,
-          "l1",
-          "l2"
-        )
+        assertColumnEquality(sourceDF, "l1", "l2")
       }
 
       "works for computed ArrayType columns" - {
         val sourceData = Seq(
-          Row(
-            "i like blue and red",
-            Array(
-              "blue",
-              "red"
-            )
-          ),
-          Row(
-            "you pink and blue",
-            Array(
-              "blue",
-              "pink"
-            )
-          ),
-          Row(
-            "i like fun",
-            Array("")
-          )
+          Row("i like blue and red", Array("blue", "red")),
+          Row("you pink and blue", Array("blue", "pink")),
+          Row("i like fun", Array(""))
         )
 
         val sourceSchema = List(
-          StructField(
-            "words",
-            StringType,
-            true
-          ),
-          StructField(
-            "expected_colors",
-            ArrayType(
-              StringType,
-              true
-            ),
-            true
-          )
+          StructField("words", StringType, true),
+          StructField("expected_colors", ArrayType(StringType, true), true)
         )
 
         val sourceDF = spark.createDataFrame(
@@ -213,22 +169,10 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           split(
             concat_ws(
               ",",
-              when(
-                col("words").contains("blue"),
-                "blue"
-              ),
-              when(
-                col("words").contains("red"),
-                "red"
-              ),
-              when(
-                col("words").contains("pink"),
-                "pink"
-              ),
-              when(
-                col("words").contains("cyan"),
-                "cyan"
-              )
+              when(col("words").contains("blue"), "blue"),
+              when(col("words").contains("red"), "red"),
+              when(col("words").contains("pink"), "pink"),
+              when(col("words").contains("cyan"), "cyan")
             ),
             ","
           )
@@ -248,27 +192,13 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
       "doesn't throw an error when two DoubleType columns are equal" - {
 
         val sourceData = Seq(
-          Row(
-            1.3,
-            1.3
-          ),
-          Row(
-            5.01,
-            5.0101
-          )
+          Row(1.3, 1.3),
+          Row(5.01, 5.0101)
         )
 
         val sourceSchema = List(
-          StructField(
-            "d1",
-            DoubleType,
-            true
-          ),
-          StructField(
-            "d2",
-            DoubleType,
-            true
-          )
+          StructField("d1", DoubleType, true),
+          StructField("d2", DoubleType, true)
         )
 
         val df = spark.createDataFrame(
@@ -276,39 +206,20 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           StructType(sourceSchema)
         )
 
-        assertDoubleTypeColumnEquality(
-          df,
-          "d1",
-          "d2",
-          0.01
-        )
+        assertDoubleTypeColumnEquality(df, "d1", "d2", 0.01)
 
       }
 
       "throws an error when two DoubleType columns are equal" - {
 
         val sourceData = Seq(
-          Row(
-            1.3,
-            1.8
-          ),
-          Row(
-            5.01,
-            5.0101
-          )
+          Row(1.3, 1.8),
+          Row(5.01, 5.0101)
         )
 
         val sourceSchema = List(
-          StructField(
-            "d1",
-            DoubleType,
-            true
-          ),
-          StructField(
-            "d2",
-            DoubleType,
-            true
-          )
+          StructField("d1", DoubleType, true),
+          StructField("d2", DoubleType, true)
         )
 
         val df = spark.createDataFrame(
@@ -316,12 +227,7 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           StructType(sourceSchema)
         )
 
-        assertDoubleTypeColumnEquality(
-          df,
-          "d1",
-          "d2",
-          0.01
-        )
+        assertDoubleTypeColumnEquality(df, "d1", "d2", 0.01)
 
       }
 
