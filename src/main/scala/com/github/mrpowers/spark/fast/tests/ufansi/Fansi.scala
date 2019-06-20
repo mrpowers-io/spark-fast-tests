@@ -446,11 +446,11 @@ object Str {
                         else {
                           currentColor = {
                             (currentColor & ~category.mask) |
-                            ((273L + category.trueIndex(
-                              r,
-                              g,
-                              b
-                            )) << category.offset)
+                              ((273L + category.trueIndex(
+                                r,
+                                g,
+                                b
+                              )) << category.offset)
                           }
                         }
                       }
@@ -566,7 +566,7 @@ object ErrorMode {
 
       throw new IllegalArgumentException(
         s"Unknown ansi-escape$detail at index $sourceIndex " +
-        "inside string cannot be parsed into an fansi.Str"
+          "inside string cannot be parsed into an fansi.Str"
       )
     }
   }

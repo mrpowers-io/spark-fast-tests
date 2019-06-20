@@ -85,54 +85,57 @@ object ArrayPrettyPrint {
     // column names
     val h: Seq[(String, Int)] = rows.head.zipWithIndex
     h.map {
-      case (cell, i) =>
-        if (truncate > 0) {
-          StringUtils.leftPad(
-            cell,
-            colWidths(i)
-          )
-        } else {
-          StringUtils.rightPad(
-            cell,
-            colWidths(i)
-          )
-        }
-    }.addString(
-      sb,
-      "|",
-      "|",
-      "|\n"
-    )
+        case (cell, i) =>
+          if (truncate > 0) {
+            StringUtils.leftPad(
+              cell,
+              colWidths(i)
+            )
+          } else {
+            StringUtils.rightPad(
+              cell,
+              colWidths(i)
+            )
+          }
+      }
+      .addString(
+        sb,
+        "|",
+        "|",
+        "|\n"
+      )
 
     sb.append(sep)
 
     // data
     rows.tail.map { row =>
       val color = if (row(0) == row(1)) "blue" else "red"
-      row.zipWithIndex.map {
-        case (cell, i) =>
-          val r = if (truncate > 0) {
-            StringUtils.leftPad(
-              cell.toString,
-              colWidths(i)
-            )
-          } else {
-            StringUtils.rightPad(
-              cell.toString,
-              colWidths(i)
-            )
-          }
-          if (color == "blue") {
-            ufansi.Color.Blue(r)
-          } else {
-            ufansi.Color.Red(r)
-          }
-      }.addString(
-        sb,
-        "|",
-        "|",
-        "|\n"
-      )
+      row.zipWithIndex
+        .map {
+          case (cell, i) =>
+            val r = if (truncate > 0) {
+              StringUtils.leftPad(
+                cell.toString,
+                colWidths(i)
+              )
+            } else {
+              StringUtils.rightPad(
+                cell.toString,
+                colWidths(i)
+              )
+            }
+            if (color == "blue") {
+              ufansi.Color.Blue(r)
+            } else {
+              ufansi.Color.Red(r)
+            }
+        }
+        .addString(
+          sb,
+          "|",
+          "|",
+          "|\n"
+        )
     }
 
     sb.append(sep)

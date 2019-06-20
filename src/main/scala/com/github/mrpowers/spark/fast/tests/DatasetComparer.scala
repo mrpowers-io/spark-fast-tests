@@ -91,7 +91,11 @@ ${DataFramePrettyPrint.showString(
   /**
    * Raises an error unless `actualDS` and `expectedDS` are equal
    */
-  def assertSmallDatasetEquality[T](actualDS: Dataset[T], expectedDS: Dataset[T], ignoreNullable: Boolean = false, ignoreColumnNames: Boolean = false, orderedComparison: Boolean = true): Unit = {
+  def assertSmallDatasetEquality[T](actualDS: Dataset[T],
+                                    expectedDS: Dataset[T],
+                                    ignoreNullable: Boolean = false,
+                                    ignoreColumnNames: Boolean = false,
+                                    orderedComparison: Boolean = true): Unit = {
     if (!SchemaComparer.equals(
           actualDS.schema,
           expectedDS.schema,
@@ -139,14 +143,12 @@ ${DataFramePrettyPrint.showString(
   /**
    * Raises an error unless `actualDS` and `expectedDS` are equal
    */
-  def assertLargeDatasetEquality[T: ClassTag](
-    actualDS: Dataset[T],
-    expectedDS: Dataset[T],
-    equals: (T, T) => Boolean = naiveEquality _,
-    ignoreNullable: Boolean = false,
-    ignoreColumnNames: Boolean = false,
-    orderedComparison: Boolean = true
-  ): Unit = {
+  def assertLargeDatasetEquality[T: ClassTag](actualDS: Dataset[T],
+                                              expectedDS: Dataset[T],
+                                              equals: (T, T) => Boolean = naiveEquality _,
+                                              ignoreNullable: Boolean = false,
+                                              ignoreColumnNames: Boolean = false,
+                                              orderedComparison: Boolean = true): Unit = {
     // first check if the schemas are equal
     if (!SchemaComparer.equals(
           actualDS.schema,
@@ -222,14 +224,12 @@ ${DataFramePrettyPrint.showString(
     }
   }
 
-  def assertApproximateDataFrameEquality(
-    actualDF: DataFrame,
-    expectedDF: DataFrame,
-    precision: Double,
-    ignoreNullable: Boolean = false,
-    ignoreColumnNames: Boolean = false,
-    orderedComparison: Boolean = true
-  ): Unit = {
+  def assertApproximateDataFrameEquality(actualDF: DataFrame,
+                                         expectedDF: DataFrame,
+                                         precision: Double,
+                                         ignoreNullable: Boolean = false,
+                                         ignoreColumnNames: Boolean = false,
+                                         orderedComparison: Boolean = true): Unit = {
     val e = (r1: Row, r2: Row) => {
       r1.equals(r2) || RowComparer.areRowsEqual(
         r1,

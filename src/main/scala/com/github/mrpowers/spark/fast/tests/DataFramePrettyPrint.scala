@@ -94,48 +94,51 @@ object DataFramePrettyPrint {
     // column names
     val h: Seq[(String, Int)] = rows.head.zipWithIndex
     h.map {
-      case (cell, i) =>
-        if (truncate > 0) {
-          StringUtils.leftPad(
-            cell,
-            colWidths(i)
-          )
-        } else {
-          StringUtils.rightPad(
-            cell,
-            colWidths(i)
-          )
-        }
-    }.addString(
-      sb,
-      "|",
-      "|",
-      "|\n"
-    )
-
-    sb.append(sep)
-
-    // data
-    rows.tail.map {
-      _.zipWithIndex.map {
         case (cell, i) =>
           if (truncate > 0) {
             StringUtils.leftPad(
-              cell.toString,
+              cell,
               colWidths(i)
             )
           } else {
             StringUtils.rightPad(
-              cell.toString,
+              cell,
               colWidths(i)
             )
           }
-      }.addString(
+      }
+      .addString(
         sb,
         "|",
         "|",
         "|\n"
       )
+
+    sb.append(sep)
+
+    // data
+    rows.tail.map {
+      _.zipWithIndex
+        .map {
+          case (cell, i) =>
+            if (truncate > 0) {
+              StringUtils.leftPad(
+                cell.toString,
+                colWidths(i)
+              )
+            } else {
+              StringUtils.rightPad(
+                cell.toString,
+                colWidths(i)
+              )
+            }
+        }
+        .addString(
+          sb,
+          "|",
+          "|",
+          "|\n"
+        )
     }
 
     sb.append(sep)

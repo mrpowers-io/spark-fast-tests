@@ -810,29 +810,35 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
 
       }
 
-      //      "works with FloatType columns" - {
-      //        val sourceDF = spark.createDF(
-      //          List(
-      //            (1.2),
-      //            (5.1),
-      //            (null)
-      //          ), List(
-      //            ("number", FloatType, true)
-      //          )
-      //        )
-      //
-      //        val expectedDF = spark.createDF(
-      //          List(
-      //            (1.2),
-      //            (5.1),
-      //            (null)
-      //          ), List(
-      //            ("number", FloatType, true)
-      //          )
-      //        )
-      //
-      //        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
-      //      }
+//      "works with FloatType columns" - {
+//        val sourceDF = spark.createDF(
+//          List(
+//            (1.2),
+//            (5.1),
+//            (null)
+//          ),
+//          List(
+//            ("number", FloatType, true)
+//          )
+//        )
+//
+//        val expectedDF = spark.createDF(
+//          List(
+//            (1.2),
+//            (5.1),
+//            (null)
+//          ),
+//          List(
+//            ("number", FloatType, true)
+//          )
+//        )
+//
+//        assertApproximateDataFrameEquality(
+//          sourceDF,
+//          expectedDF,
+//          0.01
+//        )
+//      }
 
     }
 
