@@ -26,15 +26,31 @@ trait ColumnComparer {
     assertColumnEquality(df, colName1, colName2)
   }
 
-//  private def approximatelyEqualDouble(x: Double, y: Double, precision: Double): Boolean = {
-//    (x - y).abs < precision
-//  }
-//
-//  private def areDoubleArraysEqual(x: Array[Double], y: Array[Double], precision: Double): Boolean = {
-//    x.zip(y).forall { t =>
-//      approximatelyEqualDouble(t._1, t._2, precision)
-//    }
-//  }
+  // possibly rename this to assertDeepColumnEquality...
+  // would deep equality comparison help when comparing other types of columns?
+  def assertBinaryTypeColumnEquality(df: DataFrame, colName1: String, colName2: String): Unit = {
+    val elements = df
+      .select(colName1, colName2)
+      .collect()
+    val colName1Elements = elements.map(_(0))
+    val colName2Elements = elements.map(_(1))
+    if (!colName1Elements.deep.sameElements(colName2Elements.deep)) {
+      val mismatchMessage = "\n" + ArrayPrettyPrint.showTwoColumnString(
+        Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements)
+      )
+      throw ColumnMismatch(mismatchMessage)
+    }
+  }
+
+  //  private def approximatelyEqualDouble(x: Double, y: Double, precision: Double): Boolean = {
+  //    (x - y).abs < precision
+  //  }
+  //
+  //  private def areDoubleArraysEqual(x: Array[Double], y: Array[Double], precision: Double): Boolean = {
+  //    x.zip(y).forall { t =>
+  //      approximatelyEqualDouble(t._1, t._2, precision)
+  //    }
+  //  }
 
   def assertDoubleTypeColumnEquality(df: DataFrame, colName1: String, colName2: String, precision: Double = 0.01): Unit = {
     val elements: Array[Row] = df
@@ -75,7 +91,7 @@ trait ColumnComparer {
 //  private def approximatelyEqualFloat(x: Float, y: Float, precision: Float): Boolean = {
 //    (x - y).abs < precision
 //  }
-
+//
 //  private def areFloatArraysEqual(x: Array[Float], y: Array[Float], precision: Float): Boolean = {
 //    x.zip(y).forall { t =>
 //      approximatelyEqualFloat(t._1, t._2, precision)

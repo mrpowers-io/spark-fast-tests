@@ -129,6 +129,24 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
         assertColumnEquality(sourceDF, "l1", "l2")
       }
 
+      "works for nested arrays" - {
+        val sourceData = Seq(
+          Row(Array(Array("a"), Array("a")), Array(Array("a"), Array("a"))),
+          Row(Array(Array("a", "b"), Array("a", "b")), Array(Array("a", "b"), Array("a", "b"))),
+          Row(Array(Array(), Array()), Array(Array(), Array())),
+          Row(null, null)
+        )
+        val sourceSchema = List(
+          StructField("l1", ArrayType(ArrayType(StringType, true)), true),
+          StructField("l2", ArrayType(ArrayType(StringType, true)), true)
+        )
+        val sourceDF = spark.createDataFrame(
+          spark.sparkContext.parallelize(sourceData),
+          StructType(sourceSchema)
+        )
+        assertColumnEquality(sourceDF, "l1", "l2")
+      }
+
       "works for computed ArrayType columns" - {
         val sourceData = Seq(
           Row("i like blue and red", Array("blue", "red")),
@@ -264,6 +282,49 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
         )
         val e = intercept[ColumnMismatch] {
           assertColumnEquality(sourceDF, "b1", "b2")
+        }
+      }
+
+    }
+
+    'assertBinaryTypeColumnEquality - {
+
+      "works when BinaryType columns are equal" - {
+        val sourceData = Seq(
+          Row(Array(10.toByte, 15.toByte), Array(10.toByte, 15.toByte)),
+          Row(Array(4.toByte, 33.toByte), Array(4.toByte, 33.toByte)),
+          Row(null, null)
+        )
+        val sourceSchema = List(
+          StructField("b1", BinaryType, true),
+          StructField("b2", BinaryType, true)
+        )
+        val sourceDF = spark.createDataFrame(
+          spark.sparkContext.parallelize(sourceData),
+          StructType(sourceSchema)
+        )
+        assertBinaryTypeColumnEquality(sourceDF, "b1", "b2")
+      }
+
+      "throws an error when BinaryType columns are not equal" - {
+        val sourceData = Seq(
+          Row(Array(10.toByte, 15.toByte), Array(10.toByte, 15.toByte)),
+          Row(Array(4.toByte, 33.toByte), Array(4.toByte, 33.toByte)),
+          Row(null, null),
+          Row(Array(7.toByte, 33.toByte), Array(4.toByte, 33.toByte)),
+          Row(Array(4.toByte, 33.toByte), null),
+          Row(null, Array(4.toByte, 33.toByte))
+        )
+        val sourceSchema = List(
+          StructField("b1", BinaryType, true),
+          StructField("b2", BinaryType, true)
+        )
+        val sourceDF = spark.createDataFrame(
+          spark.sparkContext.parallelize(sourceData),
+          StructType(sourceSchema)
+        )
+        val e = intercept[ColumnMismatch] {
+          assertBinaryTypeColumnEquality(sourceDF, "b1", "b2")
         }
       }
 
