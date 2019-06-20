@@ -54,7 +54,7 @@ trait ColumnComparer {
   }
 
   private def areFloatArraysEqual(x: Array[Float], y: Array[Float], precision: Float): Boolean = {
-    x.zip(y).forall { t=>
+    x.zip(y).forall { t =>
       approximatelyEqualFloat(t._1, t._2, precision)
     }
   }

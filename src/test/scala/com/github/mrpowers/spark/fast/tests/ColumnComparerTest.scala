@@ -3,6 +3,8 @@ package com.github.mrpowers.spark.fast.tests
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types._
+import java.sql.Date
+import java.sql.Timestamp
 
 import utest._
 
@@ -13,7 +15,6 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
     'assertColumnEquality - {
 
       "throws an easily readable error message" - {
-
         val sourceData = Seq(
           Row("phil", "phil"),
           Row("rashid", "rashid"),
@@ -23,21 +24,17 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           Row("li", "feng"),
           Row(null, null)
         )
-
         val sourceSchema = List(
           StructField("name", StringType, true),
           StructField("expected_name", StringType, true)
         )
-
         val sourceDF = spark.createDataFrame(
           spark.sparkContext.parallelize(sourceData),
           StructType(sourceSchema)
         )
-
         val e = intercept[ColumnMismatch] {
           assertColumnEquality(sourceDF, "name", "expected_name")
         }
-
       }
 
       "doesn't thrown an error when the columns are equal" - {
@@ -46,17 +43,14 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           Row(5, 5),
           Row(null, null)
         )
-
         val sourceSchema = List(
           StructField("num", IntegerType, true),
           StructField("expected_num", IntegerType, true)
         )
-
         val sourceDF = spark.createDataFrame(
           spark.sparkContext.parallelize(sourceData),
           StructType(sourceSchema)
         )
-
         assertColumnEquality(sourceDF, "num", "expected_num")
       }
 
@@ -66,17 +60,14 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           Row(5, 5),
           Row(null, null)
         )
-
         val sourceSchema = List(
           StructField("num", IntegerType, true),
           StructField("expected_num", IntegerType, true)
         )
-
         val sourceDF = spark.createDataFrame(
           spark.sparkContext.parallelize(sourceData),
           StructType(sourceSchema)
         )
-
         val e = intercept[ColumnMismatch] {
           assertColumnEquality(sourceDF, "num", "expected_num")
         }
@@ -88,17 +79,14 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           Row(5, "bye"),
           Row(null, null)
         )
-
         val sourceSchema = List(
           StructField("num", IntegerType, true),
           StructField("word", StringType, true)
         )
-
         val sourceDF = spark.createDataFrame(
           spark.sparkContext.parallelize(sourceData),
           StructType(sourceSchema)
         )
-
         val e = intercept[ColumnMismatch] {
           assertColumnEquality(sourceDF, "num", "word")
         }
@@ -110,17 +98,14 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           Row(null, 5),
           Row(null, null)
         )
-
         val sourceSchema = List(
           StructField("num", IntegerType, true),
           StructField("expected_num", IntegerType, true)
         )
-
         val sourceDF = spark.createDataFrame(
           spark.sparkContext.parallelize(sourceData),
           StructType(sourceSchema)
         )
-
         val e = intercept[ColumnMismatch] {
           assertColumnEquality(sourceDF, "num", "expected_num")
         }
@@ -133,17 +118,14 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           Row(Array(), Array()),
           Row(null, null)
         )
-
         val sourceSchema = List(
           StructField("l1", ArrayType(StringType, true), true),
           StructField("l2", ArrayType(StringType, true), true)
         )
-
         val sourceDF = spark.createDataFrame(
           spark.sparkContext.parallelize(sourceData),
           StructType(sourceSchema)
         )
-
         assertColumnEquality(sourceDF, "l1", "l2")
       }
 
@@ -153,17 +135,14 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           Row("you pink and blue", Array("blue", "pink")),
           Row("i like fun", Array(""))
         )
-
         val sourceSchema = List(
           StructField("words", StringType, true),
           StructField("expected_colors", ArrayType(StringType, true), true)
         )
-
         val sourceDF = spark.createDataFrame(
           spark.sparkContext.parallelize(sourceData),
           StructType(sourceSchema)
         )
-
         val actualDF = sourceDF.withColumn(
           "colors",
           split(
@@ -177,12 +156,79 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
             ","
           )
         )
+        assertColumnEquality(actualDF, "colors", "expected_colors")
+      }
 
-        assertColumnEquality(
-          actualDF,
-          "colors",
-          "expected_colors"
+      "works when DateType columns are equal" - {
+        val sourceData = Seq(
+          Row(Date.valueOf("2016-08-09"), Date.valueOf("2016-08-09")),
+          Row(Date.valueOf("2019-01-01"), Date.valueOf("2019-01-01")),
+          Row(null, null)
         )
+        val sourceSchema = List(
+          StructField("d1", DateType, true),
+          StructField("d2", DateType, true)
+        )
+        val sourceDF = spark.createDataFrame(
+          spark.sparkContext.parallelize(sourceData),
+          StructType(sourceSchema)
+        )
+        assertColumnEquality(sourceDF, "d1", "d2")
+      }
+
+      "throws an error when DateType columns are not equal" - {
+        val sourceData = Seq(
+          Row(Date.valueOf("2010-07-07"), Date.valueOf("2016-08-09")),
+          Row(Date.valueOf("2019-01-01"), Date.valueOf("2019-01-01")),
+          Row(null, null)
+        )
+        val sourceSchema = List(
+          StructField("d1", DateType, true),
+          StructField("d2", DateType, true)
+        )
+        val sourceDF = spark.createDataFrame(
+          spark.sparkContext.parallelize(sourceData),
+          StructType(sourceSchema)
+        )
+        val e = intercept[ColumnMismatch] {
+          assertColumnEquality(sourceDF, "d1", "d2")
+        }
+      }
+
+      "works when TimestampType columns are equal" - {
+        val sourceData = Seq(
+          Row(Timestamp.valueOf("2016-08-09 09:57:00"), Timestamp.valueOf("2016-08-09 09:57:00")),
+          Row(Timestamp.valueOf("2016-04-10 09:57:00"), Timestamp.valueOf("2016-04-10 09:57:00")),
+          Row(null, null)
+        )
+        val sourceSchema = List(
+          StructField("t1", TimestampType, true),
+          StructField("t2", TimestampType, true)
+        )
+        val sourceDF = spark.createDataFrame(
+          spark.sparkContext.parallelize(sourceData),
+          StructType(sourceSchema)
+        )
+        assertColumnEquality(sourceDF, "t1", "t2")
+      }
+
+      "throws an error when TimestampType columns are not equal" - {
+        val sourceData = Seq(
+          Row(Timestamp.valueOf("2010-08-09 09:57:00"), Timestamp.valueOf("2016-08-09 09:57:00")),
+          Row(Timestamp.valueOf("2016-04-10 10:01:00"), Timestamp.valueOf("2016-04-10 09:57:00")),
+          Row(null, null)
+        )
+        val sourceSchema = List(
+          StructField("t1", TimestampType, true),
+          StructField("t2", TimestampType, true)
+        )
+        val sourceDF = spark.createDataFrame(
+          spark.sparkContext.parallelize(sourceData),
+          StructType(sourceSchema)
+        )
+        val e = intercept[ColumnMismatch] {
+          assertColumnEquality(sourceDF, "t1", "t2")
+        }
       }
 
     }
@@ -190,47 +236,37 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
     'assertDoubleTypeColumnEquality - {
 
       "doesn't throw an error when two DoubleType columns are equal" - {
-
         val sourceData = Seq(
           Row(1.3, 1.3),
           Row(5.01, 5.0101)
         )
-
         val sourceSchema = List(
           StructField("d1", DoubleType, true),
           StructField("d2", DoubleType, true)
         )
-
         val df = spark.createDataFrame(
           spark.sparkContext.parallelize(sourceData),
           StructType(sourceSchema)
         )
-
         assertDoubleTypeColumnEquality(df, "d1", "d2", 0.01)
-
       }
 
       "throws an error when two DoubleType columns are not equal" - {
-
         val sourceData = Seq(
           Row(1.3, 1.8),
           Row(5.01, 5.0101)
         )
-
         val sourceSchema = List(
           StructField("d1", DoubleType, true),
           StructField("d2", DoubleType, true)
         )
-
         val df = spark.createDataFrame(
           spark.sparkContext.parallelize(sourceData),
           StructType(sourceSchema)
         )
-
         val e = intercept[ColumnMismatch] {
           assertDoubleTypeColumnEquality(df, "d1", "d2", 0.01)
         }
-
       }
 
     }
@@ -238,25 +274,20 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
     'assertFloatTypeColumnEquality - {
 
       "doesn't throw an error when two FloatType columns are equal" - {
-
         val sourceData = Seq(
           Row(1.3.toFloat, 1.3.toFloat),
           Row(5.01.toFloat, 5.0101.toFloat)
         )
-
         val sourceSchema = List(
           StructField("d1", FloatType, true),
           StructField("d2", FloatType, true)
         )
-
         val df = spark.createDataFrame(
           spark.sparkContext.parallelize(sourceData),
           StructType(sourceSchema)
         )
-
         val p: Float = 0.01.toFloat
         assertFloatTypeColumnEquality(df, "d1", "d2", p)
-
       }
 
     }
