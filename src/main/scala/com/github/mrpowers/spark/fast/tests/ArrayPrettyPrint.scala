@@ -80,7 +80,8 @@ object ArrayPrettyPrint {
     rows.tail.map { row =>
       val color = if (row(0) == row(1)) "blue" else "red"
       row.zipWithIndex
-        .map { case (cell, i) =>
+        .map {
+          case (cell, i) =>
             val r = if (truncate > 0) {
               StringUtils.leftPad(cell.toString, colWidths(i))
             } else {

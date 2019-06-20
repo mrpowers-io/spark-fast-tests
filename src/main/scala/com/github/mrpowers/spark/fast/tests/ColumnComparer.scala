@@ -8,10 +8,7 @@ trait ColumnComparer {
 
   def assertColumnEquality(df: DataFrame, colName1: String, colName2: String): Unit = {
     val elements = df
-      .select(
-        colName1,
-        colName2
-      )
+      .select(colName1, colName2)
       .collect()
     val colName1Elements = elements.map(_(0))
     val colName2Elements = elements.map(_(1))
@@ -25,11 +22,7 @@ trait ColumnComparer {
 
   // ace stands for 'assertColumnEquality'
   def ace(df: DataFrame, colName1: String, colName2: String): Unit = {
-    assertColumnEquality(
-      df,
-      colName1,
-      colName2
-    )
+    assertColumnEquality(df, colName1, colName2)
   }
 
   private def approximatelyEqual(x: Double, y: Double, precision: Double): Boolean = {
@@ -39,29 +32,40 @@ trait ColumnComparer {
   private def areDoubleArraysEqual(x: Array[Double], y: Array[Double], precision: Double): Boolean = {
     val zipped: Array[(Double, Double)] = x.zip(y)
     val mapped = zipped.map { t =>
-      !approximatelyEqual(
-        t._1,
-        t._2,
-        0.01
-      )
+      !approximatelyEqual(t._1, t._2, precision)
     }
     mapped.contains(false)
   }
 
   def assertDoubleTypeColumnEquality(df: DataFrame, colName1: String, colName2: String, precision: Double = 0.01): Unit = {
     val elements = df
-      .select(
-        colName1,
-        colName2
-      )
+      .select(colName1, colName2)
       .collect()
     val colName1Elements: Array[Double] = elements.map(_(0).toString().toDouble)
     val colName2Elements: Array[Double] = elements.map(_(1).toString().toDouble)
-    if (!areDoubleArraysEqual(
-          colName1Elements,
-          colName2Elements,
-          precision
-        )) {
+    if (!areDoubleArraysEqual(colName1Elements, colName2Elements, precision)) {
+      val mismatchMessage = "\n" + ArrayPrettyPrint.showTwoColumnString(
+        Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements)
+      )
+      throw ColumnMismatch(mismatchMessage)
+    }
+  }
+
+  private def areFloatArraysEqual(x: Array[Float], y: Array[Float], precision: Float): Boolean = {
+    val zipped: Array[(Float, Float)] = x.zip(y)
+    val mapped = zipped.map { t =>
+      !((t._1 - t._2).abs < precision)
+    }
+    mapped.contains(false)
+  }
+
+  def assertFloatTypeColumnEquality(df: DataFrame, colName1: String, colName2: String, precision: Float): Unit = {
+    val elements = df
+      .select(colName1, colName2)
+      .collect()
+    val colName1Elements: Array[Float] = elements.map(_(0).toString().toFloat)
+    val colName2Elements: Array[Float] = elements.map(_(1).toString().toFloat)
+    if (!areFloatArraysEqual(colName1Elements, colName2Elements, precision)) {
       val mismatchMessage = "\n" + ArrayPrettyPrint.showTwoColumnString(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements)
       )
