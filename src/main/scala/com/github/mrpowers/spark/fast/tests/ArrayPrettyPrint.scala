@@ -18,23 +18,11 @@ object ArrayPrettyPrint {
           case binary: Array[Byte] =>
             binary
               .map("%02X".format(_))
-              .mkString(
-                "[",
-                " ",
-                "]"
-              )
+              .mkString("[", " ", "]")
           case array: Array[_] =>
-            array.mkString(
-              "[",
-              ", ",
-              "]"
-            )
+            array.mkString("[", ", ", "]")
           case seq: Seq[_] =>
-            seq.mkString(
-              "[",
-              ", ",
-              "]"
-            )
+            seq.mkString("[", ", ", "]")
           case d: Date =>
             DateTimeUtils.dateToString(DateTimeUtils.fromJavaDate(d))
           case _ => cell.toString
@@ -63,10 +51,7 @@ object ArrayPrettyPrint {
     // Compute the width of each column
     for (row <- rows) {
       for ((cell, i) <- row.zipWithIndex) {
-        colWidths(i) = math.max(
-          colWidths(i),
-          cell.length
-        )
+        colWidths(i) = math.max(colWidths(i), cell.length)
       }
     }
 
@@ -74,12 +59,7 @@ object ArrayPrettyPrint {
     val sep: String =
       colWidths
         .map("-" * _)
-        .addString(
-          sb,
-          "+",
-          "+",
-          "+\n"
-        )
+        .addString(sb, "+", "+", "+\n")
         .toString()
 
     // column names
@@ -87,23 +67,12 @@ object ArrayPrettyPrint {
     h.map {
         case (cell, i) =>
           if (truncate > 0) {
-            StringUtils.leftPad(
-              cell,
-              colWidths(i)
-            )
+            StringUtils.leftPad(cell, colWidths(i))
           } else {
-            StringUtils.rightPad(
-              cell,
-              colWidths(i)
-            )
+            StringUtils.rightPad(cell, colWidths(i))
           }
       }
-      .addString(
-        sb,
-        "|",
-        "|",
-        "|\n"
-      )
+      .addString(sb, "|", "|", "|\n")
 
     sb.append(sep)
 
@@ -111,18 +80,11 @@ object ArrayPrettyPrint {
     rows.tail.map { row =>
       val color = if (row(0) == row(1)) "blue" else "red"
       row.zipWithIndex
-        .map {
-          case (cell, i) =>
+        .map { case (cell, i) =>
             val r = if (truncate > 0) {
-              StringUtils.leftPad(
-                cell.toString,
-                colWidths(i)
-              )
+              StringUtils.leftPad(cell.toString, colWidths(i))
             } else {
-              StringUtils.rightPad(
-                cell.toString,
-                colWidths(i)
-              )
+              StringUtils.rightPad(cell.toString, colWidths(i))
             }
             if (color == "blue") {
               ufansi.Color.Blue(r)
@@ -130,12 +92,7 @@ object ArrayPrettyPrint {
               ufansi.Color.Red(r)
             }
         }
-        .addString(
-          sb,
-          "|",
-          "|",
-          "|\n"
-        )
+        .addString(sb, "|", "|", "|\n")
     }
 
     sb.append(sep)
