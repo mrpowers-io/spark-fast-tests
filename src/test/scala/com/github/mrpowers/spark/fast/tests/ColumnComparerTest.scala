@@ -293,7 +293,9 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           Row(1.3, 1.8),
           Row(5.01, 5.0101),
           Row(null, 10.0),
-          Row(3.4, null)
+          Row(3.4, null),
+          Row(-1.1, -1.1),
+          Row(null, null)
         )
         val sourceSchema = List(
           StructField("d1", DoubleType, true),
@@ -315,7 +317,8 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
       "doesn't throw an error when two FloatType columns are equal" - {
         val sourceData = Seq(
           Row(1.3f, 1.3f),
-          Row(5.01f, 5.0101f)
+          Row(5.01f, 5.0101f),
+          Row(null, null)
         )
         val sourceSchema = List(
           StructField("num1", FloatType, true),
@@ -325,8 +328,28 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
           spark.sparkContext.parallelize(sourceData),
           StructType(sourceSchema)
         )
-        val p: Float = 0.01f
-        assertFloatTypeColumnEquality(df, "num1", "num2", p)
+        assertFloatTypeColumnEquality(df, "num1", "num2", 0.01f)
+      }
+
+      "throws an error when two FloatType columns are not equal" - {
+        val sourceData = Seq(
+          Row(1.3f, 1.8f),
+          Row(5.01f, 5.0101f),
+          Row(null, 10.0f),
+          Row(3.4f, null),
+          Row(null, null)
+        )
+        val sourceSchema = List(
+          StructField("d1", FloatType, true),
+          StructField("d2", FloatType, true)
+        )
+        val df = spark.createDataFrame(
+          spark.sparkContext.parallelize(sourceData),
+          StructType(sourceSchema)
+        )
+        val e = intercept[ColumnMismatch] {
+          assertFloatTypeColumnEquality(df, "d1", "d2", 0.01f)
+        }
       }
 
     }
