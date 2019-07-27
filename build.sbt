@@ -10,7 +10,7 @@ spDescription := "Test your code quickly"
 version := "0.19.2"
 crossScalaVersions := Seq("2.11.12", "2.12.7")
 scalaVersion := "2.11.12"
-sparkVersion := "2.4.2"
+sparkVersion := "2.4.3"
 
 spAppendScalaVersion := true
 
