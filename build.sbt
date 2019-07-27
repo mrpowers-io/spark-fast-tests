@@ -14,7 +14,7 @@ sparkVersion := "2.4.3"
 
 spAppendScalaVersion := true
 
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.2" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.3" % "provided"
 
 libraryDependencies += "com.lihaoyi" %% "utest" % "0.6.3" % "test"
 testFrameworks += new TestFramework("com.github.mrpowers.spark.fast.tests.CustomFramework")
