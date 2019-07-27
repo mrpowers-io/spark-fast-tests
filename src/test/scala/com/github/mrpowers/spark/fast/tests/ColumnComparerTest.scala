@@ -177,6 +177,70 @@ object ColumnComparerTest extends TestSuite with ColumnComparer with SparkSessio
         assertColumnEquality(actualDF, "colors", "expected_colors")
       }
 
+      "works for MapType columns" - {
+        val data = Seq(
+          Row(Map("good_song" -> "santeria", "bad_song" -> "doesn't exist"), Map("good_song" -> "santeria", "bad_song" -> "doesn't exist"))
+        )
+        val schema = List(
+          StructField("m1", MapType(StringType, StringType, true), true),
+          StructField("m2", MapType(StringType, StringType, true), true)
+        )
+        val df = spark.createDataFrame(
+          spark.sparkContext.parallelize(data),
+          StructType(schema)
+        )
+        assertColumnEquality(df, "m1", "m2")
+      }
+
+      "throws error when MapType columns aren't equal" - {
+        val data = Seq(
+          Row(Map("good_song" -> "santeria", "bad_song" -> "doesn't exist"), Map("good_song" -> "what i got", "bad_song" -> "doesn't exist"))
+        )
+        val schema = List(
+          StructField("m1", MapType(StringType, StringType, true), true),
+          StructField("m2", MapType(StringType, StringType, true), true)
+        )
+        val df = spark.createDataFrame(
+          spark.sparkContext.parallelize(data),
+          StructType(schema)
+        )
+        val e = intercept[ColumnMismatch] {
+          assertColumnEquality(df, "m1", "m2")
+        }
+      }
+
+      "works for MapType columns with deep comparisons" - {
+        val data = Seq(
+          Row(Map("good_song" -> Array(1, 2, 3, 4)), Map("good_song" -> Array(1, 2, 3, 4)))
+        )
+        val schema = List(
+          StructField("m1", MapType(StringType, ArrayType(IntegerType, true), true), true),
+          StructField("m2", MapType(StringType, ArrayType(IntegerType, true), true), true)
+        )
+        val df = spark.createDataFrame(
+          spark.sparkContext.parallelize(data),
+          StructType(schema)
+        )
+        assertColumnEquality(df, "m1", "m2")
+      }
+
+      "throws an errors for MapType columns with deep comparisons that aren't equal" - {
+        val data = Seq(
+          Row(Map("good_song" -> Array(1, 2, 3, 4)), Map("good_song" -> Array(1, 2, 3, 8)))
+        )
+        val schema = List(
+          StructField("m1", MapType(StringType, ArrayType(IntegerType, true), true), true),
+          StructField("m2", MapType(StringType, ArrayType(IntegerType, true), true), true)
+        )
+        val df = spark.createDataFrame(
+          spark.sparkContext.parallelize(data),
+          StructType(schema)
+        )
+        val e = intercept[ColumnMismatch] {
+          assertColumnEquality(df, "m1", "m2")
+        }
+      }
+
       "works when DateType columns are equal" - {
         val sourceData = Seq(
           Row(Date.valueOf("2016-08-09"), Date.valueOf("2016-08-09")),

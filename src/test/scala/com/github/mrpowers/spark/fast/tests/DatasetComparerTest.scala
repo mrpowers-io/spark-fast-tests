@@ -89,6 +89,33 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
         assertLargeDatasetEquality(sourceDS, expectedDS)
       }
 
+      "works with DataFrames that have ArrayType columns" - {
+        val sourceDF = spark.createDF(
+          List(
+            (1, Array("word1", "blah")),
+            (5, Array("hi", "there"))
+          ),
+          List(
+            ("number", IntegerType, true),
+            ("words", ArrayType(StringType, true), true)
+          )
+        )
+
+        val expectedDF = spark.createDF(
+          List(
+            (1, Array("word1", "blah")),
+            (5, Array("hi", "there"))
+          ),
+          List(
+            ("number", IntegerType, true),
+            ("words", ArrayType(StringType, true), true)
+          )
+        )
+
+        assertLargeDatasetEquality(sourceDF, expectedDF)
+        assertSmallDatasetEquality(sourceDF, expectedDF)
+      }
+
       "throws an error if the DataFrames have different schemas" - {
         val sourceDF = spark.createDF(
           List(

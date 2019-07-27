@@ -197,9 +197,9 @@ ${DataFramePrettyPrint.showString(
         val maxUnequalRowsToShow = 10
         if (!unequalRDD.isEmpty()) {
           throw DatasetContentMismatch(
-            countMismatchMessage(
-              actualCount,
-              expectedCount
+            basicMismatchMessage(
+              ds1,
+              ds2
             )
           )
         }

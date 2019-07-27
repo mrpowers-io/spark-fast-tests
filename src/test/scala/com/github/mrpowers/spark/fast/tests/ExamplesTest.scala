@@ -68,6 +68,37 @@
 //
 //      }
 //
+//      "error when content doesn't match" - {
+//
+//        val sourceDF = spark.createDF(
+//          List(
+//            (1, "z"),
+//            (5, "b")
+//          ),
+//          List(
+//            ("number", IntegerType, true),
+//            ("letter", StringType, true)
+//          )
+//        )
+//
+//        val expectedDF = spark.createDF(
+//          List(
+//            (1, "a"),
+//            (5, "b")
+//          ),
+//          List(
+//            ("number", IntegerType, true),
+//            ("letter", StringType, true)
+//          )
+//        )
+//
+//        assertLargeDataFrameEquality(
+//          sourceDF,
+//          expectedDF
+//        )
+//
+//      }
+//
 //    }
 //
 //  }
