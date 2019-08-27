@@ -2,6 +2,8 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.Row
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.StructField
 
 case class ColumnMismatch(smth: String) extends Exception(smth)
 
@@ -129,6 +131,39 @@ trait ColumnComparer {
       val mismatchMessage = "\n" + ArrayPrettyPrint.showTwoColumnStringColorCustomizable(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements),
         rowsEqual.toArray
+      )
+      throw ColumnMismatch(mismatchMessage)
+    }
+  }
+
+  def assertColEquality(df: DataFrame, colName1: String, colName2: String): Unit = {
+    val cn = s"are_${colName1}_and_${colName2}_equal"
+
+    val schema           = df.schema
+    val sf1: StructField = schema.find((sf: StructField) => sf.name == colName1).get
+    val sf2              = schema.find((sf: StructField) => sf.name == colName2).get
+
+    if (sf1.dataType != sf2.dataType) {
+      throw ColumnMismatch(
+        s"The column dataTypes are different. The `${colName1}` column has a `${sf1.dataType}` dataType and the `${colName2}` column has a `${sf2.dataType}` dataType.")
+    }
+
+    val r = df
+      .withColumn(
+        cn,
+        col(colName1) <=> col(colName2)
+      )
+      .select(cn)
+      .collect()
+
+    if (r.contains(Row(false))) {
+      val elements = df
+        .select(colName1, colName2)
+        .collect()
+      val colName1Elements = elements.map(_(0))
+      val colName2Elements = elements.map(_(1))
+      val mismatchMessage = "\n" + ArrayPrettyPrint.showTwoColumnString(
+        Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements)
       )
       throw ColumnMismatch(mismatchMessage)
     }
