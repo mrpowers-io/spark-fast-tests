@@ -273,8 +273,7 @@ ${DataFramePrettyPrint.showString(
         // Group them together and filter for difference
         val maxUnequalRowsToShow = 10
         val unequalRDD = ds1Keyed.cogroup(ds2Keyed).filter {
-          case (_, (i1, i2)) =>
-            i1.isEmpty || i2.isEmpty || i1 != i2
+          case (_, (i1, i2)) => i1.isEmpty || i2.isEmpty || i1 != i2
         }
 
         if (!unequalRDD.isEmpty()) {
@@ -286,10 +285,8 @@ ${DataFramePrettyPrint.showString(
           )
         }
         unequalRDD.take(maxUnequalRowsToShow).headOption.map {
-          case (v, (i1, i2)) =>
-            (v, i1.headOption.getOrElse(0), i2.headOption.getOrElse(0))
+          case (v, (i1, i2)) => (v, i1.headOption.getOrElse(0), i2.headOption.getOrElse(0))
         }
-
       } finally {
         ds1.rdd.unpersist()
         ds2.rdd.unpersist()
