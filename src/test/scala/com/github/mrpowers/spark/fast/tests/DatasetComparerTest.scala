@@ -140,6 +140,9 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
           assertLargeDatasetEquality(sourceDF, expectedDF)
         }
         val e2 = intercept[DatasetSchemaMismatch] {
+          assertLargeDatasetEqualityWithoutOrder(sourceDF, expectedDF)
+        }
+        val e3 = intercept[DatasetSchemaMismatch] {
           assertSmallDatasetEquality(sourceDF, expectedDF)
         }
       }

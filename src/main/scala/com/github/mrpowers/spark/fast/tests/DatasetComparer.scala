@@ -274,7 +274,7 @@ ${DataFramePrettyPrint.showString(
         val maxUnequalRowsToShow = 10
         val unequalRDD = ds1Keyed.cogroup(ds2Keyed).filter {
           case (_, (i1, i2)) =>
-            i1.isEmpty || i2.isEmpty || i1.head != i2.head
+            i1.isEmpty || i2.isEmpty || i1 != i2
         }
 
         if (!unequalRDD.isEmpty()) {
