@@ -89,19 +89,18 @@ ${DataFramePrettyPrint.showString(
   }
 
   /**
-   * Raises an error unless `actualDS` and `expectedDS` are equal
-   */
-  def assertSmallDatasetEquality[T](actualDS: Dataset[T],
-                                    expectedDS: Dataset[T],
-                                    ignoreNullable: Boolean = false,
-                                    ignoreColumnNames: Boolean = false,
-                                    orderedComparison: Boolean = true): Unit = {
+    * Check if the schemas are equal
+    */
+  private def schemaComparer[T](actualDS: Dataset[T],
+                                expectedDS: Dataset[T],
+                                ignoreNullable: Boolean = false,
+                                ignoreColumnNames: Boolean = false): Unit = {
     if (!SchemaComparer.equals(
-          actualDS.schema,
-          expectedDS.schema,
-          ignoreNullable,
-          ignoreColumnNames
-        )) {
+      actualDS.schema,
+      expectedDS.schema,
+      ignoreNullable,
+      ignoreColumnNames
+    )) {
       throw DatasetSchemaMismatch(
         betterSchemaMismatchMessage(
           actualDS,
@@ -109,6 +108,20 @@ ${DataFramePrettyPrint.showString(
         )
       )
     }
+  }
+
+  /**
+   * Raises an error unless `actualDS` and `expectedDS` are equal
+   */
+  def assertSmallDatasetEquality[T](actualDS: Dataset[T],
+                                    expectedDS: Dataset[T],
+                                    ignoreNullable: Boolean = false,
+                                    ignoreColumnNames: Boolean = false,
+                                    orderedComparison: Boolean = true): Unit = {
+
+    // first check if the schemas are equal
+    schemaComparer(actualDS, expectedDS, ignoreNullable, ignoreColumnNames)
+
     if (orderedComparison) {
       val a = actualDS.collect()
       val e = expectedDS.collect()
@@ -150,19 +163,7 @@ ${DataFramePrettyPrint.showString(
                                               ignoreColumnNames: Boolean = false,
                                               orderedComparison: Boolean = true): Unit = {
     // first check if the schemas are equal
-    if (!SchemaComparer.equals(
-          actualDS.schema,
-          expectedDS.schema,
-          ignoreNullable,
-          ignoreColumnNames
-        )) {
-      throw DatasetSchemaMismatch(
-        betterSchemaMismatchMessage(
-          actualDS,
-          expectedDS
-        )
-      )
-    }
+    schemaComparer(actualDS, expectedDS, ignoreNullable, ignoreColumnNames)
     // then check if the DataFrames have the same content
     def throwIfDatasetsAreUnequal(ds1: Dataset[T], ds2: Dataset[T]) = {
       try {
@@ -235,19 +236,7 @@ ${DataFramePrettyPrint.showString(
                                                           ignoreNullable: Boolean = false,
                                                           ignoreColumnNames: Boolean = false): Unit = {
     // first check if the schemas are equal
-    if (!SchemaComparer.equals(
-          actualDS.schema,
-          expectedDS.schema,
-          ignoreNullable,
-          ignoreColumnNames
-        )) {
-      throw DatasetSchemaMismatch(
-        betterSchemaMismatchMessage(
-          actualDS,
-          expectedDS
-        )
-      )
-    }
+    schemaComparer(actualDS, expectedDS, ignoreNullable, ignoreColumnNames)
     // then check if the DataFrames have the same content
     def throwIfDatasetsAreUnequal(ds1: Dataset[T], ds2: Dataset[T]) = {
       try {
@@ -260,16 +249,13 @@ ${DataFramePrettyPrint.showString(
         if (actualCount != expectedCount) {
           throw DatasetCountMismatch(
             countMismatchMessage(
-              actualCount,
-              expectedCount
+              actualCount, expectedCount
             )
           )
         }
-
         // Key the values and count the number of each unique element
         val ds1Keyed = ds1.rdd.map(x => (x, 1)).reduceByKey(_ + _)
         val ds2Keyed = ds2.rdd.map(x => (x, 1)).reduceByKey(_ + _)
-
         // Group them together and filter for difference
         val maxUnequalRowsToShow = 10
         val unequalRDD = ds1Keyed.cogroup(ds2Keyed).filter {
@@ -277,12 +263,7 @@ ${DataFramePrettyPrint.showString(
         }
 
         if (!unequalRDD.isEmpty()) {
-          throw DatasetContentMismatch(
-            basicMismatchMessage(
-              ds1,
-              ds2
-            )
-          )
+          throw DatasetContentMismatch(basicMismatchMessage(ds1, ds2))
         }
         unequalRDD.take(maxUnequalRowsToShow).headOption.map {
           case (v, (i1, i2)) => (v, i1.headOption.getOrElse(0), i2.headOption.getOrElse(0))
