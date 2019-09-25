@@ -398,6 +398,10 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
           expectedDF,
           orderedComparison = false
         )
+        assertLargeDatasetEqualityWithoutOrder(
+          sourceDF,
+          expectedDF
+        )
         assertSmallDatasetEquality(
           sourceDF,
           expectedDF,
@@ -420,6 +424,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
         )
 
         assertLargeDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
+        assertLargeDatasetEqualityWithoutOrder(sourceDS, expectedDS)
         assertSmallDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
       }
 

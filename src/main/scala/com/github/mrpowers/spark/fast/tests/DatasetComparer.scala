@@ -224,6 +224,84 @@ ${DataFramePrettyPrint.showString(
     }
   }
 
+  /**
+   * Raises an error unless `actualDS` and `expectedDS` are equal (un ordered)
+   *
+   * Credit goes to @limansky (https://github.com/holdenk/spark-testing-base)
+   */
+  def assertLargeDatasetEqualityWithoutOrder[T: ClassTag](actualDS: Dataset[T],
+                                                          expectedDS: Dataset[T],
+                                                          equals: (T, T) => Boolean = naiveEquality _,
+                                                          ignoreNullable: Boolean = false,
+                                                          ignoreColumnNames: Boolean = false): Unit = {
+    // first check if the schemas are equal
+    if (!SchemaComparer.equals(
+          actualDS.schema,
+          expectedDS.schema,
+          ignoreNullable,
+          ignoreColumnNames
+        )) {
+      throw DatasetSchemaMismatch(
+        betterSchemaMismatchMessage(
+          actualDS,
+          expectedDS
+        )
+      )
+    }
+    // then check if the DataFrames have the same content
+    def throwIfDatasetsAreUnequal(ds1: Dataset[T], ds2: Dataset[T]) = {
+      try {
+        ds1.rdd.cache
+        ds2.rdd.cache
+
+        val actualCount   = ds1.rdd.count
+        val expectedCount = ds2.rdd.count
+
+        if (actualCount != expectedCount) {
+          throw DatasetCountMismatch(
+            countMismatchMessage(
+              actualCount,
+              expectedCount
+            )
+          )
+        }
+
+        // Key the values and count the number of each unique element
+        val ds1Keyed = ds1.rdd.map(x => (x, 1)).reduceByKey(_ + _)
+        val ds2Keyed = ds2.rdd.map(x => (x, 1)).reduceByKey(_ + _)
+
+        // Group them together and filter for difference
+        val maxUnequalRowsToShow = 10
+        val unequalRDD = ds1Keyed.cogroup(ds2Keyed).filter {
+          case (_, (i1, i2)) =>
+            i1.isEmpty || i2.isEmpty || i1.head != i2.head
+        }
+
+        if (!unequalRDD.isEmpty()) {
+          throw DatasetContentMismatch(
+            basicMismatchMessage(
+              ds1,
+              ds2
+            )
+          )
+        }
+        unequalRDD.take(maxUnequalRowsToShow).headOption.map {
+          case (v, (i1, i2)) =>
+            (v, i1.headOption.getOrElse(0), i2.headOption.getOrElse(0))
+        }
+
+      } finally {
+        ds1.rdd.unpersist()
+        ds2.rdd.unpersist()
+      }
+    }
+
+    throwIfDatasetsAreUnequal(
+      actualDS,
+      expectedDS
+    )
+  }
+
   def assertApproximateDataFrameEquality(actualDF: DataFrame,
                                          expectedDF: DataFrame,
                                          precision: Double,
