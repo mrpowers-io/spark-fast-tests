@@ -60,10 +60,10 @@ Fetch the JAR file from Maven.
 resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
 
 // Scala 2.11
-libraryDependencies += "MrPowers" % "spark-fast-tests" % "0.17.1-s_2.11"
+libraryDependencies += "MrPowers" % "spark-fast-tests" % "0.20.0-s_2.11"
 
 // Scala 2.12, Spark 2.4+
-libraryDependencies += "MrPowers" % "spark-fast-tests" % "0.17.1-s_2.12"
+libraryDependencies += "MrPowers" % "spark-fast-tests" % "0.20.0-s_2.12"
 ```
 
 [Here's a link to all the JAR files in Maven](https://mvnrepository.com/artifact/MrPowers/spark-fast-tests?repo=spark-packages).
