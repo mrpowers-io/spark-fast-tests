@@ -2,6 +2,7 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.types._
 import SparkSessionExt._
+import org.apache.spark.sql.Row
 import utest._
 
 object Person {
@@ -12,6 +13,7 @@ object Person {
 }
 case class Person(name: String, age: Int)
 case class PrecisePerson(name: String, age: Double)
+case class Employee(person: Person, jobTitle: String)
 
 object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSessionTestWrapper {
 
@@ -82,6 +84,70 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
           Seq(
             Person("Alice", 12),
             Person("Bob", 17)
+          )
+        )
+
+        assertSmallDatasetEquality(sourceDS, expectedDS)
+        assertLargeDatasetEquality(sourceDS, expectedDS)
+      }
+
+      "works for DataFrames with StructType columns" - {
+        val sourceDF = spark.createDF(
+          List(
+            Row(1, Row("Hello", "Goodbye")),
+            Row(5, Row("Hola", "Adios"))
+          ),
+          List(
+            StructField("number", IntegerType, true),
+            StructField("language_words",
+                        StructType(
+                          List(
+                            StructField("greeting", StringType, true),
+                            StructField("farewell", StringType, true)
+                          )),
+                        true)
+          )
+        )
+
+        val expectedDF = spark.createDF(
+          List(
+            Row(1, Row("Hello", "Goodbye")),
+            Row(5, Row("Hola", "Adios"))
+          ),
+          List(
+            StructField("number", IntegerType, true),
+            StructField("language_words",
+                        StructType(
+                          List(
+                            StructField("greeting", StringType, true),
+                            StructField("farewell", StringType, true)
+                          )),
+                        true)
+          )
+        )
+
+        assertSmallDatasetEquality(
+          sourceDF,
+          expectedDF
+        )
+        assertLargeDatasetEquality(
+          sourceDF,
+          expectedDF
+        )
+      }
+
+      "works for Datasets with StructType columns" - {
+        val sourceDS = spark.createDataset[Employee](
+          Seq(
+            Employee(Person("Alice", 12), "Engineer"),
+            Employee(Person("Bob", 17), "Project Manager")
+          )
+        )
+
+        val expectedDS = spark.createDataset[Employee](
+          Seq(
+            Employee(Person("Alice", 12), "Engineer"),
+            Employee(Person("Bob", 17), "Project Manager")
           )
         )
 
@@ -254,6 +320,44 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
         assertLargeDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
       }
 
+      "ignores the nullable flag in nested structures when making DataFrame comparisons" - {
+        val sourceDF = spark.createDF(
+          List(
+            Row(1, Row("Hello", "Goodbye")),
+            Row(5, Row("Hola", "Adios"))
+          ),
+          List(
+            StructField("number", IntegerType, true),
+            StructField("language_words",
+                        StructType(
+                          List(
+                            StructField("greeting", StringType, true),
+                            StructField("farewell", StringType, true)
+                          )),
+                        true)
+          )
+        )
+
+        val expectedDF = spark.createDF(
+          List(
+            Row(1, Row("Hello", "Goodbye")),
+            Row(5, Row("Hola", "Adios"))
+          ),
+          List(
+            StructField("number", IntegerType, true),
+            StructField("language_words",
+                        StructType(
+                          List(
+                            StructField("greeting", StringType, false),
+                            StructField("farewell", StringType, true)
+                          )),
+                        true)
+          )
+        )
+
+        assertLargeDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
+      }
+
       "can performed unordered DataFrame comparisons" - {
         val sourceDF = spark.createDF(
           List(
@@ -367,6 +471,48 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
             (5)
           ),
           List(("number", IntegerType, true))
+        )
+
+        assertSmallDatasetEquality(
+          sourceDF,
+          expectedDF,
+          ignoreNullable = true
+        )
+      }
+
+      "ignores the nullable flag in nested structures when making DataFrame comparisons" - {
+        val sourceDF = spark.createDF(
+          List(
+            Row(1, Row("Hello", "Goodbye")),
+            Row(5, Row("Hola", "Adios"))
+          ),
+          List(
+            StructField("number", IntegerType, true),
+            StructField("language_words",
+                        StructType(
+                          List(
+                            StructField("greeting", StringType, true),
+                            StructField("farewell", StringType, true)
+                          )),
+                        true)
+          )
+        )
+
+        val expectedDF = spark.createDF(
+          List(
+            Row(1, Row("Hello", "Goodbye")),
+            Row(5, Row("Hola", "Adios"))
+          ),
+          List(
+            StructField("number", IntegerType, true),
+            StructField("language_words",
+                        StructType(
+                          List(
+                            StructField("greeting", StringType, false),
+                            StructField("farewell", StringType, true)
+                          )),
+                        true)
+          )
         )
 
         assertSmallDatasetEquality(
@@ -637,35 +783,35 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
 
       }
 
-//      "works with FloatType columns" - {
-//        val sourceDF = spark.createDF(
-//          List(
-//            (1.2),
-//            (5.1),
-//            (null)
-//          ),
-//          List(
-//            ("number", FloatType, true)
-//          )
-//        )
-//
-//        val expectedDF = spark.createDF(
-//          List(
-//            (1.2),
-//            (5.1),
-//            (null)
-//          ),
-//          List(
-//            ("number", FloatType, true)
-//          )
-//        )
-//
-//        assertApproximateDataFrameEquality(
-//          sourceDF,
-//          expectedDF,
-//          0.01
-//        )
-//      }
+      //      "works with FloatType columns" - {
+      //        val sourceDF = spark.createDF(
+      //          List(
+      //            (1.2),
+      //            (5.1),
+      //            (null)
+      //          ),
+      //          List(
+      //            ("number", FloatType, true)
+      //          )
+      //        )
+      //
+      //        val expectedDF = spark.createDF(
+      //          List(
+      //            (1.2),
+      //            (5.1),
+      //            (null)
+      //          ),
+      //          List(
+      //            ("number", FloatType, true)
+      //          )
+      //        )
+      //
+      //        assertApproximateDataFrameEquality(
+      //          sourceDF,
+      //          expectedDF,
+      //          0.01
+      //        )
+      //      }
 
     }
 
