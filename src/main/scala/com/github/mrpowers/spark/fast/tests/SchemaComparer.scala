@@ -6,8 +6,9 @@ object SchemaComparer {
 
   def equals(s1: StructType, s2: StructType, ignoreNullable: Boolean = false, ignoreColumnNames: Boolean = false): Boolean = {
     def structTypesAreEqual(st1: StructType, st2: StructType): Boolean =
-      (st1.length == st2.length) && st1.zip(st2).forall { t =>
-        fieldsAreEqual(t._1, t._2)
+      (st1.length == st2.length) && st1.zip(st2).forall {
+        case (f1: StructField, f2: StructField) =>
+          fieldsAreEqual(f1, f2)
       }
 
     def fieldsAreEqual(f1: StructField, f2: StructField): Boolean = {
