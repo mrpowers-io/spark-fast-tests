@@ -94,6 +94,40 @@ object SchemaComparerTest extends TestSuite {
 
       }
 
+      "can ignore the nullable flag when determining equality in nested structures" - {
+
+        val s1 = StructType(
+          Seq(
+            StructField("something", StringType, true),
+            StructField("many_things",
+                        StructType(
+                          Seq(
+                            StructField("some_value", IntegerType, true),
+                            StructField("another_value", TimestampType, true)
+                          )),
+                        true)
+          )
+        )
+
+        val s2 = StructType(
+          Seq(
+            StructField("something", StringType, true),
+            StructField("many_things",
+                        StructType(
+                          Seq(
+                            StructField("some_value", IntegerType, false),
+                            StructField("another_value", TimestampType, false)
+                          )),
+                        false)
+          )
+        )
+
+        assert(
+          SchemaComparer.equals(s1, s2, ignoreNullable = true) == true
+        )
+
+      }
+
       "can ignore the column names flag when determining equality" - {
 
         val s1 = StructType(
