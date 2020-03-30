@@ -47,7 +47,7 @@ The `DatasetComparer` has `assertSmallDatasetEquality` and `assertLargeDatasetEq
 
 If you only need to compare DataFrames, you can use `DataFrameComparer` with the associated `assertSmallDataFrameEquality` and `assertLargeDataFrameEquality` methods.  Under the hood, `DataFrameComparer` uses the `assertSmallDatasetEquality` and `assertLargeDatasetEquality`.
 
-*Note : comparing Datasets can be tricky since some column names might be given by Spark when applying transformations. 
+*Note : comparing Datasets can be tricky since some column names might be given by Spark when applying transformations.
 Use the `ignoreColumnNames` boolean to skip name verification.*
 
 ## Setup
@@ -92,11 +92,28 @@ Scala 2.12 support is only for Spark 2.4+.
 
 ## Why is this library fast?
 
-The `assertSmallDataFrameEquality` method runs 31% faster than the `assertLargeDatasetEquality` method as described in [this blog post](https://medium.com/@mrpowers/how-to-cut-the-run-time-of-a-spark-sbt-test-suite-by-40-52d71219773f).
+This library provides three main methods to test your code.
 
-The `assertSmallDataFrameEquality` method uses the Dataset `collect()` method, which is a lot faster than the RDD `zipWithIndex()` method that's used by the other Spark testing libraries (and the `assertLargeDatasetEquality()` method).
+Suppose you'd like to test this function:
 
-spark-fast-tests also provides a `assertColumnEquality()` method that's even faster and easier to use!
+```scala
+def myLowerClean(col: Column): Column = {
+  lower(regexp_replace(col, "\\s+", ""))
+}
+```
+
+Here's how long the tests take to execute:
+
+|test method|runtime|
+|-------|--------------------|
+|`assertLargeDataFrameEquality|709 milliseconds|
+|`assertSmallDataFrameEquality`|166 milliseconds|
+|`assertColumnEquality`|108 milliseconds|
+|`evalString`|26 milliseconds|
+
+`evalString` isn't the most robust for testing, but is the fastest.  `assertColumnEquality` is robust and we can see it saves a lot of time.
+
+Other testing libraries don't have methods like `assertSmallDataFrameEquality` or `assertColumnEquality` so they run slower.
 
 ## Usage
 
