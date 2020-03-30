@@ -31,19 +31,21 @@ ${expectedDS.schema}
   }
 
   private def betterSchemaMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
-    "\n" + actualDS.schema
+    "\nActual Schema Field | Expected Schema Field\n" + actualDS.schema
       .zipAll(
         expectedDS.schema,
         "",
         ""
       )
       .map {
+        case (sf1, sf2) if sf1 == sf2 =>
+          ufansi.Color.Blue(s"$sf1 | $sf2")
+        case ("", sf2) =>
+          ufansi.Color.Red(s"MISSING | $sf2")
+        case (sf1, "") =>
+          ufansi.Color.Red(s"$sf1 | MISSING")
         case (sf1, sf2) =>
-          if (sf1.equals(sf2)) {
-            ufansi.Color.Blue(s"$sf1 | $sf2")
-          } else {
-            ufansi.Color.Red(s"$sf1 | $sf2")
-          }
+          ufansi.Color.Red(s"$sf1 | $sf2")
       }
       .mkString("\n")
   }
@@ -73,19 +75,14 @@ Expected DataFrame Row Count: '${expectedCount}'
       .mkString("\n")
   }
 
-  private def basicMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
-    s"""
-Actual DataFrame Content:
-${DataFramePrettyPrint.showString(
-      actualDS.toDF(),
-      10
-    )}
-Expected DataFrame Content:
-${DataFramePrettyPrint.showString(
-      expectedDS.toDF(),
-      10
-    )}
-"""
+  private def unequalRDDMessage[T](unequalRDD: RDD[(Long, (T, T))], length: Int): String = {
+    "\nRow Index | Actual Row | Expected Row\n" + unequalRDD
+      .take(length)
+      .map {
+        case (idx, (left, right)) =>
+          ufansi.Color.Red(s"$idx | $left | $right")
+      }
+      .mkString("\n")
   }
 
   /**
@@ -197,10 +194,7 @@ ${DataFramePrettyPrint.showString(
         val maxUnequalRowsToShow = 10
         if (!unequalRDD.isEmpty()) {
           throw DatasetContentMismatch(
-            basicMismatchMessage(
-              ds1,
-              ds2
-            )
+            unequalRDDMessage(unequalRDD, maxUnequalRowsToShow)
           )
         }
         unequalRDD.take(maxUnequalRowsToShow)
