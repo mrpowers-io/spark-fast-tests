@@ -106,7 +106,7 @@ Here's how long the tests take to execute:
 
 |test method|runtime|
 |-------|--------------------|
-|`assertLargeDataFrameEquality|709 milliseconds|
+|`assertLargeDataFrameEquality`|709 milliseconds|
 |`assertSmallDataFrameEquality`|166 milliseconds|
 |`assertColumnEquality`|108 milliseconds|
 |`evalString`|26 milliseconds|

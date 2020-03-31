@@ -492,7 +492,7 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
         val e = intercept[DatasetContentMismatch] {
           assertSmallDatasetEquality(sourceDF, expectedDF)
         }
-        assert(e.smth.count(_ == '\n') == 3)
+        assert(e.smth.count(_ == '\n') == 4)
       }
 
     }

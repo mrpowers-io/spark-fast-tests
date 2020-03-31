@@ -58,19 +58,21 @@ Expected DataFrame Row Count: '${expectedCount}'
   }
 
   private def betterContentMismatchMessage[T](a: Array[T], e: Array[T]): String = {
-    "\n" + a
+    "\nActual Content | Expected Content\n" + a
       .zipAll(
         e,
         "",
         ""
       )
       .map {
+        case (r1, r2) if (r1.equals(r2)) =>
+          ufansi.Color.Blue(s"$r1 | $r2")
+        case ("", r2) =>
+          ufansi.Color.Red(s"MISSING | $r2")
+        case (r1, "") =>
+          ufansi.Color.Red(s"$r1 | MISSING")
         case (r1, r2) =>
-          if (r1.equals(r2)) {
-            ufansi.Color.Blue(s"$r1 | $r2")
-          } else {
-            ufansi.Color.Red(s"$r1 | $r2")
-          }
+          ufansi.Color.Red(s"$r1 | $r2")
       }
       .mkString("\n")
   }
