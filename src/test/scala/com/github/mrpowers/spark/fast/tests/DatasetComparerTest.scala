@@ -147,12 +147,18 @@ object DatasetComparerTest extends TestSuite with DatasetComparer with SparkSess
       "throws an error if the DataFrames content is different" - {
         val sourceDF = Seq(
           (1),
-          (5)
+          (5),
+          (7),
+          (1),
+          (1)
         ).toDF("number")
 
         val expectedDF = Seq(
           (10),
-          (5)
+          (5),
+          (3),
+          (7),
+          (1)
         ).toDF("number")
 
         val e = intercept[DatasetContentMismatch] {
