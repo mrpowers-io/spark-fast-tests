@@ -5,7 +5,7 @@
 //
 //import org.scalatest.FreeSpec
 //
-//class ExamplesTest extends FreeSpec with SparkSessionTestWrapper with DataFrameComparer {
+//class ExamplesTest extends FreeSpec with SparkSessionTestWrapper with DataFrameComparer with ColumnComparer {
 //
 //  "assertSmallDatasetEquality" - {
 //
@@ -81,7 +81,7 @@
 //
 //      val expectedDF = spark.createDF(
 //        List(
-//          (1, "a"),
+//          (1111, "a"),
 //          (5, "b")
 //        ),
 //        List(
@@ -90,12 +90,29 @@
 //        )
 //      )
 //
-//      assertLargeDataFrameEquality(
+//      assertSmallDataFrameEquality(
 //        sourceDF,
 //        expectedDF
 //      )
 //
 //    }
+//
+//  }
+//
+//  "pretty column mismatch message" in {
+//
+//    val df = spark.createDF(
+//      List(
+//        ("a", "z"),
+//        ("b", "b")
+//      ),
+//      List(
+//        ("letter1", StringType, true),
+//        ("letter", StringType, true)
+//      )
+//    )
+//
+//    assertColumnEquality(df, "letter1", "letter")
 //
 //  }
 //

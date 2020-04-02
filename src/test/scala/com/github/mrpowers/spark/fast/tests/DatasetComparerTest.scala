@@ -491,7 +491,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
       val e = intercept[DatasetContentMismatch] {
         assertSmallDatasetEquality(sourceDF, expectedDF)
       }
-      assert(e.smth.count(_ == '\n') == 4)
     }
 
   }

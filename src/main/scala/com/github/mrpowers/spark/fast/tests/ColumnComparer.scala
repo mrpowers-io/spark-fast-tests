@@ -16,7 +16,8 @@ trait ColumnComparer {
     val colName1Elements = elements.map(_(0))
     val colName2Elements = elements.map(_(1))
     if (!colName1Elements.sameElements(colName2Elements)) {
-      val mismatchMessage = "\n" + ArrayPrettyPrint.showTwoColumnString(
+      // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
+      val mismatchMessage = "Diffs\n" + ArrayPrettyPrint.showTwoColumnString(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements)
       )
       throw ColumnMismatch(mismatchMessage)
@@ -37,7 +38,8 @@ trait ColumnComparer {
     val colName1Elements = elements.map(_(0))
     val colName2Elements = elements.map(_(1))
     if (!colName1Elements.deep.sameElements(colName2Elements.deep)) {
-      val mismatchMessage = "\n" + ArrayPrettyPrint.showTwoColumnString(
+      // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
+      val mismatchMessage = "Diffs\n" + ArrayPrettyPrint.showTwoColumnString(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements)
       )
       throw ColumnMismatch(mismatchMessage)
@@ -82,7 +84,8 @@ trait ColumnComparer {
     if (!allRowsAreEqual) {
       val colName1Elements = elements.map(_(0))
       val colName2Elements = elements.map(_(1))
-      val mismatchMessage = "\n" + ArrayPrettyPrint.showTwoColumnStringColorCustomizable(
+      // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
+      val mismatchMessage = "Diffs\n" + ArrayPrettyPrint.showTwoColumnStringColorCustomizable(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements),
         rowsEqual.toArray
       )
@@ -128,7 +131,8 @@ trait ColumnComparer {
     if (!allRowsAreEqual) {
       val colName1Elements = elements.map(_(0))
       val colName2Elements = elements.map(_(1))
-      val mismatchMessage = "\n" + ArrayPrettyPrint.showTwoColumnStringColorCustomizable(
+      // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
+      val mismatchMessage = "Diffs\n" + ArrayPrettyPrint.showTwoColumnStringColorCustomizable(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements),
         rowsEqual.toArray
       )
@@ -162,7 +166,8 @@ trait ColumnComparer {
         .collect()
       val colName1Elements = elements.map(_(0))
       val colName2Elements = elements.map(_(1))
-      val mismatchMessage = "\n" + ArrayPrettyPrint.showTwoColumnString(
+      // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
+      val mismatchMessage = "Diffs\n" + ArrayPrettyPrint.showTwoColumnString(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements)
       )
       throw ColumnMismatch(mismatchMessage)

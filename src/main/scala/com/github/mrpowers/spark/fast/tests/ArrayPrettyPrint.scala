@@ -81,7 +81,7 @@ object ArrayPrettyPrint {
               StringUtils.rightPad(cell.toString, colWidths(i))
             }
             if (color == "blue") {
-              ufansi.Color.Blue(r)
+              ufansi.Color.DarkGray(r)
             } else {
               ufansi.Color.Red(r)
             }
