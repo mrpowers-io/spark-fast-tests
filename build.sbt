@@ -16,8 +16,7 @@ spAppendScalaVersion := true
 
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.3" % "provided"
 
-libraryDependencies += "com.lihaoyi" %% "utest" % "0.6.3" % "test"
-testFrameworks += new TestFramework("com.github.mrpowers.spark.fast.tests.CustomFramework")
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
 artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
   artifact.name + "-" + module.revision + "." + artifact.extension

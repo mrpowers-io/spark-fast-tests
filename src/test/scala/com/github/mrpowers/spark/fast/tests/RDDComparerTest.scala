@@ -1,31 +1,29 @@
 package com.github.mrpowers.spark.fast.tests
 
-import utest._
+import org.scalatest.FreeSpec
 
-object RDDComparerTest extends TestSuite with RDDComparer with SparkSessionTestWrapper {
+class RDDComparerTest extends FreeSpec with RDDComparer with SparkSessionTestWrapper {
 
-  val tests = Tests {
+  "contentMismatchMessage" - {
 
-    'contentMismatchMessage - {
+    "returns a string string to compare the expected and actual RDDs" in {
+      val sourceData = List(
+        ("cat"),
+        ("dog"),
+        ("frog")
+      )
 
-      "returns a string string to compare the expected and actual RDDs" - {
-        val sourceData = List(
-          ("cat"),
-          ("dog"),
-          ("frog")
-        )
+      val actualRDD = spark.sparkContext.parallelize(sourceData)
 
-        val actualRDD = spark.sparkContext.parallelize(sourceData)
+      val expectedData = List(
+        ("man"),
+        ("can"),
+        ("pan")
+      )
 
-        val expectedData = List(
-          ("man"),
-          ("can"),
-          ("pan")
-        )
+      val expectedRDD = spark.sparkContext.parallelize(expectedData)
 
-        val expectedRDD = spark.sparkContext.parallelize(expectedData)
-
-        val expected = """
+      val expected = """
 Actual RDD Content:
 cat
 dog
@@ -36,56 +34,54 @@ can
 pan
 """
 
-        assert(
-          contentMismatchMessage(actualRDD, expectedRDD) == expected
-        )
-      }
-
+      assert(
+        contentMismatchMessage(actualRDD, expectedRDD) == expected
+      )
     }
 
-    'assertSmallRDDEquality - {
+  }
 
-      "does nothing if the RDDs have the same content" - {
-        val sourceData = List(
-          ("cat"),
-          ("dog"),
-          ("frog")
-        )
+  "assertSmallRDDEquality" - {
 
-        val sourceRDD = spark.sparkContext.parallelize(sourceData)
+    "does nothing if the RDDs have the same content" in {
+      val sourceData = List(
+        ("cat"),
+        ("dog"),
+        ("frog")
+      )
 
-        val expectedData = List(
-          ("cat"),
-          ("dog"),
-          ("frog")
-        )
+      val sourceRDD = spark.sparkContext.parallelize(sourceData)
 
-        val expectedRDD = spark.sparkContext.parallelize(expectedData)
+      val expectedData = List(
+        ("cat"),
+        ("dog"),
+        ("frog")
+      )
 
+      val expectedRDD = spark.sparkContext.parallelize(expectedData)
+
+      assertSmallRDDEquality(sourceRDD, expectedRDD)
+    }
+
+    "throws an error if the RDDs have different content" in {
+      val sourceData = List(
+        ("cat"),
+        ("dog"),
+        ("frog")
+      )
+      val sourceRDD = spark.sparkContext.parallelize(sourceData)
+
+      val expectedData = List(
+        ("mouse"),
+        ("pig"),
+        ("frog")
+      )
+
+      val expectedRDD = spark.sparkContext.parallelize(expectedData)
+
+      val e = intercept[RDDContentMismatch] {
         assertSmallRDDEquality(sourceRDD, expectedRDD)
       }
-
-      "throws an error if the RDDs have different content" - {
-        val sourceData = List(
-          ("cat"),
-          ("dog"),
-          ("frog")
-        )
-        val sourceRDD = spark.sparkContext.parallelize(sourceData)
-
-        val expectedData = List(
-          ("mouse"),
-          ("pig"),
-          ("frog")
-        )
-
-        val expectedRDD = spark.sparkContext.parallelize(expectedData)
-
-        val e = intercept[RDDContentMismatch] {
-          assertSmallRDDEquality(sourceRDD, expectedRDD)
-        }
-      }
-
     }
 
   }
