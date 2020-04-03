@@ -58,26 +58,6 @@ Expected DataFrame Row Count: '${expectedCount}'
   }
 
   private def betterContentMismatchMessage[T](a: Array[T], e: Array[T]): String = {
-//     using a preceding colon to hack header row on new line for Scalatest
-//     this is a complete hack that's needed for Scalatest printing
-//    "\nActual Content | Expected Content\n" + a
-//      .zipAll(
-//        e,
-//        "",
-//        ""
-//      )
-//      .map {
-//        case (r1, r2) if (r1.equals(r2)) =>
-//          ufansi.Color.Blue(s"$r1 | $r2")
-//        case ("", r2) =>
-//          ufansi.Color.Red(s"MISSING | $r2")
-//        case (r1, "") =>
-//          ufansi.Color.Red(s"$r1 | MISSING")
-//        case (r1, r2) =>
-//          ufansi.Color.Red(s"$r1 | $r2")
-//      }
-//      .mkString("\n")
-
     // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
     "Diffs\n" ++ ArrayPrettyPrint.showTwoColumnString(Array(("Actual Content", "Expected Content")) ++ a.zip(e))
   }
