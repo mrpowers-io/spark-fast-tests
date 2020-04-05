@@ -8,7 +8,7 @@ spShortDescription := "Fast tests with Spark"
 spDescription := "Test your code quickly"
 
 version := "0.21.0"
-crossScalaVersions := Seq("2.11.12", "2.12.7")
+crossScalaVersions := Seq("2.11.12", "2.12.10")
 scalaVersion := "2.11.12"
 sparkVersion := "2.4.3"
 
