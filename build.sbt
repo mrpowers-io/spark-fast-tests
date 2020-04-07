@@ -14,7 +14,7 @@ sparkVersion := "2.4.5"
 
 spAppendScalaVersion := true
 
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.3" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.5" % "provided"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
