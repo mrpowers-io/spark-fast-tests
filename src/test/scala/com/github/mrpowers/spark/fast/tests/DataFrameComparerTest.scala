@@ -1,6 +1,7 @@
 package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.types.{IntegerType, StringType}
+import org.apache.spark.sql.functions._
 import SparkSessionExt._
 
 import org.scalatest.FreeSpec
@@ -43,6 +44,21 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
   }
 
   "checkingDataFrameEquality" - {
+
+    "provides a descriptive error message" in {
+      val someDF = spark.createDF(
+        List(
+          (8, "bat"),
+          (64, "mouse"),
+          (-27, "horse")
+        ),
+        List(
+          ("number", IntegerType, true),
+          ("word", StringType, true)
+        )
+      )
+      assertLargeDataFrameEquality(someDF.sort(col("number")), someDF)
+    }
 
     "does nothing if the DataFrames have the same schemas and content" in {
       val sourceDF = spark.createDF(
