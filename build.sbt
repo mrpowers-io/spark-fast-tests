@@ -9,7 +9,7 @@ name := "spark-fast-tests"
 /*spShortDescription := "Fast tests with Spark"*/
 /*spDescription := "Test your code quickly"*/
 
-version := "0.21.2"
+version := "0.21.3"
 crossScalaVersions := Seq("2.11.12", "2.12.10")
 scalaVersion := crossScalaVersions.value.head
 val sparkVersion = "2.4.5"
