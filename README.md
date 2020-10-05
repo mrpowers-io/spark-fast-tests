@@ -1,8 +1,28 @@
 # spark-fast-tests
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ab42211c18984740bee7f87c631a8f42)](https://www.codacy.com/app/MrPowers/spark-fast-tests?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MrPowers/spark-fast-tests&amp;utm_campaign=Badge_Grade) [![Join the chat at https://gitter.im/spark-fast-tests/community](https://badges.gitter.im/spark-fast-tests/community.svg)](https://gitter.im/spark-fast-tests/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 A fast Apache Spark testing helper library with beautifully formatted error messages!  Works with scalatest and uTest.
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ab42211c18984740bee7f87c631a8f42)](https://www.codacy.com/app/MrPowers/spark-fast-tests?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MrPowers/spark-fast-tests&amp;utm_campaign=Badge_Grade) [![Join the chat at https://gitter.im/spark-fast-tests/community](https://badges.gitter.im/spark-fast-tests/community.svg)](https://gitter.im/spark-fast-tests/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+PySpark codebases should use [chispa](https://github.com/MrPowers/chispa) instead of this library.
+
+Read [Testing Spark Applications](https://leanpub.com/testing-spark) for a full explanation on the best way to test Spark code!  Good test suites make higher quality codebases that are easy to refactor.
+
+## Install
+
+Fetch the JAR file from Maven.
+
+```scala
+libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "0.21.3" % "test"
+```
+
+Here's a link to the [Scala 2.11 JAR files](https://repo1.maven.org/maven2/com/github/mrpowers/spark-fast-tests_2.11/) and the [Scala 2.12 JAR files](https://repo1.maven.org/maven2/com/github/mrpowers/spark-fast-tests_2.12/).  [Here's a link to all the legacy JAR files in Maven](https://mvnrepository.com/artifact/MrPowers/spark-fast-tests?repo=spark-packages).
+
+You should use Scala 2.11 with Spark 2 and Scala 2.12 with Spark 3.  The `libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "0.21.3" % "test"` syntax automatically grabs a JAR file compiled with the correct Scala version for your project.
+
+You'll get weird errors if you use a JAR file compiled with Scala 2.11 with a Spark 3 project.
+
+## Simple examples
 
 The `assertSmallDatasetEquality` method can be used to compare two Datasets (or two DataFrames).
 
@@ -50,46 +70,6 @@ If you only need to compare DataFrames, you can use `DataFrameComparer` with the
 *Note : comparing Datasets can be tricky since some column names might be given by Spark when applying transformations.
 Use the `ignoreColumnNames` boolean to skip name verification.*
 
-## Setup
-
-**Option 1: Maven**
-
-Fetch the JAR file from Maven.
-
-```scala
-resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
-
-// Scala 2.11
-libraryDependencies += "MrPowers" % "spark-fast-tests" % "0.20.0-s_2.11"
-
-// Scala 2.12, Spark 2.4+
-libraryDependencies += "MrPowers" % "spark-fast-tests" % "0.20.0-s_2.12"
-```
-
-[Here's a link to all the JAR files in Maven](https://mvnrepository.com/artifact/MrPowers/spark-fast-tests?repo=spark-packages).
-
-**Option 2: JitPack**
-
-Update your `build.sbt` file as follows.
-
-```scala
-resolvers += "jitpack" at "https://jitpack.io"
-libraryDependencies += "com.github.mrpowers" % "spark-fast-tests" % "v0.16.0" % "test"
-```
-
-**Spark version compatibility by spark-fast-tests version**
-
-|       | 0.16.0             | 0.17.0             |
-|-------|--------------------|--------------------|
-| 2.0.0 | :white_check_mark: | :white_check_mark: |
-| 2.1.0 | :white_check_mark: | :white_check_mark: |
-| 2.2.2 | :white_check_mark: | :white_check_mark: |
-| 2.3.0 | :white_check_mark: | :white_check_mark: |
-| 2.3.1 | :white_check_mark: | :white_check_mark: |
-| 2.4.0 | :white_check_mark: | :white_check_mark: |
-
-Scala 2.12 support is only for Spark 2.4+.
-
 ## Why is this library fast?
 
 This library provides three main methods to test your code.
@@ -111,7 +91,7 @@ Here's how long the tests take to execute:
 |`assertColumnEquality`|108 milliseconds|
 |`evalString`|26 milliseconds|
 
-`evalString` isn't the most robust for testing, but is the fastest.  `assertColumnEquality` is robust and we can see it saves a lot of time.
+`evalString` isn't as robust, but is the fastest.  `assertColumnEquality` is robust and saves a lot of time.
 
 Other testing libraries don't have methods like `assertSmallDataFrameEquality` or `assertColumnEquality` so they run slower.
 
@@ -136,7 +116,7 @@ trait SparkSessionTestWrapper {
 }
 ```
 
-It's typically best set the number of shuffle partitions to one in your test suite.  This configuration can make your tests run up to 70% faster.  You can remove this configuration option or adjust it if you're working with big DataFrames in your test suite.
+It's best set the number of shuffle partitions to a small number like one or four in your test suite.  This configuration can make your tests run up to 70% faster.  You can remove this configuration option or adjust it if you're working with big DataFrames in your test suite.
 
 Make sure to only use the `SparkSessionTestWrapper` trait in your test suite.  You don't want to use test specific configuration (like one shuffle partition) when running production code.
 
@@ -317,6 +297,45 @@ assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
 * Try to organize your code as [custom transformations](https://medium.com/@mrpowers/chaining-custom-dataframe-transformations-in-spark-a39e315f903c) so it's easy to test the logic elegantly
 * Don't write tests that read from files or write files.  Dependency injection is a great way to avoid file I/O in you test suite.
 
+## Alternatives
+
+The [spark-testing-base](https://github.com/holdenk/spark-testing-base) project has more features (e.g. streaming support) and is compiled to support a variety of Scala and Spark versions.
+
+You might want to use spark-fast-tests instead of spark-testing-base in these cases:
+
+* You want to use uTest or a testing framework other than scalatest
+* You want to run tests in parallel (you need to set `parallelExecution in Test := false` with spark-testing-base)
+* You don't want to include hive as a project dependency
+* You don't want to restart the SparkSession after each test file executes so the suite runs faster
+
+## Publishing
+
+Run `sbt` to open the SBT console.
+
+Run `> ; + publishSigned; sonatypeBundleRelease` to create the JAR files and release them to Maven.  These commands are made available by the [sbt-sonatype](https://github.com/xerial/sbt-sonatype) plugin.
+
+When the release command is run, you'll be prompted to enter your GPG passphrase.
+
+The Sonatype credentials should be stored in the `~/.sbt/sonatype_credentials` file in this format:
+
+```
+realm=Sonatype Nexus Repository Manager
+host=oss.sonatype.org
+user=$USERNAME
+password=$PASSWORD
+```
+
+## Additional Goals
+
+* Use memory efficiently so Spark test runs don't crash
+* Provide readable error messages
+* Easy to use in conjunction with other test suites
+* Give the user control of the SparkSession
+
+## Contributing
+
+Open an issue or send a pull request to contribute.  Anyone that makes good contributions to the project will be promoted to project maintainer status.
+
 ## uTest settings to display color output
 
 Create a `CustomFramework` class with overrides that turn off the default uTest color settings.
@@ -342,33 +361,4 @@ Update the `build.sbt` file to use the `CustomFramework` class:
 testFrameworks += new TestFramework("com.github.mrpowers.spark.fast.tests.CustomFramework")
 ```
 
-## Alternatives
-
-The [spark-testing-base](https://github.com/holdenk/spark-testing-base) project has more features (e.g. streaming support) and is compiled to support a variety of Scala and Spark versions.
-
-You might want to use spark-fast-tests instead of spark-testing-base in these cases:
-
-* You want to use uTest or a testing framework other than scalatest
-* You want to run tests in parallel (you need to set `parallelExecution in Test := false` with spark-testing-base)
-* You don't want to include hive as a project dependency
-* You don't want to restart the SparkSession after each test file executes so the suite runs faster
-
-## Publishing
-
-Build the JAR / POM files with `sbt +spDist` as described in [this GitHub issue](https://github.com/databricks/sbt-spark-package/issues/18#issuecomment-184107369).
-
-Manually upload the zip files to [Spark Packages](https://spark-packages.org/).
-
-Make a GitHub release so the code is available via JitPack.
-
-## Additional Goals
-
-* Use memory efficiently so Spark test runs don't crash
-* Provide readable error messages
-* Easy to use in conjunction with other test suites
-* Give the user control of the SparkSession
-
-## Contributing
-
-Open an issue or send a pull request to contribute.  Anyone that makes good contributions to the project will be promoted to project maintainer status.
 
