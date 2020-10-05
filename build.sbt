@@ -4,20 +4,13 @@ scalafmtOnCompile in Compile := true
 
 organization := "com.github.mrpowers"
 name := "spark-fast-tests"
-/*spName := "MrPowers/spark-fast-tests"*/
-
-/*spShortDescription := "Fast tests with Spark"*/
-/*spDescription := "Test your code quickly"*/
 
 version := "0.21.3"
 crossScalaVersions := Seq("2.11.12", "2.12.10")
 scalaVersion := crossScalaVersions.value.head
 val sparkVersion = "2.4.5"
 
-/*spAppendScalaVersion := true*/
-
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
-
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
 artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
@@ -40,15 +33,6 @@ updateOptions := updateOptions.value.withLatestSnapshots(false)
 
 publishMavenStyle := true
 
-/*spAppendScalaVersion := true*/
-
-/*spIncludeMaven := true*/
-
 publishTo := sonatypePublishToBundle.value
 
 Global/useGpgPinentry := true
-
-// Skip tests during assembly
-/*test in assembly := {}*/
-
-/*addArtifact(artifact in (Compile, assembly), assembly)*/
