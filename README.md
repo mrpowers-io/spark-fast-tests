@@ -2,11 +2,11 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ab42211c18984740bee7f87c631a8f42)](https://www.codacy.com/app/MrPowers/spark-fast-tests?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MrPowers/spark-fast-tests&amp;utm_campaign=Badge_Grade) [![Join the chat at https://gitter.im/spark-fast-tests/community](https://badges.gitter.im/spark-fast-tests/community.svg)](https://gitter.im/spark-fast-tests/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-A fast Apache Spark testing helper library with beautifully formatted error messages!  Works with scalatest and uTest.
+A fast Apache Spark testing helper library with beautifully formatted error messages!  Works with [scalatest](https://github.com/scalatest/scalatest), [uTest](https://github.com/lihaoyi/utest), and [munit](https://github.com/scalameta/munit).
 
 PySpark codebases should use [chispa](https://github.com/MrPowers/chispa) instead of this library.
 
-Read [Testing Spark Applications](https://leanpub.com/testing-spark) for a full explanation on the best way to test Spark code!  Good test suites make higher quality codebases that are easy to refactor.
+Read [Testing Spark Applications](https://leanpub.com/testing-spark) for a full explanation on the best way to test Spark code!  Good test suites yield higher quality codebases that are easy to refactor.
 
 ## Install
 
@@ -18,7 +18,7 @@ libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "0.21.3" % 
 
 Here's a link to the [Scala 2.11 JAR files](https://repo1.maven.org/maven2/com/github/mrpowers/spark-fast-tests_2.11/) and the [Scala 2.12 JAR files](https://repo1.maven.org/maven2/com/github/mrpowers/spark-fast-tests_2.12/).  [Here's a link to all the legacy JAR files in Maven](https://mvnrepository.com/artifact/MrPowers/spark-fast-tests?repo=spark-packages).
 
-You should use Scala 2.11 with Spark 2 and Scala 2.12 with Spark 3.  The `libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "0.21.3" % "test"` syntax automatically grabs a JAR file compiled with the correct Scala version for your project.
+You should use Scala 2.11 with Spark 2 and Scala 2.12 with Spark 3.  The `libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "0.21.3" % "test"` syntax automatically grabs the JAR file that corresponds with the Scala version in your project.
 
 You'll get weird errors if you use a JAR file compiled with Scala 2.11 with a Spark 3 project.
 
