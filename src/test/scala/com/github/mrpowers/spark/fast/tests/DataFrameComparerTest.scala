@@ -39,7 +39,80 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
         expectedDF
       )
     }
+    assert(e.getMessage.indexOf("bob") >= 0)
+    assert(e.getMessage.indexOf("camila") >= 0)
+  }
 
+  "also print a descriptive error message if the right side is missing" in {
+    val sourceDF = spark.createDF(
+      List(
+        ("bob", 1, "uk"),
+        ("camila", 5, "peru"),
+        ("jean-jacques", 4, "france")
+      ),
+      List(
+        ("name", StringType, true),
+        ("age", IntegerType, true),
+        ("country", StringType, true)
+      )
+    )
+
+    val expectedDF = spark.createDF(
+      List(
+        ("bob", 1, "france"),
+        ("camila", 5, "peru")
+      ),
+      List(
+        ("name", StringType, true),
+        ("age", IntegerType, true),
+        ("country", StringType, true)
+      )
+    )
+
+    val e = intercept[DatasetContentMismatch] {
+      assertSmallDataFrameEquality(
+        sourceDF,
+        expectedDF
+      )
+    }
+
+    assert(e.getMessage.indexOf("jean-jacques") >= 0)
+  }
+
+  "also print a descriptive error message if the left side is missing" in {
+    val sourceDF = spark.createDF(
+      List(
+        ("bob", 1, "uk"),
+        ("camila", 5, "peru")
+      ),
+      List(
+        ("name", StringType, true),
+        ("age", IntegerType, true),
+        ("country", StringType, true)
+      )
+    )
+
+    val expectedDF = spark.createDF(
+      List(
+        ("bob", 1, "france"),
+        ("camila", 5, "peru"),
+        ("jean-claude", 4, "france")
+      ),
+      List(
+        ("name", StringType, true),
+        ("age", IntegerType, true),
+        ("country", StringType, true)
+      )
+    )
+
+    val e = intercept[DatasetContentMismatch] {
+      assertSmallDataFrameEquality(
+        sourceDF,
+        expectedDF
+      )
+    }
+
+    assert(e.getMessage.indexOf("jean-claude") >= 0)
   }
 
   "checkingDataFrameEquality" - {
