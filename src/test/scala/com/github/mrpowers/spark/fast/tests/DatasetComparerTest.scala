@@ -42,6 +42,28 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
 
     }
 
+    "works with really long columns" in {
+
+      val sourceDS = Seq(
+        Person("juanisareallygoodguythatilikealotOK", 5),
+        Person("bob", 1),
+        Person("li", 49),
+        Person("alice", 5)
+      ).toDS
+
+      val expectedDS = Seq(
+        Person("juanisareallygoodguythatilikealotNOT", 5),
+        Person("frank", 10),
+        Person("li", 49),
+        Person("lucy", 5)
+      ).toDS
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(sourceDS, expectedDS)
+      }
+
+    }
+
     "does nothing if the DataFrames have the same schemas and content" in {
       val sourceDF = spark.createDF(
         List(

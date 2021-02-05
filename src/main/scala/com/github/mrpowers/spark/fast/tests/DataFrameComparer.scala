@@ -1,6 +1,5 @@
 package com.github.mrpowers.spark.fast.tests
 
-import com.github.mrpowers.spark.fast.tests.DatasetComparerLike.naiveEquality
 import org.apache.spark.sql.DataFrame
 
 trait DataFrameComparer extends DatasetComparer {
@@ -12,13 +11,15 @@ trait DataFrameComparer extends DatasetComparer {
                                    expectedDF: DataFrame,
                                    ignoreNullable: Boolean = false,
                                    ignoreColumnNames: Boolean = false,
-                                   orderedComparison: Boolean = true): Unit = {
+                                   orderedComparison: Boolean = true,
+                                   truncate: Int = 500): Unit = {
     assertSmallDatasetEquality(
       actualDF,
       expectedDF,
       ignoreNullable,
       ignoreColumnNames,
-      orderedComparison
+      orderedComparison,
+      truncate
     )
   }
 

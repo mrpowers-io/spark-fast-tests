@@ -57,9 +57,10 @@ Expected DataFrame Row Count: '${expectedCount}'
 """
   }
 
-  private def betterContentMismatchMessage[T](a: Array[T], e: Array[T]): String = {
+  private def betterContentMismatchMessage[T](a: Array[T], e: Array[T], truncate: Int): String = {
     // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
-    "Diffs\n" ++ ArrayPrettyPrint.showTwoColumnString(Array(("Actual Content", "Expected Content")) ++ a.zipAll(e, "": Any, "": Any))
+    val arr = Array(("Actual Content", "Expected Content")) ++ a.zipAll(e, "": Any, "": Any)
+    "Diffs\n" ++ ArrayPrettyPrint.showTwoColumnString(arr, truncate)
   }
 
   private def unequalRDDMessage[T](unequalRDD: RDD[(Long, (T, T))], length: Int): String = {
@@ -79,41 +80,24 @@ Expected DataFrame Row Count: '${expectedCount}'
                                     expectedDS: Dataset[T],
                                     ignoreNullable: Boolean = false,
                                     ignoreColumnNames: Boolean = false,
-                                    orderedComparison: Boolean = true): Unit = {
-    if (!SchemaComparer.equals(
-          actualDS.schema,
-          expectedDS.schema,
-          ignoreNullable,
-          ignoreColumnNames
-        )) {
+                                    orderedComparison: Boolean = true,
+                                    truncate: Int = 500): Unit = {
+    if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames)) {
       throw DatasetSchemaMismatch(
-        betterSchemaMismatchMessage(
-          actualDS,
-          expectedDS
-        )
+        betterSchemaMismatchMessage(actualDS, expectedDS)
       )
     }
     if (orderedComparison) {
       val a = actualDS.collect()
       val e = expectedDS.collect()
       if (!a.sameElements(e)) {
-        throw DatasetContentMismatch(
-          betterContentMismatchMessage(
-            a,
-            e
-          )
-        )
+        throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
       }
     } else {
       val a = defaultSortDataset(actualDS).collect()
       val e = defaultSortDataset(expectedDS).collect()
       if (!a.sameElements(e)) {
-        throw DatasetContentMismatch(
-          betterContentMismatchMessage(
-            a,
-            e
-          )
-        )
+        throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
       }
     }
   }
@@ -134,18 +118,8 @@ Expected DataFrame Row Count: '${expectedCount}'
                                               ignoreColumnNames: Boolean = false,
                                               orderedComparison: Boolean = true): Unit = {
     // first check if the schemas are equal
-    if (!SchemaComparer.equals(
-          actualDS.schema,
-          expectedDS.schema,
-          ignoreNullable,
-          ignoreColumnNames
-        )) {
-      throw DatasetSchemaMismatch(
-        betterSchemaMismatchMessage(
-          actualDS,
-          expectedDS
-        )
-      )
+    if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames)) {
+      throw DatasetSchemaMismatch(betterSchemaMismatchMessage(actualDS, expectedDS))
     }
     // then check if the DataFrames have the same content
     def throwIfDatasetsAreUnequal(ds1: Dataset[T], ds2: Dataset[T]) = {
@@ -157,26 +131,15 @@ Expected DataFrame Row Count: '${expectedCount}'
         val expectedCount = ds2.rdd.count
 
         if (actualCount != expectedCount) {
-          throw DatasetCountMismatch(
-            countMismatchMessage(
-              actualCount,
-              expectedCount
-            )
-          )
+          throw DatasetCountMismatch(countMismatchMessage(actualCount, expectedCount))
         }
 
-        val expectedIndexValue: RDD[(Long, T)] =
-          RddHelpers.zipWithIndex(ds1.rdd)
-        val resultIndexValue: RDD[(Long, T)] =
-          RddHelpers.zipWithIndex(ds2.rdd)
+        val expectedIndexValue: RDD[(Long, T)] = RddHelpers.zipWithIndex(ds1.rdd)
+        val resultIndexValue: RDD[(Long, T)]   = RddHelpers.zipWithIndex(ds2.rdd)
         val unequalRDD = expectedIndexValue
           .join(resultIndexValue)
           .filter {
-            case (idx, (o1, o2)) =>
-              !equals(
-                o1,
-                o2
-              )
+            case (idx, (o1, o2)) => !equals(o1, o2)
           }
         val maxUnequalRowsToShow = 10
         if (!unequalRDD.isEmpty()) {
@@ -193,15 +156,9 @@ Expected DataFrame Row Count: '${expectedCount}'
     }
 
     if (orderedComparison) {
-      throwIfDatasetsAreUnequal(
-        actualDS,
-        expectedDS
-      )
+      throwIfDatasetsAreUnequal(actualDS, expectedDS)
     } else {
-      throwIfDatasetsAreUnequal(
-        defaultSortDataset(actualDS),
-        defaultSortDataset(expectedDS)
-      )
+      throwIfDatasetsAreUnequal(defaultSortDataset(actualDS), defaultSortDataset(expectedDS))
     }
   }
 
@@ -212,11 +169,7 @@ Expected DataFrame Row Count: '${expectedCount}'
                                          ignoreColumnNames: Boolean = false,
                                          orderedComparison: Boolean = true): Unit = {
     val e = (r1: Row, r2: Row) => {
-      r1.equals(r2) || RowComparer.areRowsEqual(
-        r1,
-        r2,
-        precision
-      )
+      r1.equals(r2) || RowComparer.areRowsEqual(r1, r2, precision)
     }
     assertLargeDatasetEquality[Row](
       actualDF,
