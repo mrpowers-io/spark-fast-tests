@@ -14,6 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: olafurpg/setup-scala@v5
+      - uses: olafurpg/setup-scala@v10
       - name: Test
         run: sbt -Dspark.testVersion=${{ matrix.spark  }} ++${{ matrix.scala }} test
