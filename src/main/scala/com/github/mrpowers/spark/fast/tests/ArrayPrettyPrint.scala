@@ -1,10 +1,9 @@
 package com.github.mrpowers.spark.fast.tests
 
 import java.sql.Date
-
 import com.github.mrpowers.spark.fast.tests.ufansi.EscapeAttr
+import java.time.format.DateTimeFormatter
 import org.apache.commons.lang3.StringUtils
-import org.apache.spark.sql.catalyst.util.DateTimeUtils
 
 object ArrayPrettyPrint {
 
@@ -16,7 +15,7 @@ object ArrayPrettyPrint {
           case binary: Array[Byte] => binary.map("%02X".format(_)).mkString("[", " ", "]")
           case array: Array[_]     => array.mkString("[", ", ", "]")
           case seq: Seq[_]         => seq.mkString("[", ", ", "]")
-          case d: Date             => DateTimeUtils.dateToString(DateTimeUtils.fromJavaDate(d))
+          case d: Date             => d.toLocalDate.format(DateTimeFormatter.ISO_DATE)
           case _                   => cell.toString
         }
         if (truncate > 0 && str.length > truncate) {
