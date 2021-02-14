@@ -1,10 +1,10 @@
 package com.github.mrpowers.spark.fast.tests
 
 import java.sql.Date
-
+import java.time.format.DateTimeFormatter
 import org.apache.commons.lang3.StringUtils
-import org.apache.spark.sql.{DataFrame, Dataset}
-import org.apache.spark.sql.catalyst.util.DateTimeUtils
+
+import org.apache.spark.sql.DataFrame
 
 object DataFramePrettyPrint {
 
@@ -42,7 +42,7 @@ object DataFramePrettyPrint {
               "]"
             )
           case d: Date =>
-            DateTimeUtils.dateToString(DateTimeUtils.fromJavaDate(d))
+            d.toLocalDate.format(DateTimeFormatter.ISO_DATE)
           case _ => cell.toString
         }
         if (truncate > 0 && str.length > truncate) {
