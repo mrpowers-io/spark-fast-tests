@@ -20,10 +20,7 @@ ${expectedRDD.take(5).mkString("\n")}
   def assertSmallRDDEquality[T: ClassTag](actualRDD: RDD[T], expectedRDD: RDD[T]): Unit = {
     if (!actualRDD.collect().sameElements(expectedRDD.collect())) {
       throw RDDContentMismatch(
-        contentMismatchMessage(
-          actualRDD,
-          expectedRDD
-        )
+        contentMismatchMessage(actualRDD, expectedRDD)
       )
     }
   }

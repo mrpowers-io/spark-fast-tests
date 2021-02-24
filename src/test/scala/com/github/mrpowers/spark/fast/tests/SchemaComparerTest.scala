@@ -20,7 +20,7 @@ class SchemaComparerTest extends FreeSpec {
           StructField("mood", StringType, true)
         )
       )
-      assert(SchemaComparer.equals(s1, s2) == true)
+      assert(SchemaComparer.equals(s1, s2))
     }
 
     "works for single column schemas" in {
@@ -34,7 +34,7 @@ class SchemaComparerTest extends FreeSpec {
           StructField("something", StringType, false)
         )
       )
-      assert(SchemaComparer.equals(s1, s2, true) == true)
+      assert(SchemaComparer.equals(s1, s2, true))
     }
 
     "returns false if the schemas aren't equal" in {
@@ -65,7 +65,7 @@ class SchemaComparerTest extends FreeSpec {
           StructField("mood", StringType, true)
         )
       )
-      assert(SchemaComparer.equals(s1, s2, ignoreNullable = true) == true)
+      assert(SchemaComparer.equals(s1, s2, ignoreNullable = true))
     }
 
     "can ignore the column names flag when determining equality" in {
@@ -81,7 +81,7 @@ class SchemaComparerTest extends FreeSpec {
           StructField("different", StringType, true)
         )
       )
-      assert(SchemaComparer.equals(s1, s2, ignoreColumnNames = true) == true)
+      assert(SchemaComparer.equals(s1, s2, ignoreColumnNames = true))
     }
 
   }
