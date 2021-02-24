@@ -33,10 +33,7 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
     )
 
     val e = intercept[DatasetContentMismatch] {
-      assertSmallDataFrameEquality(
-        sourceDF,
-        expectedDF
-      )
+      assertSmallDataFrameEquality(sourceDF, expectedDF)
     }
     assert(e.getMessage.indexOf("bob") >= 0)
     assert(e.getMessage.indexOf("camila") >= 0)
@@ -99,10 +96,7 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
     )
 
     val e = intercept[DatasetContentMismatch] {
-      assertSmallDataFrameEquality(
-        sourceDF,
-        expectedDF
-      )
+      assertSmallDataFrameEquality(sourceDF, expectedDF)
     }
 
     assert(e.getMessage.indexOf("jean-jacques") >= 0)
@@ -135,10 +129,7 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
     )
 
     val e = intercept[DatasetContentMismatch] {
-      assertSmallDataFrameEquality(
-        sourceDF,
-        expectedDF
-      )
+      assertSmallDataFrameEquality(sourceDF, expectedDF)
     }
 
     assert(e.getMessage.indexOf("jean-claude") >= 0)
@@ -163,14 +154,8 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
         List(("number", IntegerType, true))
       )
 
-      assertSmallDataFrameEquality(
-        sourceDF,
-        expectedDF
-      )
-      assertLargeDataFrameEquality(
-        sourceDF,
-        expectedDF
-      )
+      assertSmallDataFrameEquality(sourceDF, expectedDF)
+      assertLargeDataFrameEquality(sourceDF, expectedDF)
     }
 
     "throws an error if the DataFrames have different schemas" in {
@@ -194,16 +179,10 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
       )
 
       val e = intercept[DatasetSchemaMismatch] {
-        assertLargeDataFrameEquality(
-          sourceDF,
-          expectedDF
-        )
+        assertLargeDataFrameEquality(sourceDF, expectedDF)
       }
       val e2 = intercept[DatasetSchemaMismatch] {
-        assertSmallDataFrameEquality(
-          sourceDF,
-          expectedDF
-        )
+        assertSmallDataFrameEquality(sourceDF, expectedDF)
       }
     }
 
@@ -225,16 +204,10 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
       )
 
       val e = intercept[DatasetContentMismatch] {
-        assertLargeDataFrameEquality(
-          sourceDF,
-          expectedDF
-        )
+        assertLargeDataFrameEquality(sourceDF, expectedDF)
       }
       val e2 = intercept[DatasetContentMismatch] {
-        assertSmallDataFrameEquality(
-          sourceDF,
-          expectedDF
-        )
+        assertSmallDataFrameEquality(sourceDF, expectedDF)
       }
     }
 
@@ -257,11 +230,7 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
         ),
         List(("number", IntegerType, true))
       )
-      assertSmallDataFrameEquality(
-        sourceDF,
-        expectedDF,
-        orderedComparison = false
-      )
+      assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
     }
 
     "throws an error for unordered DataFrame comparisons that don't match" in {
@@ -281,11 +250,7 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
         List(("number", IntegerType, true))
       )
       val e = intercept[DatasetContentMismatch] {
-        assertSmallDataFrameEquality(
-          sourceDF,
-          expectedDF,
-          orderedComparison = false
-        )
+        assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
       }
     }
 

@@ -81,14 +81,8 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         List(("number", IntegerType, true))
       )
 
-      assertSmallDatasetEquality(
-        sourceDF,
-        expectedDF
-      )
-      assertLargeDatasetEquality(
-        sourceDF,
-        expectedDF
-      )
+      assertSmallDatasetEquality(sourceDF, expectedDF)
+      assertLargeDatasetEquality(sourceDF, expectedDF)
     }
 
     "does nothing if the Datasets have the same schemas and content" in {
@@ -216,26 +210,14 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
     "succeeds if custom comparator returns true" in {
       val sourceDS = spark.createDataset[Person](
         Seq(
-          Person(
-            "bob",
-            1
-          ),
-          Person(
-            "alice",
-            5
-          )
+          Person("bob", 1),
+          Person("alice", 5)
         )
       )
       val expectedDS = spark.createDataset[Person](
         Seq(
-          Person(
-            "Bob",
-            1
-          ),
-          Person(
-            "Alice",
-            5
-          )
+          Person("Bob", 1),
+          Person("Alice", 5)
         )
       )
       assertLargeDatasetEquality(sourceDS, expectedDS, Person.caseInsensitivePersonEquals)
@@ -243,7 +225,10 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
 
     "fails if custom comparator for returns false" in {
       val sourceDS = spark.createDataset[Person](
-        Seq(Person("bob", 10), Person("alice", 5))
+        Seq(
+          Person("bob", 10),
+          Person("alice", 5)
+        )
       )
       val expectedDS = spark.createDataset[Person](
         Seq(
@@ -341,11 +326,7 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
       )
 
       val e = intercept[DatasetCountMismatch] {
-        assertLargeDatasetEquality(
-          sourceDF,
-          expectedDF,
-          orderedComparison = false
-        )
+        assertLargeDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
       }
     }
 
@@ -367,10 +348,7 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
       )
 
       val e = intercept[DatasetCountMismatch] {
-        assertLargeDatasetEquality(
-          sourceDF,
-          expectedDF
-        )
+        assertLargeDatasetEquality(sourceDF, expectedDF)
       }
     }
 
@@ -396,11 +374,7 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         List(("number", IntegerType, true))
       )
 
-      assertSmallDatasetEquality(
-        sourceDF,
-        expectedDF,
-        ignoreNullable = true
-      )
+      assertSmallDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
     }
 
     "can performed unordered DataFrame comparisons" in {
@@ -411,7 +385,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("number", IntegerType, true))
       )
-
       val expectedDF = spark.createDF(
         List(
           (5),
@@ -419,17 +392,8 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("number", IntegerType, true))
       )
-
-      assertLargeDatasetEquality(
-        sourceDF,
-        expectedDF,
-        orderedComparison = false
-      )
-      assertSmallDatasetEquality(
-        sourceDF,
-        expectedDF,
-        orderedComparison = false
-      )
+      assertLargeDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
+      assertSmallDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
     }
 
     "can performed unordered Dataset comparisons" in {
@@ -445,7 +409,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
           Person("bob", 1)
         )
       )
-
       assertLargeDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
       assertSmallDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
     }
@@ -457,7 +420,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
           Person("frank", 5)
         )
       )
-
       val expectedDS = spark.createDataset[Person](
         Seq(
           Person("frank", 5),
@@ -465,7 +427,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
           Person("sadie", 2)
         )
       )
-
       val e = intercept[DatasetContentMismatch] {
         assertSmallDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
       }
@@ -487,7 +448,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("number", IntegerType, true))
       )
-
       val e = intercept[DatasetContentMismatch] {
         assertSmallDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
       }
@@ -509,7 +469,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("number", IntegerType, true))
       )
-
       val e = intercept[DatasetContentMismatch] {
         assertSmallDatasetEquality(sourceDF, expectedDF)
       }
@@ -531,9 +490,7 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
           ("name", StringType, true)
         )
       )
-
       val actualDF = defaultSortDataset(sourceDF)
-
       val expectedDF = spark.createDF(
         List(
           (1, "phil"),
@@ -545,7 +502,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
           ("name", StringType, true)
         )
       )
-
       assertSmallDatasetEquality(actualDF, expectedDF)
     }
 
@@ -562,7 +518,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("number", DoubleType, true))
       )
-
       val expectedDF = spark.createDF(
         List(
           (1.2),
@@ -571,7 +526,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("number", DoubleType, true))
       )
-
       assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
     }
 
@@ -583,7 +537,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("number", DoubleType, true))
       )
-
       val expectedDF = spark.createDF(
         List(
           (1.2),
@@ -591,7 +544,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("number", DoubleType, true))
       )
-
       val e = intercept[DatasetContentMismatch] {
         assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
       }
@@ -606,7 +558,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("number", DoubleType, true))
       )
-
       val expectedDF = spark.createDF(
         List(
           (1.2),
@@ -614,7 +565,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("number", DoubleType, true))
       )
-
       val e = intercept[DatasetCountMismatch] {
         assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
       }
@@ -628,7 +578,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("number", DoubleType, false))
       )
-
       val expectedDF = spark.createDF(
         List(
           (1.2),
@@ -636,7 +585,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("number", DoubleType, true))
       )
-
       assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, ignoreNullable = true)
     }
 
@@ -649,7 +597,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("BLAHBLBH", DoubleType, true))
       )
-
       val expectedDF = spark.createDF(
         List(
           (1.2),
@@ -658,7 +605,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("number", DoubleType, true))
       )
-
       assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, ignoreColumnNames = true)
     }
 
