@@ -1,6 +1,6 @@
 # spark-fast-tests
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ab42211c18984740bee7f87c631a8f42)](https://www.codacy.com/app/MrPowers/spark-fast-tests?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MrPowers/spark-fast-tests&amp;utm_campaign=Badge_Grade) ![GitHub Build Status](https://github.com/mrpowers/spark-fast-tests/workflows/master/badge.svg)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ab42211c18984740bee7f87c631a8f42)](https://www.codacy.com/app/MrPowers/spark-fast-tests?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MrPowers/spark-fast-tests&amp;utm_campaign=Badge_Grade) [![CI](https://github.com/MrPowers/spark-fast-tests/actions/workflows/ci.yml/badge.svg)](https://github.com/MrPowers/spark-fast-tests/actions/workflows/ci.yml)
 
 A fast Apache Spark testing helper library with beautifully formatted error messages!  Works with [scalatest](https://github.com/scalatest/scalatest), [uTest](https://github.com/lihaoyi/utest), and [munit](https://github.com/scalameta/munit).
 
