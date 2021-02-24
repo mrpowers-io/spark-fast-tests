@@ -13,10 +13,6 @@ val sparkVersion = "2.4.5"
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
-artifactName := { (sv: ScalaVersion, module: ModuleID, artifact: Artifact) =>
-  Artifact.artifactName(sv, module, artifact).replaceAll(s"-${module.revision}", s"-${sparkVersion}${module.revision}")
-}
-
 credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
 
 fork in Test := true
