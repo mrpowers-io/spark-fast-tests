@@ -4,7 +4,7 @@
 
 A fast Apache Spark testing helper library with beautifully formatted error messages!  Works with [scalatest](https://github.com/scalatest/scalatest), [uTest](https://github.com/lihaoyi/utest), and [munit](https://github.com/scalameta/munit).
 
-PySpark codebases should use [chispa](https://github.com/MrPowers/chispa) instead of this library.
+Use [chispa](https://github.com/MrPowers/chispa) for PySpark applications.
 
 Read [Testing Spark Applications](https://leanpub.com/testing-spark) for a full explanation on the best way to test Spark code!  Good test suites yield higher quality codebases that are easy to refactor.
 
@@ -13,14 +13,16 @@ Read [Testing Spark Applications](https://leanpub.com/testing-spark) for a full 
 Fetch the JAR file from Maven.
 
 ```scala
-libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "0.21.3" % "test"
+// for Spark 3
+libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "1.0.0" % "test"
+
+// for Spark 2
+libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "0.23.0" % "test"
 ```
 
 Here's a link to the [Scala 2.11 JAR files](https://repo1.maven.org/maven2/com/github/mrpowers/spark-fast-tests_2.11/) and the [Scala 2.12 JAR files](https://repo1.maven.org/maven2/com/github/mrpowers/spark-fast-tests_2.12/).  [Here's a link to all the legacy JAR files in Maven](https://mvnrepository.com/artifact/MrPowers/spark-fast-tests?repo=spark-packages).
 
-You should use Scala 2.11 with Spark 2 and Scala 2.12 with Spark 3.  The `libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "0.21.3" % "test"` syntax automatically grabs the JAR file that corresponds with the Scala version in your project.
-
-You'll get weird errors if you use a JAR file compiled with Scala 2.11 with a Spark 3 project.
+You should use Scala 2.11 with Spark 2 and Scala 2.12 with Spark 3.
 
 ## Simple examples
 

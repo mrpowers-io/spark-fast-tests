@@ -5,7 +5,7 @@ scalafmtOnCompile in Compile := true
 organization := "com.github.mrpowers"
 name := "spark-fast-tests"
 
-version := "0.23.0"
+version := "1.0.0"
 crossScalaVersions := Seq("2.12.12")
 scalaVersion := crossScalaVersions.value.head
 val sparkVersion = "3.0.1"
