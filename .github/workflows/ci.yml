@@ -6,11 +6,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scala: ["2.12.12", "2.11.12"]
-        spark: ["2.4.0", "3.0.0"]
-        exclude:
-          - scala: "2.11.12"
-            spark: "3.0.0"
+        scala: ["2.12.12"]
+        spark: ["3.0.1"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
