@@ -608,6 +608,21 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
       assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, ignoreColumnNames = true)
     }
 
+    "can work with precision and unordered comparison" in {
+      import spark.implicits._
+      val ds1 = Seq(
+        ("1", "10/01/2019", 26.762499999999996),
+        ("1", "11/01/2019", 26.762499999999996)
+      ).toDF("col_B", "col_C", "col_A")
+
+      val ds2 = Seq(
+        ("1", "10/01/2019", 26.762499999999946),
+        ("1", "11/01/2019", 26.76249999999991)
+      ).toDF("col_B", "col_C", "col_A")
+
+      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
+    }
+
   }
 
 //      "works with FloatType columns" - {

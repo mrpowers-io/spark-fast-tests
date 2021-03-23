@@ -103,7 +103,7 @@ Expected DataFrame Row Count: '${expectedCount}'
   }
 
   def defaultSortDataset[T](ds: Dataset[T]): Dataset[T] = {
-    val colNames = ds.columns.sorted
+    val colNames = ds.columns
     val cols     = colNames.map(col)
     ds.sort(cols: _*)
   }
