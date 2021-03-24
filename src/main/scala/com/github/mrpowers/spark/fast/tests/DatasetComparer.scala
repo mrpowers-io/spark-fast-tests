@@ -108,6 +108,16 @@ Expected DataFrame Row Count: '${expectedCount}'
     ds.sort(cols: _*)
   }
 
+  def sortPreciseColumns[T](ds: Dataset[T]): Dataset[T] = {
+    val colNames = ds.dtypes
+      .withFilter { dtype =>
+        !(Seq("DoubleType", "DecimalType", "FloatType").contains(dtype._2))
+      }
+      .map(_._1)
+    val cols = colNames.map(col)
+    ds.sort(cols: _*)
+  }
+
   /**
    * Raises an error unless `actualDS` and `expectedDS` are equal
    */
@@ -158,7 +168,7 @@ Expected DataFrame Row Count: '${expectedCount}'
     if (orderedComparison) {
       throwIfDatasetsAreUnequal(actualDS, expectedDS)
     } else {
-      throwIfDatasetsAreUnequal(defaultSortDataset(actualDS), defaultSortDataset(expectedDS))
+      throwIfDatasetsAreUnequal(sortPreciseColumns(actualDS), sortPreciseColumns(expectedDS))
     }
   }
 
