@@ -5,7 +5,7 @@ import com.github.mrpowers.spark.fast.tests.ufansi.EscapeAttr
 import java.time.format.DateTimeFormatter
 import org.apache.commons.lang3.StringUtils
 
-object ArrayPrettyPrint {
+object ArrayUtil {
 
   def weirdTypesToStrings(arr: Array[(Any, Any)], truncate: Int = 20): Array[List[String]] = {
     arr.map { row =>
@@ -160,4 +160,21 @@ object ArrayPrettyPrint {
     sb.toString()
   }
 
+  // The following code is taken from: https://github.com/scala/scala/blob/86e75db7f36bcafdd75302f2c2cca0c68413214d/src/partest/scala/tools/partest/Util.scala
+  def prettyArray(a: Array[_]): collection.IndexedSeq[Any] = new collection.AbstractSeq[Any] with collection.IndexedSeq[Any] {
+    def length: Int = a.length
+
+    def apply(idx: Int): Any = a(idx) match {
+      case x: AnyRef if x.getClass.isArray => prettyArray(x.asInstanceOf[Array[_]])
+      case x                               => x
+    }
+
+    // Ignore deprecation warning in 2.13 - this is the correct def for 2.12 compatibility
+    override def stringPrefix: String = "Array"
+  }
+
+  // The following code is taken from: https://github.com/scala/scala/blob/86e75db7f36bcafdd75302f2c2cca0c68413214d/src/partest/scala/tools/partest/Util.scala
+  implicit class ArrayDeep(val a: Array[_]) extends AnyVal {
+    def deep: collection.IndexedSeq[Any] = prettyArray(a)
+  }
 }

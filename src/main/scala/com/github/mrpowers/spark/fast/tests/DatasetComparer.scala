@@ -60,7 +60,7 @@ Expected DataFrame Row Count: '${expectedCount}'
   private def betterContentMismatchMessage[T](a: Array[T], e: Array[T], truncate: Int): String = {
     // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
     val arr = Array(("Actual Content", "Expected Content")) ++ a.zipAll(e, "": Any, "": Any)
-    "Diffs\n" ++ ArrayPrettyPrint.showTwoColumnString(arr, truncate)
+    "Diffs\n" ++ ArrayUtil.showTwoColumnString(arr, truncate)
   }
 
   private def unequalRDDMessage[T](unequalRDD: RDD[(Long, (T, T))], length: Int): String = {

@@ -17,7 +17,7 @@ trait ColumnComparer {
     val colName2Elements = elements.map(_(1))
     if (!colName1Elements.sameElements(colName2Elements)) {
       // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
-      val mismatchMessage = "Diffs\n" + ArrayPrettyPrint.showTwoColumnString(
+      val mismatchMessage = "Diffs\n" + ArrayUtil.showTwoColumnString(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements)
       )
       throw ColumnMismatch(mismatchMessage)
@@ -32,6 +32,8 @@ trait ColumnComparer {
   // possibly rename this to assertDeepColumnEquality...
   // would deep equality comparison help when comparing other types of columns?
   def assertBinaryTypeColumnEquality(df: DataFrame, colName1: String, colName2: String): Unit = {
+    import ArrayUtil._
+
     val elements = df
       .select(colName1, colName2)
       .collect()
@@ -39,7 +41,7 @@ trait ColumnComparer {
     val colName2Elements = elements.map(_(1))
     if (!colName1Elements.deep.sameElements(colName2Elements.deep)) {
       // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
-      val mismatchMessage = "Diffs\n" + ArrayPrettyPrint.showTwoColumnString(
+      val mismatchMessage = "Diffs\n" + ArrayUtil.showTwoColumnString(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements)
       )
       throw ColumnMismatch(mismatchMessage)
@@ -85,7 +87,7 @@ trait ColumnComparer {
       val colName1Elements = elements.map(_(0))
       val colName2Elements = elements.map(_(1))
       // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
-      val mismatchMessage = "Diffs\n" + ArrayPrettyPrint.showTwoColumnStringColorCustomizable(
+      val mismatchMessage = "Diffs\n" + ArrayUtil.showTwoColumnStringColorCustomizable(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements),
         rowsEqual.toArray
       )
@@ -132,7 +134,7 @@ trait ColumnComparer {
       val colName1Elements = elements.map(_(0))
       val colName2Elements = elements.map(_(1))
       // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
-      val mismatchMessage = "Diffs\n" + ArrayPrettyPrint.showTwoColumnStringColorCustomizable(
+      val mismatchMessage = "Diffs\n" + ArrayUtil.showTwoColumnStringColorCustomizable(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements),
         rowsEqual.toArray
       )
@@ -167,7 +169,7 @@ trait ColumnComparer {
       val colName1Elements = elements.map(_(0))
       val colName2Elements = elements.map(_(1))
       // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
-      val mismatchMessage = "Diffs\n" + ArrayPrettyPrint.showTwoColumnString(
+      val mismatchMessage = "Diffs\n" + ArrayUtil.showTwoColumnString(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements)
       )
       throw ColumnMismatch(mismatchMessage)
