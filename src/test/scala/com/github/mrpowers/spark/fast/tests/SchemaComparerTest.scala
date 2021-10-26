@@ -84,6 +84,38 @@ class SchemaComparerTest extends FreeSpec {
       assert(SchemaComparer.equals(s1, s2, ignoreColumnNames = true))
     }
 
+    "returns true if the schemas not in the same order and schemaOrderedComparison is set to false" in {
+      val s1 = StructType(
+        Seq(
+          StructField("mood", StringType, true),
+          StructField("something", StringType, true)
+        )
+      )
+      val s2 = StructType(
+        Seq(
+          StructField("something", StringType, true),
+          StructField("mood", StringType, true)
+        )
+      )
+      assert(SchemaComparer.equals(s1, s2, schemaOrderedComparison = false))
+    }
+
+    "returns false if the schemas not in the same order and schemaOrderedComparison is set to true" in {
+      val s1 = StructType(
+        Seq(
+          StructField("mood", StringType, true),
+          StructField("something", StringType, true)
+        )
+      )
+      val s2 = StructType(
+        Seq(
+          StructField("something", StringType, true),
+          StructField("mood", StringType, true)
+        )
+      )
+      assert(!SchemaComparer.equals(s1, s2, schemaOrderedComparison = true))
+    }
+
   }
 
 }

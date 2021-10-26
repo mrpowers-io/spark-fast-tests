@@ -81,8 +81,9 @@ Expected DataFrame Row Count: '${expectedCount}'
                                     ignoreNullable: Boolean = false,
                                     ignoreColumnNames: Boolean = false,
                                     orderedComparison: Boolean = true,
+                                    schemaOrderedComparison: Boolean = true,
                                     truncate: Int = 500): Unit = {
-    if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames)) {
+    if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames, schemaOrderedComparison)) {
       throw DatasetSchemaMismatch(
         betterSchemaMismatchMessage(actualDS, expectedDS)
       )
@@ -126,9 +127,10 @@ Expected DataFrame Row Count: '${expectedCount}'
                                               equals: (T, T) => Boolean = naiveEquality _,
                                               ignoreNullable: Boolean = false,
                                               ignoreColumnNames: Boolean = false,
-                                              orderedComparison: Boolean = true): Unit = {
+                                              orderedComparison: Boolean = true,
+                                              schemaOrderedComparison: Boolean = true): Unit = {
     // first check if the schemas are equal
-    if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames)) {
+    if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames, schemaOrderedComparison)) {
       throw DatasetSchemaMismatch(betterSchemaMismatchMessage(actualDS, expectedDS))
     }
     // then check if the DataFrames have the same content
@@ -177,7 +179,8 @@ Expected DataFrame Row Count: '${expectedCount}'
                                          precision: Double,
                                          ignoreNullable: Boolean = false,
                                          ignoreColumnNames: Boolean = false,
-                                         orderedComparison: Boolean = true): Unit = {
+                                         orderedComparison: Boolean = true,
+                                         schemaOrderedComparison: Boolean = true): Unit = {
     val e = (r1: Row, r2: Row) => {
       r1.equals(r2) || RowComparer.areRowsEqual(r1, r2, precision)
     }
@@ -187,7 +190,8 @@ Expected DataFrame Row Count: '${expectedCount}'
       equals = e,
       ignoreNullable,
       ignoreColumnNames,
-      orderedComparison
+      orderedComparison,
+      schemaOrderedComparison
     )
   }
 
