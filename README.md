@@ -312,6 +312,8 @@ You might want to use spark-fast-tests instead of spark-testing-base in these ca
 
 ## Publishing
 
+GPG & Sonatype need to be setup properly before running these commands.  See the [spark-daria](https://github.com/MrPowers/spark-daria) README for more information.
+
 Run `sbt` to open the SBT console.
 
 Run `> ; + publishSigned; sonatypeBundleRelease` to create the JAR files and release them to Maven.  These commands are made available by the [sbt-sonatype](https://github.com/xerial/sbt-sonatype) plugin.
