@@ -6,9 +6,9 @@ organization := "com.github.mrpowers"
 name := "spark-fast-tests"
 
 version := "1.0.0"
-crossScalaVersions := Seq("2.12.12")
+crossScalaVersions := Seq("2.12.15")
 scalaVersion := crossScalaVersions.value.head
-val sparkVersion = "3.0.1"
+val sparkVersion = "3.2.1"
 
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % "test"
