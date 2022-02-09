@@ -1,6 +1,6 @@
 # spark-fast-tests
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/ab42211c18984740bee7f87c631a8f42)](https://www.codacy.com/app/MrPowers/spark-fast-tests?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=MrPowers/spark-fast-tests&amp;utm_campaign=Badge_Grade) [![CI](https://github.com/MrPowers/spark-fast-tests/actions/workflows/ci.yml/badge.svg)](https://github.com/MrPowers/spark-fast-tests/actions/workflows/ci.yml)
+[![CI](https://github.com/MrPowers/spark-fast-tests/actions/workflows/ci.yml/badge.svg)](https://github.com/MrPowers/spark-fast-tests/actions/workflows/ci.yml)
 
 A fast Apache Spark testing helper library with beautifully formatted error messages!  Works with [scalatest](https://github.com/scalatest/scalatest), [uTest](https://github.com/lihaoyi/utest), and [munit](https://github.com/scalameta/munit).
 
@@ -14,15 +14,20 @@ Fetch the JAR file from Maven.
 
 ```scala
 // for Spark 3
-libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "1.0.0" % "test"
+libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "1.1.0" % "test"
 
 // for Spark 2
 libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "0.23.0" % "test"
 ```
 
-Here's a link to the [Scala 2.11 JAR files](https://repo1.maven.org/maven2/com/github/mrpowers/spark-fast-tests_2.11/) and the [Scala 2.12 JAR files](https://repo1.maven.org/maven2/com/github/mrpowers/spark-fast-tests_2.12/).  [Here's a link to all the legacy JAR files in Maven](https://mvnrepository.com/artifact/MrPowers/spark-fast-tests?repo=spark-packages).
+Here's a link to the releases for different Scala versions:
 
-You should use Scala 2.11 with Spark 2 and Scala 2.12 with Spark 3.
+* [Scala 2.11 JAR files](https://repo1.maven.org/maven2/com/github/mrpowers/spark-fast-tests_2.11/)
+* [Scala 2.12 JAR files](https://repo1.maven.org/maven2/com/github/mrpowers/spark-fast-tests_2.12/)
+* [Scala 2.13 JAR files](https://repo1.maven.org/maven2/com/github/mrpowers/spark-fast-tests_2.13/)
+* [Legacy JAR files in Maven](https://mvnrepository.com/artifact/MrPowers/spark-fast-tests?repo=spark-packages).
+
+You should use Scala 2.11 with Spark 2 and Scala 2.12 / 2.13 with Spark 3.
 
 ## Simple examples
 
@@ -314,7 +319,7 @@ You might want to use spark-fast-tests instead of spark-testing-base in these ca
 
 GPG & Sonatype need to be setup properly before running these commands.  See the [spark-daria](https://github.com/MrPowers/spark-daria) README for more information.
 
-Run `sbt` to open the SBT console.
+Run `sbt` to open the SBT console.  Good idea to always run `clean` before running any publishing commands.
 
 Run `> ; + publishSigned; sonatypeBundleRelease` to create the JAR files and release them to Maven.  These commands are made available by the [sbt-sonatype](https://github.com/xerial/sbt-sonatype) plugin.
 
