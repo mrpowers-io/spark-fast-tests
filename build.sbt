@@ -6,11 +6,26 @@ organization := "com.github.mrpowers"
 name := "spark-fast-tests"
 
 version := "1.2.0"
-crossScalaVersions := Seq("2.12.15", "2.13.8")
-scalaVersion := crossScalaVersions.value.head
-val sparkVersion = "3.2.1"
 
-libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
+val versionRegex      = """^(.*)\.(.*)\.(.*)$""".r
+
+val sparkVersion = settingKey[String]("Spark version")
+
+val scala2_13= "2.13.8"
+val scala2_12= "2.12.15"
+val scala2_11= "2.11.12"
+
+sparkVersion := System.getProperty("spark.testVersion", "3.2.1")
+crossScalaVersions := {sparkVersion.value match {
+  case versionRegex("3", m, _) if m.toInt >= 2 => Seq(scala2_12, scala2_13)
+  case versionRegex("3", _ , _) => Seq(scala2_12)
+  case versionRegex("2", _ , _)  => Seq(scala2_11)
+}
+}
+
+scalaVersion := crossScalaVersions.value.head
+
+libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion.value % "provided"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.1.0" % "test"
 
 credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
