@@ -5,7 +5,7 @@ scalafmtOnCompile in Compile := true
 organization := "com.github.mrpowers"
 name := "spark-fast-tests"
 
-version := "1.2.0"
+version := "1.3.0"
 
 val versionRegex      = """^(.*)\.(.*)\.(.*)$""".r
 
