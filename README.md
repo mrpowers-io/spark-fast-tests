@@ -319,9 +319,21 @@ You might want to use spark-fast-tests instead of spark-testing-base in these ca
 
 GPG & Sonatype need to be setup properly before running these commands.  See the [spark-daria](https://github.com/MrPowers/spark-daria) README for more information.
 
-Run `sbt` to open the SBT console.  Good idea to always run `clean` before running any publishing commands.
+It's a good idea to always run `clean` before running any publishing commands.  It's also important to run `clean` before different publishing commands as well.
 
-Run `> ; + publishSigned; sonatypeBundleRelease` to create the JAR files and release them to Maven.  These commands are made available by the [sbt-sonatype](https://github.com/xerial/sbt-sonatype) plugin.
+There is a two step process for publishing.
+
+Generate Scala 2.11 JAR files:
+
+* Run `sbt -Dspark.testVersion=2.4.8`
+* Run `> ; + publishSigned; sonatypeBundleRelease` to create the JAR files and release them to Maven.
+
+Generate Scala 2.12 & Scala 2.13 JAR files:
+
+* Run `sbt`
+* Run `> ; + publishSigned; sonatypeBundleRelease`
+
+The `publishSigned` and `sonatypeBundleRelease` commands are made available by the [sbt-sonatype](https://github.com/xerial/sbt-sonatype) plugin.
 
 When the release command is run, you'll be prompted to enter your GPG passphrase.
 
