@@ -1,11 +1,11 @@
 package com.github.mrpowers.spark.fast.tests
 
+import com.github.mrpowers.spark.fast.tests.SparkSessionExt._
+import org.scalatest.freespec.AnyFreeSpec
+
 import org.apache.spark.sql.types.{IntegerType, StringType}
-import SparkSessionExt._
 
-import org.scalatest.FreeSpec
-
-class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSessionTestWrapper {
+class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with SparkSessionTestWrapper {
 
   "prints a descriptive error message if it bugs out" in {
     val sourceDF = spark.createDF(

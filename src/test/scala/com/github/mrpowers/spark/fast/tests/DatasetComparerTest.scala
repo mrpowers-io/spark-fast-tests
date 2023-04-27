@@ -1,9 +1,9 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.apache.spark.sql.types._
-import SparkSessionExt._
+import com.github.mrpowers.spark.fast.tests.SparkSessionExt._
+import org.scalatest.freespec.AnyFreeSpec
 
-import org.scalatest.FreeSpec
+import org.apache.spark.sql.types._
 
 object Person {
 
@@ -14,7 +14,7 @@ object Person {
 case class Person(name: String, age: Int)
 case class PrecisePerson(name: String, age: Double)
 
-class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessionTestWrapper {
+class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSessionTestWrapper {
 
   "checkDatasetEquality" - {
 

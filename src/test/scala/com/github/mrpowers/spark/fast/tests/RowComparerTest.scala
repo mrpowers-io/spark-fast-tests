@@ -1,10 +1,10 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
 import org.apache.spark.sql.Row
 
-class RowComparerTest extends FreeSpec {
+class RowComparerTest extends AnyFreeSpec {
 
   "areRowsEqual" - {
 
