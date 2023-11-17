@@ -6,6 +6,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import org.apache.spark.sql.functions._
 
 import scala.reflect.ClassTag
+import java.time.Duration
 
 case class DatasetSchemaMismatch(smth: String)  extends Exception(smth)
 case class DatasetContentMismatch(smth: String) extends Exception(smth)
@@ -175,11 +176,12 @@ Expected DataFrame Row Count: '${expectedCount}'
   def assertApproximateDataFrameEquality(actualDF: DataFrame,
                                          expectedDF: DataFrame,
                                          precision: Double,
+                                         precisionTimestamps: Duration = Duration.ZERO,
                                          ignoreNullable: Boolean = false,
                                          ignoreColumnNames: Boolean = false,
                                          orderedComparison: Boolean = true): Unit = {
     val e = (r1: Row, r2: Row) => {
-      r1.equals(r2) || RowComparer.areRowsEqual(r1, r2, precision)
+      r1.equals(r2) || RowComparer.areRowsEqual(r1, r2, precision, precisionTimestamps)
     }
     assertLargeDatasetEquality[Row](
       actualDF,

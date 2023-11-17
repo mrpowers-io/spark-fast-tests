@@ -3,9 +3,9 @@
 //import org.apache.spark.sql.types._
 //import SparkSessionExt._
 //
-//import org.scalatest.FreeSpec
+//import org.scalatest.freespec.AnyFreeSpec
 //
-//class ExamplesTest extends FreeSpec with SparkSessionTestWrapper with DataFrameComparer with ColumnComparer {
+//class ExamplesTest extends AnyFreeSpec with SparkSessionTestWrapper with DataFrameComparer with ColumnComparer {
 //
 //  "assertSmallDatasetEquality" - {
 //

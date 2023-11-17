@@ -1,14 +1,15 @@
 package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.Row
-
 import java.sql.Timestamp
 import scala.math.abs
+
+import java.time.Duration
 
 object RowComparer {
 
   /** Approximate equality, based on equals from [[Row]] */
-  def areRowsEqual(r1: Row, r2: Row, tol: Double): Boolean = {
+  def areRowsEqual(r1: Row, r2: Row, tol: Double, tolTimestamp: Duration): Boolean = {
     if (r1.length != r2.length) {
       return false
     } else {
@@ -53,7 +54,9 @@ object RowComparer {
               }
 
             case t1: Timestamp =>
-              if (abs(t1.getTime - o2.asInstanceOf[Timestamp].getTime) > tol) {
+              val t1Instant = t1.toInstant
+              val t2Instant = o2.asInstanceOf[Timestamp].toInstant
+              if (Duration.between(t1Instant, t2Instant).abs.compareTo(tolTimestamp) > 0) {
                 return false
               }
 
