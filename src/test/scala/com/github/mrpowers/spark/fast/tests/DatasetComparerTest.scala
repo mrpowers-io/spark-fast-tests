@@ -1,7 +1,9 @@
 package com.github.mrpowers.spark.fast.tests
 
+import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types._
 import SparkSessionExt._
+import java.time.Duration
 
 import org.scalatest.FreeSpec
 
@@ -636,6 +638,23 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
       ).toDF("col_B", "col_C", "col_A", "col_D")
 
       assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
+    }
+
+    "can work with timestamps precision" in {
+      import spark.implicits._
+      val ds1 = Seq(
+        ("1", "2019-10-01 00:00:00", 26.762499999999996, "A"),
+        ("1", "2019-10-01 00:00:00", 26.762499999999996, "B")
+      ).toDF("col_B", "col_C", "col_A", "col_D")
+        .withColumn("col_C", col("col_C").cast(TimestampType))
+
+      val ds2 = Seq(
+        ("1", "2019-10-01 00:00:01", 26.762499999999946, "A"),
+        ("1", "2019-10-01 00:00:01", 26.76249999999991, "B")
+      ).toDF("col_B", "col_C", "col_A", "col_D")
+        .withColumn("col_C", col("col_C").cast(TimestampType))
+
+      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, Duration.ofSeconds(1), orderedComparison = false)
     }
 
   }
