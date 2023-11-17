@@ -6,9 +6,9 @@ import org.apache.spark.sql.types._
 import java.sql.Date
 import java.sql.Timestamp
 
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
-class ColumnComparerTest extends FreeSpec with ColumnComparer with SparkSessionTestWrapper {
+class ColumnComparerTest extends AnyFreeSpec with ColumnComparer with SparkSessionTestWrapper {
 
   "assertColumnEquality" - {
 

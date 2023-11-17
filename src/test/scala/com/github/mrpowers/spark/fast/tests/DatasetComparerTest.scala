@@ -5,7 +5,7 @@ import org.apache.spark.sql.types._
 import SparkSessionExt._
 import java.time.Duration
 
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
 object Person {
 
@@ -16,7 +16,7 @@ object Person {
 case class Person(name: String, age: Int)
 case class PrecisePerson(name: String, age: Double)
 
-class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessionTestWrapper {
+class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSessionTestWrapper {
 
   "checkDatasetEquality" - {
 
