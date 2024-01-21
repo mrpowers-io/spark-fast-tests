@@ -81,23 +81,46 @@ Expected DataFrame Row Count: '${expectedCount}'
                                     ignoreNullable: Boolean = false,
                                     ignoreColumnNames: Boolean = false,
                                     orderedComparison: Boolean = true,
+                                    orderedColumnComparison: Boolean = true,
                                     truncate: Int = 500): Unit = {
-    if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames)) {
-      throw DatasetSchemaMismatch(
-        betterSchemaMismatchMessage(actualDS, expectedDS)
-      )
-    }
-    if (orderedComparison) {
-      val a = actualDS.collect()
-      val e = expectedDS.collect()
-      if (!a.sameElements(e)) {
-        throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
+
+    require((ignoreColumnNames, orderedColumnComparison) != (true, false))
+
+    if (!orderedColumnComparison) {
+      def orderColumns(dataset1: Dataset[T], dataset2: Dataset[T]): Tuple2[Dataset[T], Dataset[T]] = {
+        val cols          = dataset1.columns.map(col)
+        val datasetResult = dataset2.select(cols: _*).as[T](dataset1.encoder)
+        (dataset1, datasetResult)
       }
+      val (newActualDS, newExpectedDS) = orderColumns(actualDS, expectedDS)
+      assertSmallDatasetEquality(
+        newActualDS,
+        newExpectedDS,
+        ignoreNullable,
+        ignoreColumnNames,
+        orderedComparison,
+        !orderedColumnComparison,
+        truncate
+      )
     } else {
-      val a = defaultSortDataset(actualDS).collect()
-      val e = defaultSortDataset(expectedDS).collect()
-      if (!a.sameElements(e)) {
-        throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
+      if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames)) {
+        throw DatasetSchemaMismatch(
+          betterSchemaMismatchMessage(actualDS, expectedDS)
+        )
+      }
+
+      if (orderedComparison) {
+        val a = actualDS.collect()
+        val e = expectedDS.collect()
+        if (!a.sameElements(e)) {
+          throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
+        }
+      } else {
+        val a = defaultSortDataset(actualDS).collect()
+        val e = defaultSortDataset(expectedDS).collect()
+        if (!a.sameElements(e)) {
+          throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
+        }
       }
     }
   }
