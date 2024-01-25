@@ -119,7 +119,6 @@ Expected DataFrame Row Count: '${expectedCount}'
         throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
       }
     }
-    //}
   }
 
   def defaultSortDataset[T](ds: Dataset[T]): Dataset[T] = {
