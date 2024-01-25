@@ -81,17 +81,21 @@ Expected DataFrame Row Count: '${expectedCount}'
                                     ignoreNullable: Boolean = false,
                                     ignoreColumnNames: Boolean = false,
                                     orderedComparison: Boolean = true,
-                                    orderedColumnComparison: Boolean = true,
+                                    ignoreColumnOrder: Boolean = true,
                                     truncate: Int = 500): Unit = {
 
-    require((ignoreColumnNames, orderedColumnComparison) != (true, false))
+    require(
+      (ignoreColumnNames, ignoreColumnOrder) != (true, true),
+      "Ignore columns is incompatible with an unordered column compare."
+    )
 
-    if (!orderedColumnComparison) {
-      def orderColumns(dataset1: Dataset[T], dataset2: Dataset[T]): Tuple2[Dataset[T], Dataset[T]] = {
-        val cols          = dataset1.columns.map(col)
-        val datasetResult = dataset2.select(cols: _*).as[T](dataset1.encoder)
-        (dataset1, datasetResult)
-      }
+    if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)) {
+      throw DatasetSchemaMismatch(
+        betterSchemaMismatchMessage(actualDS, expectedDS)
+      )
+    }
+
+    if (ignoreColumnOrder) {
       val (newActualDS, newExpectedDS) = orderColumns(actualDS, expectedDS)
       assertSmallDatasetEquality(
         newActualDS,
@@ -99,30 +103,23 @@ Expected DataFrame Row Count: '${expectedCount}'
         ignoreNullable,
         ignoreColumnNames,
         orderedComparison,
-        !orderedColumnComparison,
+        !ignoreColumnOrder,
         truncate
       )
-    } else {
-      if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames)) {
-        throw DatasetSchemaMismatch(
-          betterSchemaMismatchMessage(actualDS, expectedDS)
-        )
+    } else if (orderedComparison) {
+      val a = actualDS.collect()
+      val e = expectedDS.collect()
+      if (!a.sameElements(e)) {
+        throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
       }
-
-      if (orderedComparison) {
-        val a = actualDS.collect()
-        val e = expectedDS.collect()
-        if (!a.sameElements(e)) {
-          throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
-        }
-      } else {
-        val a = defaultSortDataset(actualDS).collect()
-        val e = defaultSortDataset(expectedDS).collect()
-        if (!a.sameElements(e)) {
-          throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
-        }
+    } else {
+      val a = defaultSortDataset(actualDS).collect()
+      val e = defaultSortDataset(expectedDS).collect()
+      if (!a.sameElements(e)) {
+        throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
       }
     }
+    //}
   }
 
   def defaultSortDataset[T](ds: Dataset[T]): Dataset[T] = {
@@ -139,6 +136,12 @@ Expected DataFrame Row Count: '${expectedCount}'
       .map(_._1)
     val cols = colNames.map(col)
     ds.sort(cols: _*)
+  }
+
+  def orderColumns[T](ds1: Dataset[T], ds2: Dataset[T]): (Dataset[T], Dataset[T]) = {
+    val cols          = ds1.columns.map(col)
+    val datasetResult = ds2.select(cols: _*).as[T](ds1.encoder)
+    (ds1, datasetResult)
   }
 
   /**

@@ -12,7 +12,7 @@ trait DataFrameComparer extends DatasetComparer {
                                    ignoreNullable: Boolean = false,
                                    ignoreColumnNames: Boolean = false,
                                    orderedComparison: Boolean = true,
-                                   orderedColumnComparison: Boolean = true,
+                                   ignoreColumnOrder: Boolean = false,
                                    truncate: Int = 500): Unit = {
     assertSmallDatasetEquality(
       actualDF,
@@ -20,7 +20,7 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreNullable,
       ignoreColumnNames,
       orderedComparison,
-      orderedColumnComparison,
+      ignoreColumnOrder,
       truncate
     )
   }
