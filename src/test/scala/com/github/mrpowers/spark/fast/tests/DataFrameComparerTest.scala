@@ -354,7 +354,7 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
       }
     }
 
-    "does not throw an error if schemas, regardless of order, do not match" in {
+    "throw an error if schemas, regardless of order, do not match" in {
       val sourceDF = spark.createDF(
         List(
           ("word", 1, false),

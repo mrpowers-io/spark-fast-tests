@@ -32,12 +32,14 @@ trait DataFrameComparer extends DatasetComparer {
                                    expectedDF: DataFrame,
                                    ignoreNullable: Boolean = false,
                                    ignoreColumnNames: Boolean = false,
+                                   ignoreColumnOrder: Boolean = false,
                                    orderedComparison: Boolean = true): Unit = {
     assertLargeDatasetEquality(
       actualDF,
       expectedDF,
       ignoreNullable = ignoreNullable,
       ignoreColumnNames = ignoreColumnNames,
+      ignoreColumnOrder = ignoreColumnOrder,
       orderedComparison = orderedComparison
     )
   }
