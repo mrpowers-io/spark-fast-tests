@@ -1,7 +1,5 @@
 package com.github.mrpowers.spark.fast.tests
 
-import java.sql.Timestamp
-
 import scala.annotation.tailrec
 import scala.math.abs
 
