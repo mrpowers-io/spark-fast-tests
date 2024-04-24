@@ -1,6 +1,5 @@
 package com.github.mrpowers.spark.fast.tests
 
-import com.github.mrpowers.spark.fast.tests.DatasetComparerLike.naiveEquality
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import org.apache.spark.sql.functions._
@@ -10,14 +9,6 @@ import scala.reflect.ClassTag
 case class DatasetSchemaMismatch(smth: String)  extends Exception(smth)
 case class DatasetContentMismatch(smth: String) extends Exception(smth)
 case class DatasetCountMismatch(smth: String)   extends Exception(smth)
-
-object DatasetComparerLike {
-
-  def naiveEquality[T](o1: T, o2: T): Boolean = {
-    o1.equals(o2)
-  }
-
-}
 
 trait DatasetComparer {
 
@@ -52,8 +43,8 @@ ${expectedDS.schema}
 
   private def countMismatchMessage(actualCount: Long, expectedCount: Long): String = {
     s"""
-Actual DataFrame Row Count: '${actualCount}'
-Expected DataFrame Row Count: '${expectedCount}'
+Actual DataFrame Row Count: '$actualCount'
+Expected DataFrame Row Count: '$expectedCount'
 """
   }
 
@@ -102,16 +93,12 @@ Expected DataFrame Row Count: '${expectedCount}'
     }
   }
 
-  def defaultSortDataset[T](ds: Dataset[T]): Dataset[T] = {
-    val colNames = ds.columns
-    val cols     = colNames.map(col)
-    ds.sort(cols: _*)
-  }
+  def defaultSortDataset[T](ds: Dataset[T]): Dataset[T] = ds.sort(ds.columns.map(col).toIndexedSeq: _*)
 
   def sortPreciseColumns[T](ds: Dataset[T]): Dataset[T] = {
     val colNames = ds.dtypes
       .withFilter { dtype =>
-        !(Seq("DoubleType", "DecimalType", "FloatType").contains(dtype._2))
+        !Seq("DoubleType", "DecimalType", "FloatType").contains(dtype._2)
       }
       .map(_._1)
     val cols = colNames.map(col)
@@ -123,7 +110,7 @@ Expected DataFrame Row Count: '${expectedCount}'
    */
   def assertLargeDatasetEquality[T: ClassTag](actualDS: Dataset[T],
                                               expectedDS: Dataset[T],
-                                              equals: (T, T) => Boolean = naiveEquality _,
+                                              equals: (T, T) => Boolean = (o1: T, o2: T) => o1 == o2,
                                               ignoreNullable: Boolean = false,
                                               ignoreColumnNames: Boolean = false,
                                               orderedComparison: Boolean = true): Unit = {
@@ -132,25 +119,19 @@ Expected DataFrame Row Count: '${expectedCount}'
       throw DatasetSchemaMismatch(betterSchemaMismatchMessage(actualDS, expectedDS))
     }
     // then check if the DataFrames have the same content
-    def throwIfDatasetsAreUnequal(ds1: Dataset[T], ds2: Dataset[T]) = {
+    def throwIfDatasetsAreUnequal(ds1: Dataset[T], ds2: Dataset[T]): Unit = {
       try {
-        ds1.rdd.cache
-        ds2.rdd.cache
+        val ds1RDD = ds1.rdd.cache()
+        val ds2RDD = ds2.rdd.cache()
 
-        val actualCount   = ds1.rdd.count
-        val expectedCount = ds2.rdd.count
+        val actualCount   = ds1RDD.count
+        val expectedCount = ds2RDD.count
 
         if (actualCount != expectedCount) {
           throw DatasetCountMismatch(countMismatchMessage(actualCount, expectedCount))
         }
 
-        val expectedIndexValue: RDD[(Long, T)] = RddHelpers.zipWithIndex(ds1.rdd)
-        val resultIndexValue: RDD[(Long, T)]   = RddHelpers.zipWithIndex(ds2.rdd)
-        val unequalRDD = expectedIndexValue
-          .join(resultIndexValue)
-          .filter {
-            case (idx, (o1, o2)) => !equals(o1, o2)
-          }
+        val unequalRDD = ds1RDD.zip(ds2RDD).filter { case (o1: T, o2: T) => !equals(o1, o2) }.zipWithIndex().map { case ((t1, t2), idx) => (idx, (t1, t2)) }
         val maxUnequalRowsToShow = 10
         if (!unequalRDD.isEmpty()) {
           throw DatasetContentMismatch(
@@ -190,5 +171,4 @@ Expected DataFrame Row Count: '${expectedCount}'
       orderedComparison
     )
   }
-
 }
