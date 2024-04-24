@@ -1,9 +1,9 @@
 package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.types._
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
-class SchemaComparerTest extends FreeSpec {
+class SchemaComparerTest extends AnyFreeSpec {
 
   "equals" - {
 

@@ -9,9 +9,8 @@ object RowComparer {
 
   /** Approximate equality, based on equals from [[Row]] */
   def areRowsEqual(r1: Row, r2: Row, tol: Double): Boolean = {
-    @tailrec
-    def compareRowIdx(idx: Int): Boolean = {
-      val validation = (r1.get(idx), r2.get(idx)) match {
+    r1.length == r2.length && r1.toSeq.zip(r2.toSeq).forall {
+      case (v1, v2) => (v1, v2) match {
         case (null, null) => true
         case (null, _) | (_, null) => false
         case (b1: Array[Byte], b2: Array[Byte]) => java.util.Arrays.equals(b1, b2)
@@ -25,16 +24,10 @@ object RowComparer {
           bd1.subtract(bd2).abs().compareTo(new java.math.BigDecimal(tol)) == -1
         case (t1: java.time.Instant, t2: java.time.Instant) => abs(t1.compareTo(t2)) <= tol
         // TODO: check if this is required for comparing nested row
-        case (rr1: Row, rr2: Row) => areRowsEqual(rr1, rr2, tol)
         case (o1, o2) => o1 == o2
-      }
-      if (validation) {
-        compareRowIdx(idx + 1)
-      } else {
-        false
+        case (rr1: Row, rr2: Row) => areRowsEqual(rr1, rr2, tol)
       }
     }
-    r1.length == r2.length && compareRowIdx(0)
   }
 
 }
