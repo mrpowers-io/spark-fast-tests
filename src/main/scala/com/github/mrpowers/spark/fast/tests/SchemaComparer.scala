@@ -8,12 +8,15 @@ object SchemaComparer {
     if (s1.length != s2.length) {
       false
     } else {
-      val structFields: Seq[(StructField, StructField)] = s1.zip(s2)
-      structFields.forall { t =>
+      if (s1.length != s2.length) {
+      false
+    } else {
+      s1.sortBy(_.name).zip(s2.sortBy(_.name)).forall { t =>
         ((t._1.nullable == t._2.nullable) || ignoreNullable) &&
-        ((t._1.name == t._2.name) || ignoreColumnNames) &&
+        (t._1.name == t._2.name) &&
         equals(t._1.dataType, t._2.dataType, ignoreNullable, ignoreColumnNames)
       }
+    }
     }
   }
 
