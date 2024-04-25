@@ -9,14 +9,14 @@ object SchemaComparer {
       false
     } else {
       if (s1.length != s2.length) {
-      false
-    } else {
-      s1.sortBy(_.name).zip(s2.sortBy(_.name)).forall { t =>
-        ((t._1.nullable == t._2.nullable) || ignoreNullable) &&
-        (t._1.name == t._2.name) &&
-        equals(t._1.dataType, t._2.dataType, ignoreNullable, ignoreColumnNames)
+        false
+      } else {
+        s1.sortBy(_.name).zip(s2.sortBy(_.name)).forall { t =>
+          ((t._1.nullable == t._2.nullable) || ignoreNullable) &&
+          (t._1.name == t._2.name) &&
+          equals(t._1.dataType, t._2.dataType, ignoreNullable, ignoreColumnNames)
+        }
       }
-    }
     }
   }
 

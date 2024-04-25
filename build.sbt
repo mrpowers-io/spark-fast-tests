@@ -22,8 +22,9 @@ crossScalaVersions := {sparkVersion.value match {
 }
 
 scalaVersion := crossScalaVersions.value.head
+enablePlugins(JmhPlugin)
 
-libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion.value % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion.value % "compile"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % "test"
 
 credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
@@ -41,3 +42,7 @@ scmInfo := Some(ScmInfo(url("https://github.com/MrPowers/spark-fast-tests"), "gi
 updateOptions := updateOptions.value.withLatestSnapshots(false)
 
 publishMavenStyle := true
+
+// publishTo := sonatypePublishToBundle.value
+
+// Global / useGpgPinentry := true
