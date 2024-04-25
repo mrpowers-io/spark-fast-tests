@@ -8,7 +8,7 @@ import java.time.Instant
 import java.util.concurrent.TimeUnit
 
 // TODO: move this to separate benchmark project
-class MyBenchmark {
+private class MyBenchmark {
 
   @Benchmark
   @BenchmarkMode(Array(Mode.AverageTime))
