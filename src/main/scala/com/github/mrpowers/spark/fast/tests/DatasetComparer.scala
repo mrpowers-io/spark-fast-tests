@@ -6,41 +6,10 @@ import org.apache.spark.sql.functions._
 
 import scala.reflect.ClassTag
 
-case class DatasetSchemaMismatch(smth: String)  extends Exception(smth)
 case class DatasetContentMismatch(smth: String) extends Exception(smth)
 case class DatasetCountMismatch(smth: String)   extends Exception(smth)
 
 trait DatasetComparer {
-
-  private def schemaMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
-    s"""
-Actual Schema:
-${actualDS.schema}
-Expected Schema:
-${expectedDS.schema}
-"""
-  }
-
-  private def betterSchemaMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
-    "\nActual Schema Field | Expected Schema Field\n" + actualDS.schema
-      .zipAll(
-        expectedDS.schema,
-        "",
-        ""
-      )
-      .map {
-        case (sf1, sf2) if sf1 == sf2 =>
-          ufansi.Color.Blue(s"$sf1 | $sf2")
-        case ("", sf2) =>
-          ufansi.Color.Red(s"MISSING | $sf2")
-        case (sf1, "") =>
-          ufansi.Color.Red(s"$sf1 | MISSING")
-        case (sf1, sf2) =>
-          ufansi.Color.Red(s"$sf1 | $sf2")
-      }
-      .mkString("\n")
-  }
-
   private def countMismatchMessage(actualCount: Long, expectedCount: Long): String = {
     s"""
 Actual DataFrame Row Count: '$actualCount'
@@ -65,6 +34,13 @@ Expected DataFrame Row Count: '$expectedCount'
   }
 
   /**
+   *  order ds1 column according to ds2 column order
+   *  */
+  def orderColumns[T](ds1: Dataset[T], ds2: Dataset[T]): Dataset[T] = {
+    ds1.select(ds2.columns.map(col).toIndexedSeq: _*).as[T](ds2.encoder)
+  }
+
+  /**
    * Raises an error unless `actualDS` and `expectedDS` are equal
    */
   def assertSmallDatasetEquality[T](actualDS: Dataset[T],
@@ -72,24 +48,28 @@ Expected DataFrame Row Count: '$expectedCount'
                                     ignoreNullable: Boolean = false,
                                     ignoreColumnNames: Boolean = false,
                                     orderedComparison: Boolean = true,
+                                    ignoreColumnOrder: Boolean = false,
                                     truncate: Int = 500): Unit = {
-    if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames)) {
-      throw DatasetSchemaMismatch(
-        betterSchemaMismatchMessage(actualDS, expectedDS)
-      )
-    }
+
+    SchemaComparer.assertSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)
+    val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
+    assertSmallDatasetContentEquality(actual, expectedDS, orderedComparison, truncate)
+  }
+
+  def assertSmallDatasetContentEquality[T](actualDS: Dataset[T], expectedDS: Dataset[T], orderedComparison: Boolean, truncate: Int): Unit = {
+
     if (orderedComparison) {
-      val a = actualDS.collect()
-      val e = expectedDS.collect()
-      if (!a.sameElements(e)) {
-        throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
-      }
+      assertSmallDatasetContentEquality(actualDS, expectedDS, truncate)
     } else {
-      val a = defaultSortDataset(actualDS).collect()
-      val e = defaultSortDataset(expectedDS).collect()
-      if (!a.sameElements(e)) {
-        throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
-      }
+      assertSmallDatasetContentEquality(defaultSortDataset(actualDS), defaultSortDataset(expectedDS), truncate)
+    }
+  }
+
+  def assertSmallDatasetContentEquality[T](actualDS: Dataset[T], expectedDS: Dataset[T], truncate: Int): Unit = {
+    val a = actualDS.collect()
+    val e = expectedDS.collect()
+    if (!a.sameElements(e)) {
+      throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
     }
   }
 
@@ -113,46 +93,52 @@ Expected DataFrame Row Count: '$expectedCount'
                                               equals: (T, T) => Boolean = (o1: T, o2: T) => o1 == o2,
                                               ignoreNullable: Boolean = false,
                                               ignoreColumnNames: Boolean = false,
-                                              orderedComparison: Boolean = true): Unit = {
-    // first check if the schemas are equal
-    if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames)) {
-      throw DatasetSchemaMismatch(betterSchemaMismatchMessage(actualDS, expectedDS))
-    }
-    // then check if the DataFrames have the same content
-    def throwIfDatasetsAreUnequal(ds1: Dataset[T], ds2: Dataset[T]): Unit = {
-      try {
-        val ds1RDD = ds1.rdd.cache()
-        val ds2RDD = ds2.rdd.cache()
+                                              orderedComparison: Boolean = true,
+                                              ignoreColumnOrder: Boolean = false): Unit = {
+    SchemaComparer.assertSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)
+    val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
+    assertLargeDatasetContentEquality(actual, expectedDS, equals, orderedComparison)
+  }
 
-        val actualCount   = ds1RDD.count
-        val expectedCount = ds2RDD.count
-
-        if (actualCount != expectedCount) {
-          throw DatasetCountMismatch(countMismatchMessage(actualCount, expectedCount))
-        }
-
-        val unequalRDD = ds1RDD.zip(ds2RDD)
-          .filter { case (o1: T, o2: T) => !equals(o1, o2) }
-          .zipWithIndex()
-          .map { case ((t1, t2), idx) => (idx, (t1, t2)) }
-        val maxUnequalRowsToShow = 10
-        if (!unequalRDD.isEmpty()) {
-          throw DatasetContentMismatch(
-            unequalRDDMessage(unequalRDD, maxUnequalRowsToShow)
-          )
-        }
-        unequalRDD.take(maxUnequalRowsToShow)
-
-      } finally {
-        ds1.rdd.unpersist()
-        ds2.rdd.unpersist()
-      }
-    }
-
+  def assertLargeDatasetContentEquality[T: ClassTag](actualDS: Dataset[T],
+                                                     expectedDS: Dataset[T],
+                                                     equals: (T, T) => Boolean,
+                                                     orderedComparison: Boolean): Unit = {
     if (orderedComparison) {
-      throwIfDatasetsAreUnequal(actualDS, expectedDS)
+      assertLargeDatasetContentEquality(actualDS, expectedDS, equals)
     } else {
-      throwIfDatasetsAreUnequal(sortPreciseColumns(actualDS), sortPreciseColumns(expectedDS))
+      assertLargeDatasetContentEquality(sortPreciseColumns(actualDS), sortPreciseColumns(expectedDS), equals)
+    }
+  }
+
+  def assertLargeDatasetContentEquality[T: ClassTag](ds1: Dataset[T], ds2: Dataset[T], equals: (T, T) => Boolean): Unit = {
+    try {
+      val ds1RDD = ds1.rdd.cache()
+      val ds2RDD = ds2.rdd.cache()
+
+      val actualCount   = ds1RDD.count
+      val expectedCount = ds2RDD.count
+
+      if (actualCount != expectedCount) {
+        throw DatasetCountMismatch(countMismatchMessage(actualCount, expectedCount))
+      }
+
+      val unequalRDD = ds1RDD
+        .zip(ds2RDD)
+        .filter { case (o1: T, o2: T) => !equals(o1, o2) }
+        .zipWithIndex()
+        .map { case ((t1, t2), idx) => (idx, (t1, t2)) }
+      val maxUnequalRowsToShow = 10
+      if (!unequalRDD.isEmpty()) {
+        throw DatasetContentMismatch(
+          unequalRDDMessage(unequalRDD, maxUnequalRowsToShow)
+        )
+      }
+      unequalRDD.take(maxUnequalRowsToShow)
+
+    } finally {
+      ds1.rdd.unpersist()
+      ds2.rdd.unpersist()
     }
   }
 
@@ -161,17 +147,16 @@ Expected DataFrame Row Count: '$expectedCount'
                                          precision: Double,
                                          ignoreNullable: Boolean = false,
                                          ignoreColumnNames: Boolean = false,
-                                         orderedComparison: Boolean = true): Unit = {
-    val e = (r1: Row, r2: Row) => {
-      r1.equals(r2) || RowComparer.areRowsEqual(r1, r2, precision)
-    }
+                                         orderedComparison: Boolean = true,
+                                         ignoreColumnOrder: Boolean = false): Unit = {
     assertLargeDatasetEquality[Row](
       actualDF,
       expectedDF,
-      equals = e,
+      equals = RowComparer.areRowsEqual(_, _, precision),
       ignoreNullable,
       ignoreColumnNames,
-      orderedComparison
+      orderedComparison,
+      ignoreColumnOrder
     )
   }
 }
