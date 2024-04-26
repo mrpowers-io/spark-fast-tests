@@ -90,7 +90,7 @@ Expected DataFrame Row Count: '$expectedCount'
    */
   def assertLargeDatasetEquality[T: ClassTag](actualDS: Dataset[T],
                                               expectedDS: Dataset[T],
-                                              equals: (T, T) => Boolean = (o1: T, o2: T) => o1 == o2,
+                                              equals: (T, T) => Boolean = (o1: T, o2: T) => o1.equals(o2),
                                               ignoreNullable: Boolean = false,
                                               ignoreColumnNames: Boolean = false,
                                               orderedComparison: Boolean = true,
