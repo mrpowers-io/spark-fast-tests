@@ -151,7 +151,8 @@ trait ColumnComparer {
 
     if (sf1.dataType != sf2.dataType) {
       throw ColumnMismatch(
-        s"The column dataTypes are different. The `${colName1}` column has a `${sf1.dataType}` dataType and the `${colName2}` column has a `${sf2.dataType}` dataType.")
+        s"The column dataTypes are different. The `${colName1}` column has a `${sf1.dataType}` dataType and the `${colName2}` column has a `${sf2.dataType}` dataType."
+      )
     }
 
     val r = df

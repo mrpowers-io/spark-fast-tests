@@ -66,9 +66,8 @@ Expected DataFrame Row Count: '${expectedCount}'
   private def unequalRDDMessage[T](unequalRDD: RDD[(Long, (T, T))], length: Int): String = {
     "\nRow Index | Actual Row | Expected Row\n" + unequalRDD
       .take(length)
-      .map {
-        case (idx, (left, right)) =>
-          ufansi.Color.Red(s"$idx | $left | $right")
+      .map { case (idx, (left, right)) =>
+        ufansi.Color.Red(s"$idx | $left | $right")
       }
       .mkString("\n")
   }
@@ -76,12 +75,14 @@ Expected DataFrame Row Count: '${expectedCount}'
   /**
    * Raises an error unless `actualDS` and `expectedDS` are equal
    */
-  def assertSmallDatasetEquality[T](actualDS: Dataset[T],
-                                    expectedDS: Dataset[T],
-                                    ignoreNullable: Boolean = false,
-                                    ignoreColumnNames: Boolean = false,
-                                    orderedComparison: Boolean = true,
-                                    truncate: Int = 500): Unit = {
+  def assertSmallDatasetEquality[T](
+      actualDS: Dataset[T],
+      expectedDS: Dataset[T],
+      ignoreNullable: Boolean = false,
+      ignoreColumnNames: Boolean = false,
+      orderedComparison: Boolean = true,
+      truncate: Int = 500
+  ): Unit = {
     if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames)) {
       throw DatasetSchemaMismatch(
         betterSchemaMismatchMessage(actualDS, expectedDS)
@@ -121,12 +122,14 @@ Expected DataFrame Row Count: '${expectedCount}'
   /**
    * Raises an error unless `actualDS` and `expectedDS` are equal
    */
-  def assertLargeDatasetEquality[T: ClassTag](actualDS: Dataset[T],
-                                              expectedDS: Dataset[T],
-                                              equals: (T, T) => Boolean = naiveEquality _,
-                                              ignoreNullable: Boolean = false,
-                                              ignoreColumnNames: Boolean = false,
-                                              orderedComparison: Boolean = true): Unit = {
+  def assertLargeDatasetEquality[T: ClassTag](
+      actualDS: Dataset[T],
+      expectedDS: Dataset[T],
+      equals: (T, T) => Boolean = naiveEquality _,
+      ignoreNullable: Boolean = false,
+      ignoreColumnNames: Boolean = false,
+      orderedComparison: Boolean = true
+  ): Unit = {
     // first check if the schemas are equal
     if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames)) {
       throw DatasetSchemaMismatch(betterSchemaMismatchMessage(actualDS, expectedDS))
@@ -148,8 +151,8 @@ Expected DataFrame Row Count: '${expectedCount}'
         val resultIndexValue: RDD[(Long, T)]   = RddHelpers.zipWithIndex(ds2.rdd)
         val unequalRDD = expectedIndexValue
           .join(resultIndexValue)
-          .filter {
-            case (idx, (o1, o2)) => !equals(o1, o2)
+          .filter { case (idx, (o1, o2)) =>
+            !equals(o1, o2)
           }
         val maxUnequalRowsToShow = 10
         if (!unequalRDD.isEmpty()) {
@@ -172,12 +175,14 @@ Expected DataFrame Row Count: '${expectedCount}'
     }
   }
 
-  def assertApproximateDataFrameEquality(actualDF: DataFrame,
-                                         expectedDF: DataFrame,
-                                         precision: Double,
-                                         ignoreNullable: Boolean = false,
-                                         ignoreColumnNames: Boolean = false,
-                                         orderedComparison: Boolean = true): Unit = {
+  def assertApproximateDataFrameEquality(
+      actualDF: DataFrame,
+      expectedDF: DataFrame,
+      precision: Double,
+      ignoreNullable: Boolean = false,
+      ignoreColumnNames: Boolean = false,
+      orderedComparison: Boolean = true
+  ): Unit = {
     val e = (r1: Row, r2: Row) => {
       r1.equals(r2) || RowComparer.areRowsEqual(r1, r2, precision)
     }

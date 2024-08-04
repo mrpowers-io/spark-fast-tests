@@ -22,16 +22,20 @@ object RowComparer {
           val o2 = r2.get(idx)
           o1 match {
             case b1: Array[Byte] =>
-              if (!java.util.Arrays.equals(
-                    b1,
-                    o2.asInstanceOf[Array[Byte]]
-                  )) {
+              if (
+                !java.util.Arrays.equals(
+                  b1,
+                  o2.asInstanceOf[Array[Byte]]
+                )
+              ) {
                 return false
               }
 
             case f1: Float =>
-              if (java.lang.Float.isNaN(f1) !=
-                    java.lang.Float.isNaN(o2.asInstanceOf[Float])) {
+              if (
+                java.lang.Float.isNaN(f1) !=
+                  java.lang.Float.isNaN(o2.asInstanceOf[Float])
+              ) {
                 return false
               }
               if (abs(f1 - o2.asInstanceOf[Float]) > tol) {
@@ -39,8 +43,10 @@ object RowComparer {
               }
 
             case d1: Double =>
-              if (java.lang.Double.isNaN(d1) !=
-                    java.lang.Double.isNaN(o2.asInstanceOf[Double])) {
+              if (
+                java.lang.Double.isNaN(d1) !=
+                  java.lang.Double.isNaN(o2.asInstanceOf[Double])
+              ) {
                 return false
               }
               if (abs(d1 - o2.asInstanceOf[Double]) > tol) {
