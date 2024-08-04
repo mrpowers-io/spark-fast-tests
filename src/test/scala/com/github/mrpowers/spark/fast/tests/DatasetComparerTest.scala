@@ -161,19 +161,11 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
 
     "throws an error if the DataFrames content is different" in {
       val sourceDF = Seq(
-        (1),
-        (5),
-        (7),
-        (1),
-        (1)
+        (1), (5), (7), (1), (1)
       ).toDF("number")
 
       val expectedDF = Seq(
-        (10),
-        (5),
-        (3),
-        (7),
-        (1)
+        (10), (5), (3), (7), (1)
       ).toDF("number")
 
       val e = intercept[DatasetContentMismatch] {

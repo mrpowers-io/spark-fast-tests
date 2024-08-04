@@ -56,15 +56,13 @@ object ArrayUtil {
 
     // column names
     val h: Seq[(String, Int)] = rows.head.zipWithIndex
-    h.map {
-        case (cell, i) =>
-          if (truncate > 0) {
-            StringUtils.leftPad(cell, colWidths(i))
-          } else {
-            StringUtils.rightPad(cell, colWidths(i))
-          }
+    h.map { case (cell, i) =>
+      if (truncate > 0) {
+        StringUtils.leftPad(cell, colWidths(i))
+      } else {
+        StringUtils.rightPad(cell, colWidths(i))
       }
-      .addString(sb, "|", "|", "|\n")
+    }.addString(sb, "|", "|", "|\n")
 
     sb.append(sep)
 
@@ -72,18 +70,17 @@ object ArrayUtil {
     rows.tail.map { row =>
       val color = if (row(0) == row(1)) "blue" else "red"
       row.zipWithIndex
-        .map {
-          case (cell, i) =>
-            val r = if (truncate > 0) {
-              StringUtils.leftPad(cell.toString, colWidths(i))
-            } else {
-              StringUtils.rightPad(cell.toString, colWidths(i))
-            }
-            if (color == "blue") {
-              ufansi.Color.DarkGray(r)
-            } else {
-              ufansi.Color.Red(r)
-            }
+        .map { case (cell, i) =>
+          val r = if (truncate > 0) {
+            StringUtils.leftPad(cell.toString, colWidths(i))
+          } else {
+            StringUtils.rightPad(cell.toString, colWidths(i))
+          }
+          if (color == "blue") {
+            ufansi.Color.DarkGray(r)
+          } else {
+            ufansi.Color.Red(r)
+          }
         }
         .addString(sb, "|", "|", "|\n")
     }
@@ -123,36 +120,32 @@ object ArrayUtil {
 
     // column names
     val h: Seq[(String, Int)] = rows.head.zipWithIndex
-    h.map {
-        case (cell, i) =>
-          if (truncate > 0) {
-            StringUtils.leftPad(cell, colWidths(i))
-          } else {
-            StringUtils.rightPad(cell, colWidths(i))
-          }
+    h.map { case (cell, i) =>
+      if (truncate > 0) {
+        StringUtils.leftPad(cell, colWidths(i))
+      } else {
+        StringUtils.rightPad(cell, colWidths(i))
       }
-      .addString(sb, "|", "|", "|\n")
+    }.addString(sb, "|", "|", "|\n")
 
     sb.append(sep)
 
     // data
-    rows.tail.zipWithIndex.map {
-      case (row, j) =>
-        row.zipWithIndex
-          .map {
-            case (cell, i) =>
-              val r = if (truncate > 0) {
-                StringUtils.leftPad(cell.toString, colWidths(i))
-              } else {
-                StringUtils.rightPad(cell.toString, colWidths(i))
-              }
-              if (rowEqual(j)) {
-                equalColor(r)
-              } else {
-                unequalColor(r)
-              }
+    rows.tail.zipWithIndex.map { case (row, j) =>
+      row.zipWithIndex
+        .map { case (cell, i) =>
+          val r = if (truncate > 0) {
+            StringUtils.leftPad(cell.toString, colWidths(i))
+          } else {
+            StringUtils.rightPad(cell.toString, colWidths(i))
           }
-          .addString(sb, "|", "|", "|\n")
+          if (rowEqual(j)) {
+            equalColor(r)
+          } else {
+            unequalColor(r)
+          }
+        }
+        .addString(sb, "|", "|", "|\n")
     }
 
     sb.append(sep)
