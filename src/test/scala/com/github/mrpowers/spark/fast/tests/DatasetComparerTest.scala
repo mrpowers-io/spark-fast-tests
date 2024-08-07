@@ -2,7 +2,6 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.types._
 import SparkSessionExt._
-import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
 import org.scalatest.freespec.AnyFreeSpec
 
 object Person {

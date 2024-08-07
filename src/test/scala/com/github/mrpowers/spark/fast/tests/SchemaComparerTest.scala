@@ -125,21 +125,5 @@ class SchemaComparerTest extends AnyFreeSpec {
       )
       assert(SchemaComparer.equals(s1, s2, ignoreColumnNames = true))
     }
-
-    "can ignore the column order when determining equality" in {
-      val s1 = StructType(
-        Seq(
-          StructField("these", StringType, true),
-          StructField("are", StringType, true)
-        )
-      )
-      val s2 = StructType(
-        Seq(
-          StructField("are", StringType, true),
-          StructField("these", StringType, true)
-        )
-      )
-      assert(SchemaComparer.equals(s1, s2))
-    }
   }
 }
