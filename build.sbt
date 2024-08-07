@@ -1,3 +1,4 @@
+enablePlugins(GitVersioning)
 Compile / scalafmtOnCompile:= true
 
 organization := "com.github.mrpowers"
