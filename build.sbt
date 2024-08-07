@@ -24,7 +24,6 @@ crossScalaVersions := {
 }
 
 scalaVersion := crossScalaVersions.value.head
-enablePlugins(JmhPlugin)
 
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion.value % "provided"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % "test"
