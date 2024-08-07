@@ -15,9 +15,6 @@ Fetch the JAR file from Maven.
 ```scala
 // for Spark 3
 libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "1.1.0" % "test"
-
-// for Spark 2
-libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "0.23.0" % "test"
 ```
 
 Here's a link to the releases for different Scala versions:

@@ -14,18 +14,19 @@ val scala2_13= "2.13.13"
 val scala2_12= "2.12.15"
 val scala2_11= "2.11.17"
 
-sparkVersion := System.getProperty("spark.testVersion", "3.4.2")
-crossScalaVersions := {sparkVersion.value match {
-  case versionRegex("3", m, _) if m.toInt >= 2 => Seq(scala2_12, scala2_13)
-  case versionRegex("3", _ , _) => Seq(scala2_12)
-  case versionRegex("2", _ , _)  => Seq(scala2_11)
-}
+sparkVersion := System.getProperty("spark.testVersion", "3.5.1")
+crossScalaVersions := {
+  sparkVersion.value match {
+    case versionRegex("3", m, _) if m.toInt >= 2 => Seq(scala2_12, scala2_13)
+    case versionRegex("3", _ , _)                => Seq(scala2_12)
+    case versionRegex("2", _ , _)                => Seq(scala2_11)
+  }
 }
 
 scalaVersion := crossScalaVersions.value.head
 enablePlugins(JmhPlugin)
 
-libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion.value % "compile"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion.value % "provided"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % "test"
 
 credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
