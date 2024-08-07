@@ -1,10 +1,10 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
 import org.apache.spark.sql.Row
 
-class RowComparerTest extends FreeSpec {
+class RowComparerTest extends AnyFreeSpec {
 
   "areRowsEqual" - {
 
@@ -12,7 +12,7 @@ class RowComparerTest extends FreeSpec {
       val r1 = Row("a", "b")
       val r2 = Row("a", "b")
       assert(
-        RowComparer.areRowsEqual(r1, r2, 0.0) == true
+        RowComparer.areRowsEqual(r1, r2, 0.0)
       )
     }
 
@@ -20,7 +20,7 @@ class RowComparerTest extends FreeSpec {
       val r1 = Row("a", 3)
       val r2 = Row("a", 4)
       assert(
-        RowComparer.areRowsEqual(r1, r2, 0.0) == false
+        !RowComparer.areRowsEqual(r1, r2, 0.0)
       )
     }
 
