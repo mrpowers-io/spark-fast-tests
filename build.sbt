@@ -44,6 +44,6 @@ updateOptions := updateOptions.value.withLatestSnapshots(false)
 
 publishMavenStyle := true
 
-// publishTo := sonatypePublishToBundle.value
+publishTo := sonatypePublishToBundle.value
 
-// Global / useGpgPinentry := true
+Global / useGpgPinentry := true
