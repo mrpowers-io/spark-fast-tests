@@ -134,7 +134,8 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     assert(e.getMessage.indexOf("jean-claude") >= 0)
   }
 
-  "assertSmallDataFrameEquality" - {
+  "checkingDataFrameEquality" - {
+
     "does nothing if the DataFrames have the same schemas and content" in {
       val sourceDF = spark.createDF(
         List(
@@ -151,6 +152,8 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         ),
         List(("number", IntegerType, true))
       )
+
+      assertSmallDataFrameEquality(sourceDF, expectedDF)
       assertLargeDataFrameEquality(sourceDF, expectedDF)
     }
 
@@ -175,6 +178,9 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       )
 
       intercept[DatasetSchemaMismatch] {
+        assertLargeDataFrameEquality(sourceDF, expectedDF)
+      }
+      intercept[DatasetSchemaMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF)
       }
     }
@@ -197,9 +203,16 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       )
 
       intercept[DatasetContentMismatch] {
+        assertLargeDataFrameEquality(sourceDF, expectedDF)
+      }
+      intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF)
       }
     }
+
+  }
+
+  "assertSmallDataFrameEquality" - {
 
     "can performed unordered DataFrame comparisons" in {
       val sourceDF = spark.createDF(
@@ -239,112 +252,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
       }
     }
+
   }
 
-  "assertLargeDataFrameEquality" - {
-    "does nothing if the DataFrames have the same schemas and content" in {
-      val sourceDF = spark.createDF(
-        List(
-          (1),
-          (5)
-        ),
-        List(("number", IntegerType, true))
-      )
-
-      val expectedDF = spark.createDF(
-        List(
-          (1),
-          (5)
-        ),
-        List(("number", IntegerType, true))
-      )
-      assertLargeDataFrameEquality(sourceDF, expectedDF)
-    }
-
-    "throws an error if the DataFrames have different schemas" in {
-      val sourceDF = spark.createDF(
-        List(
-          (1),
-          (5)
-        ),
-        List(("number", IntegerType, true))
-      )
-
-      val expectedDF = spark.createDF(
-        List(
-          (1, "word"),
-          (5, "word")
-        ),
-        List(
-          ("number", IntegerType, true),
-          ("word", StringType, true)
-        )
-      )
-
-      intercept[DatasetSchemaMismatch] {
-        assertLargeDataFrameEquality(sourceDF, expectedDF)
-      }
-    }
-
-    "throws an error if the DataFrames content is different" in {
-      val sourceDF = spark.createDF(
-        List(
-          (1),
-          (5)
-        ),
-        List(("number", IntegerType, true))
-      )
-
-      val expectedDF = spark.createDF(
-        List(
-          (10),
-          (5)
-        ),
-        List(("number", IntegerType, true))
-      )
-
-      intercept[DatasetContentMismatch] {
-        assertLargeDataFrameEquality(sourceDF, expectedDF)
-      }
-    }
-
-    "can performed unordered DataFrame comparisons" in {
-      val sourceDF = spark.createDF(
-        List(
-          (1),
-          (5)
-        ),
-        List(("number", IntegerType, true))
-      )
-      val expectedDF = spark.createDF(
-        List(
-          (5),
-          (1)
-        ),
-        List(("number", IntegerType, true))
-      )
-      assertLargeDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
-    }
-
-    "throws an error for unordered DataFrame comparisons that don't match" in {
-      val sourceDF = spark.createDF(
-        List(
-          (1),
-          (5)
-        ),
-        List(("number", IntegerType, true))
-      )
-      val expectedDF = spark.createDF(
-        List(
-          (5),
-          (1),
-          (10)
-        ),
-        List(("number", IntegerType, true))
-      )
-      intercept[DatasetContentMismatch] {
-        assertLargeDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
-      }
-    }
-  }
 }
