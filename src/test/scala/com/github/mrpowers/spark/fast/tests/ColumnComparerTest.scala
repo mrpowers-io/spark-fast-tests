@@ -6,9 +6,9 @@ import org.apache.spark.sql.types._
 import java.sql.Date
 import java.sql.Timestamp
 
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
-class ColumnComparerTest extends FreeSpec with ColumnComparer with SparkSessionTestWrapper {
+class ColumnComparerTest extends AnyFreeSpec with ColumnComparer with SparkSessionTestWrapper {
 
   "assertColumnEquality" - {
 
@@ -176,15 +176,18 @@ class ColumnComparerTest extends FreeSpec with ColumnComparer with SparkSessionT
       )
       val actualDF = sourceDF.withColumn(
         "colors",
-        split(
-          concat_ws(
-            ",",
-            when(col("words").contains("blue"), "blue"),
-            when(col("words").contains("red"), "red"),
-            when(col("words").contains("pink"), "pink"),
-            when(col("words").contains("cyan"), "cyan")
+        coalesce(
+          split(
+            concat_ws(
+              ",",
+              when(col("words").contains("blue"), "blue"),
+              when(col("words").contains("red"), "red"),
+              when(col("words").contains("pink"), "pink"),
+              when(col("words").contains("cyan"), "cyan")
+            ),
+            ","
           ),
-          ","
+          typedLit(Array())
         )
       )
       assertColumnEquality(actualDF, "colors", "expected_colors")

@@ -1,8 +1,8 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
-class RDDComparerTest extends FreeSpec with RDDComparer with SparkSessionTestWrapper {
+class RDDComparerTest extends AnyFreeSpec with RDDComparer with SparkSessionTestWrapper {
 
   "contentMismatchMessage" - {
 

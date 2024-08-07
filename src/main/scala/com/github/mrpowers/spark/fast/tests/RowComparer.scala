@@ -1,14 +1,17 @@
 package com.github.mrpowers.spark.fast.tests
 
+import scala.math.abs
 import org.apache.spark.sql.Row
 
 import java.sql.Timestamp
-import scala.math.abs
 
 object RowComparer {
 
   /** Approximate equality, based on equals from [[Row]] */
-  def areRowsEqual(r1: Row, r2: Row, tol: Double): Boolean = {
+  def areRowsEqual(r1: Row, r2: Row, tol: Double = 0): Boolean = {
+    if (tol == 0) {
+      return r1 == r2
+    }
     if (r1.length != r2.length) {
       return false
     } else {
@@ -63,8 +66,7 @@ object RowComparer {
                 return false
               }
 
-            case _ =>
-              if (o1 != o2) return false
+            case _ => return o1 == o2
           }
         }
       })
