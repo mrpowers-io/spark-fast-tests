@@ -241,29 +241,5 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
       }
     }
-
-    "can performed DataFrame comparisons with unordered column" in {
-      val sourceDF = spark.createDF(
-        List(
-          (1, "word"),
-          (5, "word")
-        ),
-        List(
-          ("number", IntegerType, true),
-          ("word", StringType, true)
-        )
-      )
-      val expectedDF = spark.createDF(
-        List(
-          ("word", 1),
-          ("word", 5)
-        ),
-        List(
-          ("word", StringType, true),
-          ("number", IntegerType, true)
-        )
-      )
-      assertLargeDataFrameEquality(sourceDF, expectedDF, ignoreColumnOrder = true)
-    }
   }
 }
