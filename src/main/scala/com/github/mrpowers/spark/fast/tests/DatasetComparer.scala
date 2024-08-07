@@ -26,9 +26,8 @@ Expected DataFrame Row Count: '$expectedCount'
   private def unequalRDDMessage[T](unequalRDD: RDD[(Long, (T, T))], length: Int): String = {
     "\nRow Index | Actual Row | Expected Row\n" + unequalRDD
       .take(length)
-      .map {
-        case (idx, (left, right)) =>
-          ufansi.Color.Red(s"$idx | $left | $right")
+      .map { case (idx, (left, right)) =>
+        ufansi.Color.Red(s"$idx | $left | $right")
       }
       .mkString("\n")
   }
@@ -43,26 +42,25 @@ Expected DataFrame Row Count: '$expectedCount'
   /**
    * Raises an error unless `actualDS` and `expectedDS` are equal
    */
-  def assertSmallDatasetEquality[T](actualDS: Dataset[T],
-                                    expectedDS: Dataset[T],
-                                    ignoreNullable: Boolean = false,
-                                    ignoreColumnNames: Boolean = false,
-                                    orderedComparison: Boolean = true,
-                                    ignoreColumnOrder: Boolean = false,
-                                    truncate: Int = 500): Unit = {
-
+  def assertSmallDatasetEquality[T](
+      actualDS: Dataset[T],
+      expectedDS: Dataset[T],
+      ignoreNullable: Boolean = false,
+      ignoreColumnNames: Boolean = false,
+      orderedComparison: Boolean = true,
+      ignoreColumnOrder: Boolean = false,
+      truncate: Int = 500
+  ): Unit = {
     SchemaComparer.assertSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)
     val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
     assertSmallDatasetContentEquality(actual, expectedDS, orderedComparison, truncate)
   }
 
   def assertSmallDatasetContentEquality[T](actualDS: Dataset[T], expectedDS: Dataset[T], orderedComparison: Boolean, truncate: Int): Unit = {
-
-    if (orderedComparison) {
+    if (orderedComparison)
       assertSmallDatasetContentEquality(actualDS, expectedDS, truncate)
-    } else {
+    else
       assertSmallDatasetContentEquality(defaultSortDataset(actualDS), defaultSortDataset(expectedDS), truncate)
-    }
   }
 
   def assertSmallDatasetContentEquality[T](actualDS: Dataset[T], expectedDS: Dataset[T], truncate: Int): Unit = {
@@ -88,13 +86,16 @@ Expected DataFrame Row Count: '$expectedCount'
   /**
    * Raises an error unless `actualDS` and `expectedDS` are equal
    */
-  def assertLargeDatasetEquality[T: ClassTag](actualDS: Dataset[T],
-                                              expectedDS: Dataset[T],
-                                              equals: (T, T) => Boolean = (o1: T, o2: T) => o1.equals(o2),
-                                              ignoreNullable: Boolean = false,
-                                              ignoreColumnNames: Boolean = false,
-                                              orderedComparison: Boolean = true,
-                                              ignoreColumnOrder: Boolean = false): Unit = {
+  def assertLargeDatasetEquality[T: ClassTag](
+      actualDS: Dataset[T],
+      expectedDS: Dataset[T],
+      equals: (T, T) => Boolean = (o1: T, o2: T) => o1.equals(o2),
+      ignoreNullable: Boolean = false,
+      ignoreColumnNames: Boolean = false,
+      orderedComparison: Boolean = true,
+      ignoreColumnOrder: Boolean = false
+  ): Unit = {
+    // first check if the schemas are equal
     SchemaComparer.assertSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)
     val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
     assertLargeDatasetContentEquality(actual, expectedDS, equals, orderedComparison)
@@ -142,13 +143,18 @@ Expected DataFrame Row Count: '$expectedCount'
     }
   }
 
-  def assertApproximateDataFrameEquality(actualDF: DataFrame,
-                                         expectedDF: DataFrame,
-                                         precision: Double,
-                                         ignoreNullable: Boolean = false,
-                                         ignoreColumnNames: Boolean = false,
-                                         orderedComparison: Boolean = true,
-                                         ignoreColumnOrder: Boolean = false): Unit = {
+  def assertApproximateDataFrameEquality(
+      actualDF: DataFrame,
+      expectedDF: DataFrame,
+      precision: Double,
+      ignoreNullable: Boolean = false,
+      ignoreColumnNames: Boolean = false,
+      orderedComparison: Boolean = true,
+      ignoreColumnOrder: Boolean = false
+  ): Unit = {
+    val e = (r1: Row, r2: Row) => {
+      r1.equals(r2) || RowComparer.areRowsEqual(r1, r2, precision)
+    }
     assertLargeDatasetEquality[Row](
       actualDF,
       expectedDF,
