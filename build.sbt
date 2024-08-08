@@ -19,7 +19,6 @@ crossScalaVersions := {
   sparkVersion.value match {
     case versionRegex("3", m, _) if m.toInt >= 2 => Seq(scala2_12, scala2_13)
     case versionRegex("3", _ , _)                => Seq(scala2_12)
-    case versionRegex("2", _ , _)                => Seq(scala2_11)
   }
 }
 
