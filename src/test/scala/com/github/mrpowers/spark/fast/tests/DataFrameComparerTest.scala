@@ -2,10 +2,9 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.types.{IntegerType, StringType}
 import SparkSessionExt._
+import org.scalatest.freespec.AnyFreeSpec
 
-import org.scalatest.FreeSpec
-
-class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSessionTestWrapper {
+class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with SparkSessionTestWrapper {
 
   "prints a descriptive error message if it bugs out" in {
     val sourceDF = spark.createDF(
@@ -64,7 +63,7 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
       )
     )
 
-    val e = intercept[DatasetContentMismatch] {
+    intercept[DatasetContentMismatch] {
       assertSmallDataFrameEquality(sourceDF, expectedDF)
     }
   }
@@ -178,10 +177,10 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
         )
       )
 
-      val e = intercept[DatasetSchemaMismatch] {
+      intercept[DatasetSchemaMismatch] {
         assertLargeDataFrameEquality(sourceDF, expectedDF)
       }
-      val e2 = intercept[DatasetSchemaMismatch] {
+      intercept[DatasetSchemaMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF)
       }
     }
@@ -203,10 +202,10 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
         List(("number", IntegerType, true))
       )
 
-      val e = intercept[DatasetContentMismatch] {
+      intercept[DatasetContentMismatch] {
         assertLargeDataFrameEquality(sourceDF, expectedDF)
       }
-      val e2 = intercept[DatasetContentMismatch] {
+      intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF)
       }
     }
@@ -249,7 +248,7 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
         ),
         List(("number", IntegerType, true))
       )
-      val e = intercept[DatasetContentMismatch] {
+      intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
       }
     }

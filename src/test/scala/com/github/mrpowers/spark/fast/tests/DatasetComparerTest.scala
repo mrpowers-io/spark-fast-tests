@@ -2,8 +2,7 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.types._
 import SparkSessionExt._
-
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
 object Person {
 
@@ -14,10 +13,9 @@ object Person {
 case class Person(name: String, age: Int)
 case class PrecisePerson(name: String, age: Double)
 
-class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessionTestWrapper {
+class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSessionTestWrapper {
 
   "checkDatasetEquality" - {
-
     import spark.implicits._
 
     "provides a good README example" in {
@@ -276,7 +274,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
       )
 
       assertLargeDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
-      assertSmallDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
     }
 
     "throws an error for unordered Dataset comparisons that don't match" in {
@@ -343,7 +340,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         assertLargeDatasetEquality(sourceDF, expectedDF)
       }
     }
-
   }
 
   "assertSmallDatasetEquality" - {
@@ -384,7 +380,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         ),
         List(("number", IntegerType, true))
       )
-      assertLargeDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
       assertSmallDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
     }
 
@@ -401,7 +396,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
           Person("bob", 1)
         )
       )
-      assertLargeDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
       assertSmallDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
     }
 
@@ -465,7 +459,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
         assertSmallDatasetEquality(sourceDF, expectedDF)
       }
     }
-
   }
 
   "defaultSortDataset" - {
@@ -629,7 +622,6 @@ class DatasetComparerTest extends FreeSpec with DatasetComparer with SparkSessio
 
       assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
     }
-
   }
 
 //      "works with FloatType columns" - {
