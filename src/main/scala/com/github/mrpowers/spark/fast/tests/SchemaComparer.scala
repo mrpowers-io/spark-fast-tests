@@ -62,7 +62,7 @@ object SchemaComparer {
 
   def equals(dt1: DataType, dt2: DataType, ignoreNullable: Boolean, ignoreColumnNames: Boolean, ignoreColumnOrder: Boolean): Boolean = {
     (ignoreNullable, dt1, dt2) match {
-      case (true, st1: StructType, st2: StructType) =>
+      case (ignoreNullable, st1: StructType, st2: StructType) if ignoreNullable || ignoreColumnOrder =>
         equals(st1, st2, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)
       case (true, ArrayType(vdt1, _), ArrayType(vdt2, _)) =>
         equals(vdt1, vdt2, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)
