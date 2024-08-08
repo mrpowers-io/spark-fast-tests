@@ -2,10 +2,10 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.types.{IntegerType, StringType}
 import SparkSessionExt._
+import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
+import org.scalatest.freespec.AnyFreeSpec
 
-import org.scalatest.FreeSpec
-
-class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSessionTestWrapper {
+class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with SparkSessionTestWrapper {
 
   "prints a descriptive error message if it bugs out" in {
     val sourceDF = spark.createDF(
@@ -64,7 +64,7 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
       )
     )
 
-    val e = intercept[DatasetContentMismatch] {
+    intercept[DatasetContentMismatch] {
       assertSmallDataFrameEquality(sourceDF, expectedDF)
     }
   }
@@ -135,7 +135,7 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
     assert(e.getMessage.indexOf("jean-claude") >= 0)
   }
 
-  "checkingDataFrameEquality" - {
+  "assertSmallDataFrameEquality" - {
 
     "does nothing if the DataFrames have the same schemas and content" in {
       val sourceDF = spark.createDF(
@@ -153,8 +153,6 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
         ),
         List(("number", IntegerType, true))
       )
-
-      assertSmallDataFrameEquality(sourceDF, expectedDF)
       assertLargeDataFrameEquality(sourceDF, expectedDF)
     }
 
@@ -178,10 +176,11 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
         )
       )
 
-      val e = intercept[DatasetSchemaMismatch] {
+
+      intercept[DatasetSchemaMismatch] {
         assertLargeDataFrameEquality(sourceDF, expectedDF)
       }
-      val e2 = intercept[DatasetSchemaMismatch] {
+      intercept[DatasetSchemaMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF)
       }
     }
@@ -203,17 +202,13 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
         List(("number", IntegerType, true))
       )
 
-      val e = intercept[DatasetContentMismatch] {
+      intercept[DatasetContentMismatch] {
         assertLargeDataFrameEquality(sourceDF, expectedDF)
       }
-      val e2 = intercept[DatasetContentMismatch] {
+      intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF)
       }
     }
-
-  }
-
-  "assertSmallDataFrameEquality" - {
 
     "can performed unordered DataFrame comparisons" in {
       val sourceDF = spark.createDF(
@@ -249,11 +244,33 @@ class DataFrameComparerTest extends FreeSpec with DataFrameComparer with SparkSe
         ),
         List(("number", IntegerType, true))
       )
-      val e = intercept[DatasetContentMismatch] {
+      intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
       }
     }
 
+    "can performed DataFrame comparisons with unordered column" in {
+      val sourceDF = spark.createDF(
+        List(
+          (1, "word"),
+          (5, "word")
+        ),
+        List(
+          ("number", IntegerType, true),
+          ("word", StringType, true)
+        )
+      )
+      val expectedDF = spark.createDF(
+        List(
+          ("word", 1),
+          ("word", 5)
+        ),
+        List(
+          ("word", StringType, true),
+          ("number", IntegerType, true)
+        )
+      )
+      assertLargeDataFrameEquality(sourceDF, expectedDF, ignoreColumnOrder = true)
+    }
   }
-
 }

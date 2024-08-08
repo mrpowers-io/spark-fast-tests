@@ -2,9 +2,9 @@ package com.github.mrpowers.spark.fast.tests
 
 import java.sql.Date
 import java.time.LocalDate
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
-class ArrayUtilTest extends FreeSpec {
+class ArrayUtilTest extends AnyFreeSpec {
 
   "blah" in {
     val arr: Array[(Any, Any)] = Array(("hi", "there"), ("fun", "train"))
