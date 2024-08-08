@@ -176,7 +176,6 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         )
       )
 
-
       intercept[DatasetSchemaMismatch] {
         assertLargeDataFrameEquality(sourceDF, expectedDF)
       }
