@@ -123,12 +123,14 @@ Expected DataFrame Row Count: '$expectedCount'
       if (actualCount != expectedCount) {
         throw DatasetCountMismatch(countMismatchMessage(actualCount, expectedCount))
       }
+      val expectedIndexValue = RddHelpers.zipWithIndex(ds1RDD)
+      val resultIndexValue = RddHelpers.zipWithIndex(ds2RDD)
+      val unequalRDD = expectedIndexValue
+        .join(resultIndexValue)
+        .filter { case (_, (o1, o2)) =>
+          !equals(o1, o2)
+        }
 
-      val unequalRDD = ds1RDD
-        .zip(ds2RDD)
-        .filter { case (o1: T, o2: T) => !equals(o1, o2) }
-        .zipWithIndex()
-        .map { case ((t1, t2), idx) => (idx, (t1, t2)) }
       val maxUnequalRowsToShow = 10
       if (!unequalRDD.isEmpty()) {
         throw DatasetContentMismatch(
