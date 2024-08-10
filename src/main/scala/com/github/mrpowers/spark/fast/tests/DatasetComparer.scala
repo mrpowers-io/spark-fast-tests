@@ -1,5 +1,6 @@
 package com.github.mrpowers.spark.fast.tests
 
+import com.github.mrpowers.spark.fast.tests.DatasetComparer.maxUnequalRowsToShow
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import org.apache.spark.sql.functions._
@@ -131,7 +132,6 @@ Expected DataFrame Row Count: '$expectedCount'
           !equals(o1, o2)
         }
 
-      val maxUnequalRowsToShow = 10
       if (!unequalRDD.isEmpty()) {
         throw DatasetContentMismatch(
           unequalRDDMessage(unequalRDD, maxUnequalRowsToShow)
@@ -167,4 +167,8 @@ Expected DataFrame Row Count: '$expectedCount'
       ignoreColumnOrder
     )
   }
+}
+
+object DatasetComparer {
+  val maxUnequalRowsToShow = 10
 }
