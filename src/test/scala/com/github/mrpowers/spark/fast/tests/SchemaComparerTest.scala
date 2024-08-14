@@ -125,5 +125,61 @@ class SchemaComparerTest extends AnyFreeSpec {
       )
       assert(SchemaComparer.equals(s1, s2, ignoreColumnNames = true))
     }
+
+    "can ignore the column order when determining equality" in {
+      val s1 = StructType(
+        Seq(
+          StructField("these", StringType, true),
+          StructField("are", StringType, true)
+        )
+      )
+      val s2 = StructType(
+        Seq(
+          StructField("are", StringType, true),
+          StructField("these", StringType, true)
+        )
+      )
+      assert(SchemaComparer.equals(s1, s2))
+    }
+
+    "can ignore the column order when determining equality of complex type" in {
+      val s1 = StructType(
+        Seq(
+          StructField("array", ArrayType(StringType, containsNull = true), true),
+          StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
+          StructField("something", StringType, true),
+          StructField(
+            "struct",
+            StructType(
+              StructType(
+                Seq(
+                  StructField("mood", ArrayType(StringType, containsNull = false), true),
+                  StructField("something", StringType, false)
+                )
+              )),
+            true
+          )
+        )
+      )
+      val s2 = StructType(
+        Seq(
+          StructField("something", StringType, true),
+          StructField("array", ArrayType(StringType, containsNull = true), true),
+          StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
+          StructField(
+            "struct",
+            StructType(
+              StructType(
+                Seq(
+                  StructField("something", StringType, false),
+                  StructField("mood", ArrayType(StringType, containsNull = false), true)
+                )
+              )),
+            true
+          )
+        )
+      )
+      assert(SchemaComparer.equals(s1, s2))
+    }
   }
 }

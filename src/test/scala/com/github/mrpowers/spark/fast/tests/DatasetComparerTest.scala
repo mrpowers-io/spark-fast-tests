@@ -2,6 +2,7 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.types._
 import SparkSessionExt._
+import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
 import org.scalatest.freespec.AnyFreeSpec
 
 object Person {
@@ -340,6 +341,49 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         assertLargeDatasetEquality(sourceDF, expectedDF)
       }
     }
+
+    "can performed DataFrame comparisons with unordered column" in {
+      val sourceDF = spark.createDF(
+        List(
+          (1, "word"),
+          (5, "word")
+        ),
+        List(
+          ("number", IntegerType, true),
+          ("word", StringType, true)
+        )
+      )
+      val expectedDF = spark.createDF(
+        List(
+          ("word", 1),
+          ("word", 5)
+        ),
+        List(
+          ("word", StringType, true),
+          ("number", IntegerType, true)
+        )
+      )
+      assertLargeDatasetEquality(sourceDF, expectedDF, ignoreColumnOrder = true)
+    }
+
+    "can performed Dataset comparisons with unordered column" in {
+      val ds1 = Seq(
+        Person("juan", 5),
+        Person("bob", 1),
+        Person("li", 49),
+        Person("alice", 5)
+      ).toDS
+
+      val ds2 = Seq(
+        Person("juan", 5),
+        Person("bob", 1),
+        Person("li", 49),
+        Person("alice", 5)
+      ).toDS.select("age", "name").as(ds1.encoder)
+
+      assertLargeDatasetEquality(ds1, ds2, ignoreColumnOrder = true)
+      assertLargeDatasetEquality(ds2, ds1, ignoreColumnOrder = true)
+    }
   }
 
   "assertSmallDatasetEquality" - {
@@ -458,6 +502,49 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       val e = intercept[DatasetContentMismatch] {
         assertSmallDatasetEquality(sourceDF, expectedDF)
       }
+    }
+
+    "can performed DataFrame comparisons with unordered column" in {
+      val sourceDF = spark.createDF(
+        List(
+          (1, "word"),
+          (5, "word")
+        ),
+        List(
+          ("number", IntegerType, true),
+          ("word", StringType, true)
+        )
+      )
+      val expectedDF = spark.createDF(
+        List(
+          ("word", 1),
+          ("word", 5)
+        ),
+        List(
+          ("word", StringType, true),
+          ("number", IntegerType, true)
+        )
+      )
+      assertSmallDatasetEquality(sourceDF, expectedDF, ignoreColumnOrder = true)
+    }
+
+    "can performed Dataset comparisons with unordered column" in {
+      val ds1 = Seq(
+        Person("juan", 5),
+        Person("bob", 1),
+        Person("li", 49),
+        Person("alice", 5)
+      ).toDS
+
+      val ds2 = Seq(
+        Person("juan", 5),
+        Person("bob", 1),
+        Person("li", 49),
+        Person("alice", 5)
+      ).toDS.select("age", "name").as(ds1.encoder)
+
+      assertSmallDatasetEquality(ds1, ds2, ignoreColumnOrder = true)
+      assertSmallDatasetEquality(ds2, ds1, ignoreColumnOrder = true)
     }
   }
 
@@ -619,6 +706,22 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         ("1", "10/01/2019", 26.762499999999946, "A"),
         ("1", "10/01/2019", 26.76249999999991, "B")
       ).toDF("col_B", "col_C", "col_A", "col_D")
+
+      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
+    }
+
+    "can work with precision and unordered comparison on nested column" in {
+      import spark.implicits._
+      val ds1 = Seq(
+        ("1", "10/01/2019", 26.762499999999996, Seq(26.762499999999996, 26.762499999999996)),
+        ("1", "11/01/2019", 26.762499999999996, Seq(26.762499999999996, 26.762499999999996))
+      ).toDF("col_B", "col_C", "col_A", "col_D")
+
+      val ds2 = Seq(
+        ("1", "11/01/2019", 26.7624999999999961, Seq(26.7624999999999961, 26.7624999999999961)),
+        ("1", "10/01/2019", 26.762499999999997, Seq(26.762499999999997, 26.762499999999997)),
+      ).toDF("col_B", "col_C", "col_A", "col_D")
+
 
       assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
     }
