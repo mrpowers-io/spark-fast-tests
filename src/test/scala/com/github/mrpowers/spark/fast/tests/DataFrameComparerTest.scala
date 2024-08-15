@@ -102,6 +102,177 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     assert(e.getMessage.indexOf("jean-jacques") >= 0)
   }
 
+  "also print a descriptive error message if the left side is missing" in {
+    val sourceDF = spark.createDF(
+      List(
+        ("bob", 1, "uk"),
+        ("camila", 5, "peru")
+      ),
+      List(
+        ("name", StringType, true),
+        ("age", IntegerType, true),
+        ("country", StringType, true)
+      )
+    )
+
+    val expectedDF = spark.createDF(
+      List(
+        ("bob", 1, "france"),
+        ("camila", 5, "peru"),
+        ("jean-claude", 4, "france")
+      ),
+      List(
+        ("name", StringType, true),
+        ("age", IntegerType, true),
+        ("country", StringType, true)
+      )
+    )
+
+    val e = intercept[DatasetContentMismatch] {
+      assertSmallDataFrameEquality(sourceDF, expectedDF)
+    }
+
+    assert(e.getMessage.indexOf("jean-claude") >= 0)
+  }
+
+  "assertSmallDataFrameEquality" - {
+
+    "does nothing if the DataFrames have the same schemas and content" in {
+      val sourceDF = spark.createDF(
+        List(
+          (1),
+          (5)
+        ),
+        List(("number", IntegerType, true))
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          (1),
+          (5)
+        ),
+        List(("number", IntegerType, true))
+      )
+      assertLargeDataFrameEquality(sourceDF, expectedDF)
+    }
+
+    "throws an error if the DataFrames have different schemas" in {
+      val sourceDF = spark.createDF(
+        List(
+          (1),
+          (5)
+        ),
+        List(("number", IntegerType, true))
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          (1, "word"),
+          (5, "word")
+        ),
+        List(
+          ("number", IntegerType, true),
+          ("word", StringType, true)
+        )
+      )
+
+      intercept[DatasetSchemaMismatch] {
+        assertLargeDataFrameEquality(sourceDF, expectedDF)
+      }
+      intercept[DatasetSchemaMismatch] {
+        assertSmallDataFrameEquality(sourceDF, expectedDF)
+      }
+    }
+
+    "throws an error if the DataFrames content is different" in {
+      val sourceDF = spark.createDF(
+        List(
+          (1),
+          (5)
+        ),
+        List(("number", IntegerType, true))
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          (10),
+          (5)
+        ),
+        List(("number", IntegerType, true))
+      )
+
+      intercept[DatasetContentMismatch] {
+        assertLargeDataFrameEquality(sourceDF, expectedDF)
+      }
+      intercept[DatasetContentMismatch] {
+        assertSmallDataFrameEquality(sourceDF, expectedDF)
+      }
+    }
+
+    "can performed unordered DataFrame comparisons" in {
+      val sourceDF = spark.createDF(
+        List(
+          (1),
+          (5)
+        ),
+        List(("number", IntegerType, true))
+      )
+      val expectedDF = spark.createDF(
+        List(
+          (5),
+          (1)
+        ),
+        List(("number", IntegerType, true))
+      )
+      assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
+    }
+
+    "throws an error for unordered DataFrame comparisons that don't match" in {
+      val sourceDF = spark.createDF(
+        List(
+          (1),
+          (5)
+        ),
+        List(("number", IntegerType, true))
+      )
+      val expectedDF = spark.createDF(
+        List(
+          (5),
+          (1),
+          (10)
+        ),
+        List(("number", IntegerType, true))
+      )
+      intercept[DatasetContentMismatch] {
+        assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)
+      }
+    }
+
+    "can performed DataFrame comparisons with unordered column" in {
+      val sourceDF = spark.createDF(
+        List(
+          (1, "word"),
+          (5, "word")
+        ),
+        List(
+          ("number", IntegerType, true),
+          ("word", StringType, true)
+        )
+      )
+      val expectedDF = spark.createDF(
+        List(
+          ("word", 1),
+          ("word", 5)
+        ),
+        List(
+          ("word", StringType, true),
+          ("number", IntegerType, true)
+        )
+      )
+      assertLargeDataFrameEquality(sourceDF, expectedDF, ignoreColumnOrder = true)
+    }
+  }
+
   "assertApproximateDataFrameEquality" - {
 
     "does nothing if the DataFrames have the same schemas and content" in {
@@ -139,7 +310,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         ),
         List(("number", DoubleType, true))
       )
-      intercept[DatasetContentMismatch] {
+      val e = intercept[DatasetContentMismatch] {
         assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
       }
     }
@@ -160,7 +331,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         ),
         List(("number", DoubleType, true))
       )
-      intercept[DatasetCountMismatch] {
+      val e = intercept[DatasetCountMismatch] {
         assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
       }
     }
@@ -286,7 +457,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         ),
         List(("number", DoubleType, true))
       )
-      intercept[DatasetContentMismatch] {
+      val e = intercept[DatasetContentMismatch] {
         assertApproximateSmallDataFrameEquality(sourceDF, expectedDF, 0.01)
       }
     }
@@ -307,7 +478,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         ),
         List(("number", DoubleType, true))
       )
-      intercept[DatasetContentMismatch] {
+      val e = intercept[DatasetContentMismatch] {
         assertApproximateSmallDataFrameEquality(sourceDF, expectedDF, 0.01)
       }
     }
