@@ -1,6 +1,7 @@
 package com.github.mrpowers.spark.fast.tests
 
 import com.github.mrpowers.spark.fast.tests.DatasetComparer.maxUnequalRowsToShow
+import com.github.mrpowers.spark.fast.tests.SeqLikesExtensions.SeqExtensions
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import org.apache.spark.sql.functions._
@@ -50,24 +51,25 @@ Expected DataFrame Row Count: '$expectedCount'
       ignoreColumnNames: Boolean = false,
       orderedComparison: Boolean = true,
       ignoreColumnOrder: Boolean = false,
-      truncate: Int = 500
+      truncate: Int = 500,
+      equals: (T, T) => Boolean = (o1: T, o2: T) => o1.equals(o2)
   ): Unit = {
     SchemaComparer.assertSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)
     val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
-    assertSmallDatasetContentEquality(actual, expectedDS, orderedComparison, truncate)
+    assertSmallDatasetContentEquality(actual, expectedDS, orderedComparison, truncate, equals)
   }
 
-  def assertSmallDatasetContentEquality[T](actualDS: Dataset[T], expectedDS: Dataset[T], orderedComparison: Boolean, truncate: Int): Unit = {
+  def assertSmallDatasetContentEquality[T](actualDS: Dataset[T], expectedDS: Dataset[T], orderedComparison: Boolean, truncate: Int, equals: (T, T) => Boolean): Unit = {
     if (orderedComparison)
-      assertSmallDatasetContentEquality(actualDS, expectedDS, truncate)
+      assertSmallDatasetContentEquality(actualDS, expectedDS, truncate, equals)
     else
-      assertSmallDatasetContentEquality(defaultSortDataset(actualDS), defaultSortDataset(expectedDS), truncate)
+      assertSmallDatasetContentEquality(defaultSortDataset(actualDS), defaultSortDataset(expectedDS), truncate, equals)
   }
 
-  def assertSmallDatasetContentEquality[T](actualDS: Dataset[T], expectedDS: Dataset[T], truncate: Int): Unit = {
+  def assertSmallDatasetContentEquality[T](actualDS: Dataset[T], expectedDS: Dataset[T], truncate: Int, equals: (T, T) => Boolean): Unit = {
     val a = actualDS.collect()
     val e = expectedDS.collect()
-    if (!a.sameElements(e)) {
+    if (!a.toSeq.approximateSameElements(e, equals)) {
       throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
     }
   }
