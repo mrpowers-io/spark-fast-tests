@@ -1,4 +1,4 @@
-﻿package com.github.mrpowers.spark.fast.tests
+package com.github.mrpowers.spark.fast.tests
 
 import scala.util.Try
 
