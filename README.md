@@ -1,4 +1,4 @@
-# spark-fast-tests
+# Spark Fast Tests
 
 [![CI](https://github.com/MrPowers/spark-fast-tests/actions/workflows/ci.yml/badge.svg)](https://github.com/MrPowers/spark-fast-tests/actions/workflows/ci.yml)
 
@@ -64,7 +64,7 @@ val expectedDS = Seq(
 ).toDS
 ```
 
-![assert_small_dataset_equality_error_message](https://github.com/MrPowers/spark-fast-tests/blob/master/images/assertSmallDatasetEquality_error_message.png)
+![assert_small_dataset_equality_error_message](https://raw.githubusercontent.com/mrpowers-io/spark-fast-tests/main/images/assertSmallDatasetEquality_error_message.png)
 
 The colors in the error message make it easy to identify the rows that aren't equal.
 
@@ -89,12 +89,14 @@ def myLowerClean(col: Column): Column = {
 
 Here's how long the tests take to execute:
 
-|test method|runtime|
-|-------|--------------------|
-|`assertLargeDataFrameEquality`|709 milliseconds|
-|`assertSmallDataFrameEquality`|166 milliseconds|
-|`assertColumnEquality`|108 milliseconds|
-|`evalString`|26 milliseconds|
+
+| test method                    | runtime          |
+|--------------------------------|------------------|
+| `assertLargeDataFrameEquality` | 709 milliseconds |
+| `assertSmallDataFrameEquality` | 166 milliseconds |
+| `assertColumnEquality`         | 108 milliseconds |
+| `evalString`                   | 26 milliseconds  |
+
 
 `evalString` isn't as robust, but is the fastest.  `assertColumnEquality` is robust and saves a lot of time.
 
@@ -192,7 +194,7 @@ The following code will throw a `ColumnMismatch` error message:
 assertColumnEquality(df, "name", "expected_name")
 ```
 
-![assert_column_equality_error_message](https://github.com/MrPowers/spark-fast-tests/blob/master/images/assertColumnEquality_error_message.png)
+![assert_column_equality_error_message](https://raw.githubusercontent.com/mrpowers-io/spark-fast-tests/main/images/assertColumnEquality_error_message.png)
 
 Mix in the `ColumnComparer` trait to your test class to access the `assertColumnEquality` method:
 
