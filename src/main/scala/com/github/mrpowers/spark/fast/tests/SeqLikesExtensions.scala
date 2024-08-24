@@ -39,8 +39,9 @@ object SeqLikesExtensions {
         }
         val these = seq1.iterator
         val those = seq2.iterator
-        while (these.hasNext && those.hasNext) if (!equals(these.next(), those.next()))
-          return false
+        while (these.hasNext && those.hasNext)
+          if (!equals(these.next(), those.next()))
+            return false
         these.hasNext == those.hasNext
     }
 

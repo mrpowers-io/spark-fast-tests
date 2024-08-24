@@ -413,7 +413,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
 
       val ds2 = Seq(
         ("1", "11/01/2019", 26.7624999999999961, Seq(26.7624999999999961, 26.7624999999999961)),
-        ("1", "10/01/2019", 26.762499999999997, Seq(26.762499999999997, 26.762499999999997)),
+        ("1", "10/01/2019", 26.762499999999997, Seq(26.762499999999997, 26.762499999999997))
       ).toDF("col_B", "col_C", "col_A", "col_D")
 
       assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
@@ -560,7 +560,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
 
       val ds2 = Seq(
         ("2", "11/01/2019", 26.7624999999999961, Seq(26.7624999999999961, 26.7624999999999961)),
-        ("1", "10/01/2019", 26.762499999999997, Seq(26.762499999999997, 26.762499999999997)),
+        ("1", "10/01/2019", 26.762499999999997, Seq(26.762499999999997, 26.762499999999997))
       ).toDF("col_B", "col_C", "col_A", "col_D")
 
       assertApproximateSmallDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)

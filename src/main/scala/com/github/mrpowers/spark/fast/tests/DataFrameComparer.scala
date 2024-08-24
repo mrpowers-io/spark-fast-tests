@@ -51,13 +51,15 @@ trait DataFrameComparer extends DatasetComparer {
   /**
    * Raises an error unless `actualDF` and `expectedDF` are equal
    */
-  def assertApproximateSmallDataFrameEquality(actualDF: DataFrame,
-                                              expectedDF: DataFrame,
-                                              precision: Double,
-                                              ignoreNullable: Boolean = false,
-                                              ignoreColumnNames: Boolean = false,
-                                              orderedComparison: Boolean = true,
-                                              ignoreColumnOrder: Boolean = false): Unit = {
+  def assertApproximateSmallDataFrameEquality(
+      actualDF: DataFrame,
+      expectedDF: DataFrame,
+      precision: Double,
+      ignoreNullable: Boolean = false,
+      ignoreColumnNames: Boolean = false,
+      orderedComparison: Boolean = true,
+      ignoreColumnOrder: Boolean = false
+  ): Unit = {
     assertSmallDatasetEquality[Row](
       actualDF,
       expectedDF,
@@ -72,13 +74,15 @@ trait DataFrameComparer extends DatasetComparer {
   /**
    * Raises an error unless `actualDF` and `expectedDF` are equal
    */
-  def assertApproximateLargeDataFrameEquality(actualDF: DataFrame,
-                                         expectedDF: DataFrame,
-                                         precision: Double,
-                                         ignoreNullable: Boolean = false,
-                                         ignoreColumnNames: Boolean = false,
-                                         orderedComparison: Boolean = true,
-                                         ignoreColumnOrder: Boolean = false): Unit = {
+  def assertApproximateLargeDataFrameEquality(
+      actualDF: DataFrame,
+      expectedDF: DataFrame,
+      precision: Double,
+      ignoreNullable: Boolean = false,
+      ignoreColumnNames: Boolean = false,
+      orderedComparison: Boolean = true,
+      ignoreColumnOrder: Boolean = false
+  ): Unit = {
     assertLargeDatasetEquality[Row](
       actualDF,
       expectedDF,
