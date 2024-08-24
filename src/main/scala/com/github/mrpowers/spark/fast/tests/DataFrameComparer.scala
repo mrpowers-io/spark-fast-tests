@@ -48,6 +48,9 @@ trait DataFrameComparer extends DatasetComparer {
     )
   }
 
+  /**
+   * Raises an error unless `actualDF` and `expectedDF` are equal
+   */
   def assertApproximateSmallDataFrameEquality(actualDF: DataFrame,
                                               expectedDF: DataFrame,
                                               precision: Double,
@@ -66,6 +69,9 @@ trait DataFrameComparer extends DatasetComparer {
     )
   }
 
+  /**
+   * Raises an error unless `actualDF` and `expectedDF` are equal
+   */
   def assertApproximateLargeDataFrameEquality(actualDF: DataFrame,
                                          expectedDF: DataFrame,
                                          precision: Double,
