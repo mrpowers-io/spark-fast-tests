@@ -63,7 +63,7 @@ laikaTheme := Helium.defaults.site
     latestReleases = Seq(
       ReleaseInfo("Latest Stable Release", "1.0.0")
     ),
-    license = Some("Apache 2-0"),
+    license = Some("MIT"),
     titleLinks = Seq(
       VersionMenu.create(unversionedLabel = "Getting Started"),
       LinkGroup.create(
