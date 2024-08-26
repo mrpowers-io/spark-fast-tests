@@ -233,6 +233,10 @@
                         <span class="separator"></span>
                         <a class="object" href="SchemaComparer$.html" title=""></a>
                         <a href="SchemaComparer$.html" title="">SchemaComparer</a>
+                      </li><li class="current-entities indented6">
+                        <span class="separator"></span>
+                        <a class="object" href="SeqLikesExtensions$.html" title=""></a>
+                        <a href="SeqLikesExtensions$.html" title="">SeqLikesExtensions</a>
                       </li>
               </ul>
             </div>
@@ -398,6 +402,40 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatasetComparer.html" class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer">DatasetComparer</a></dd></dl></div>
+    </li><li name="com.github.mrpowers.spark.fast.tests.DataFrameComparer#assertApproximateLargeDataFrameEquality" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="assertApproximateLargeDataFrameEquality(actualDF:org.apache.spark.sql.DataFrame,expectedDF:org.apache.spark.sql.DataFrame,precision:Double,ignoreNullable:Boolean,ignoreColumnNames:Boolean,orderedComparison:Boolean,ignoreColumnOrder:Boolean):Unit"></a><a id="assertApproximateLargeDataFrameEquality(DataFrame,DataFrame,Double,Boolean,Boolean,Boolean,Boolean):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/github/mrpowers/spark/fast/tests/DataFrameComparer.html#assertApproximateLargeDataFrameEquality(actualDF:org.apache.spark.sql.DataFrame,expectedDF:org.apache.spark.sql.DataFrame,precision:Double,ignoreNullable:Boolean,ignoreColumnNames:Boolean,orderedComparison:Boolean,ignoreColumnOrder:Boolean):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">assertApproximateLargeDataFrameEquality</span><span class="params">(<span name="actualDF">actualDF: <span class="extype" name="org.apache.spark.sql.DataFrame">DataFrame</span></span>, <span name="expectedDF">expectedDF: <span class="extype" name="org.apache.spark.sql.DataFrame">DataFrame</span></span>, <span name="precision">precision: <span class="extype" name="scala.Double">Double</span></span>, <span name="ignoreNullable">ignoreNullable: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="ignoreColumnNames">ignoreColumnNames: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="orderedComparison">orderedComparison: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="ignoreColumnOrder">ignoreColumnOrder: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Raises an error unless <code>actualDF</code> and <code>expectedDF</code> are equal
+</p>
+    </li><li name="com.github.mrpowers.spark.fast.tests.DataFrameComparer#assertApproximateSmallDataFrameEquality" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="assertApproximateSmallDataFrameEquality(actualDF:org.apache.spark.sql.DataFrame,expectedDF:org.apache.spark.sql.DataFrame,precision:Double,ignoreNullable:Boolean,ignoreColumnNames:Boolean,orderedComparison:Boolean,ignoreColumnOrder:Boolean):Unit"></a><a id="assertApproximateSmallDataFrameEquality(DataFrame,DataFrame,Double,Boolean,Boolean,Boolean,Boolean):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../../../com/github/mrpowers/spark/fast/tests/DataFrameComparer.html#assertApproximateSmallDataFrameEquality(actualDF:org.apache.spark.sql.DataFrame,expectedDF:org.apache.spark.sql.DataFrame,precision:Double,ignoreNullable:Boolean,ignoreColumnNames:Boolean,orderedComparison:Boolean,ignoreColumnOrder:Boolean):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">assertApproximateSmallDataFrameEquality</span><span class="params">(<span name="actualDF">actualDF: <span class="extype" name="org.apache.spark.sql.DataFrame">DataFrame</span></span>, <span name="expectedDF">expectedDF: <span class="extype" name="org.apache.spark.sql.DataFrame">DataFrame</span></span>, <span name="precision">precision: <span class="extype" name="scala.Double">Double</span></span>, <span name="ignoreNullable">ignoreNullable: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="ignoreColumnNames">ignoreColumnNames: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="orderedComparison">orderedComparison: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="ignoreColumnOrder">ignoreColumnOrder: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Raises an error unless <code>actualDF</code> and <code>expectedDF</code> are equal
+</p>
     </li><li name="com.github.mrpowers.spark.fast.tests.DataFrameComparer#assertLargeDataFrameEquality" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="assertLargeDataFrameEquality(actualDF:org.apache.spark.sql.DataFrame,expectedDF:org.apache.spark.sql.DataFrame,ignoreNullable:Boolean,ignoreColumnNames:Boolean,orderedComparison:Boolean,ignoreColumnOrder:Boolean):Unit"></a><a id="assertLargeDataFrameEquality(DataFrame,DataFrame,Boolean,Boolean,Boolean,Boolean):Unit"></a>
       <span class="permalink">
@@ -483,9 +521,9 @@
       <p class="shortcomment cmt">Raises an error unless <code>actualDF</code> and <code>expectedDF</code> are equal
 </p>
     </li><li name="com.github.mrpowers.spark.fast.tests.DatasetComparer#assertSmallDatasetContentEquality" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="assertSmallDatasetContentEquality[T](actualDS:org.apache.spark.sql.Dataset[T],expectedDS:org.apache.spark.sql.Dataset[T],truncate:Int):Unit"></a><a id="assertSmallDatasetContentEquality[T](Dataset[T],Dataset[T],Int):Unit"></a>
+      <a id="assertSmallDatasetContentEquality[T](actualDS:org.apache.spark.sql.Dataset[T],expectedDS:org.apache.spark.sql.Dataset[T],truncate:Int,equals:(T,T)=&gt;Boolean):Unit"></a><a id="assertSmallDatasetContentEquality[T](Dataset[T],Dataset[T],Int,(T,T)⇒Boolean):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/github/mrpowers/spark/fast/tests/DataFrameComparer.html#assertSmallDatasetContentEquality[T](actualDS:org.apache.spark.sql.Dataset[T],expectedDS:org.apache.spark.sql.Dataset[T],truncate:Int):Unit" title="Permalink">
+      <a href="../../../../../../com/github/mrpowers/spark/fast/tests/DataFrameComparer.html#assertSmallDatasetContentEquality[T](actualDS:org.apache.spark.sql.Dataset[T],expectedDS:org.apache.spark.sql.Dataset[T],truncate:Int,equals:(T,T)=&gt;Boolean):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -494,14 +532,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">assertSmallDatasetContentEquality</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="actualDS">actualDS: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetContentEquality.T">T</span>]</span>, <span name="expectedDS">expectedDS: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetContentEquality.T">T</span>]</span>, <span name="truncate">truncate: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">assertSmallDatasetContentEquality</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="actualDS">actualDS: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetContentEquality.T">T</span>]</span>, <span name="expectedDS">expectedDS: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetContentEquality.T">T</span>]</span>, <span name="truncate">truncate: <span class="extype" name="scala.Int">Int</span></span>, <span name="equals">equals: (<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetContentEquality.T">T</span>, <span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetContentEquality.T">T</span>) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatasetComparer.html" class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer">DatasetComparer</a></dd></dl></div>
     </li><li name="com.github.mrpowers.spark.fast.tests.DatasetComparer#assertSmallDatasetContentEquality" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="assertSmallDatasetContentEquality[T](actualDS:org.apache.spark.sql.Dataset[T],expectedDS:org.apache.spark.sql.Dataset[T],orderedComparison:Boolean,truncate:Int):Unit"></a><a id="assertSmallDatasetContentEquality[T](Dataset[T],Dataset[T],Boolean,Int):Unit"></a>
+      <a id="assertSmallDatasetContentEquality[T](actualDS:org.apache.spark.sql.Dataset[T],expectedDS:org.apache.spark.sql.Dataset[T],orderedComparison:Boolean,truncate:Int,equals:(T,T)=&gt;Boolean):Unit"></a><a id="assertSmallDatasetContentEquality[T](Dataset[T],Dataset[T],Boolean,Int,(T,T)⇒Boolean):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/github/mrpowers/spark/fast/tests/DataFrameComparer.html#assertSmallDatasetContentEquality[T](actualDS:org.apache.spark.sql.Dataset[T],expectedDS:org.apache.spark.sql.Dataset[T],orderedComparison:Boolean,truncate:Int):Unit" title="Permalink">
+      <a href="../../../../../../com/github/mrpowers/spark/fast/tests/DataFrameComparer.html#assertSmallDatasetContentEquality[T](actualDS:org.apache.spark.sql.Dataset[T],expectedDS:org.apache.spark.sql.Dataset[T],orderedComparison:Boolean,truncate:Int,equals:(T,T)=&gt;Boolean):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -510,14 +548,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">assertSmallDatasetContentEquality</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="actualDS">actualDS: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetContentEquality.T">T</span>]</span>, <span name="expectedDS">expectedDS: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetContentEquality.T">T</span>]</span>, <span name="orderedComparison">orderedComparison: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="truncate">truncate: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">assertSmallDatasetContentEquality</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="actualDS">actualDS: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetContentEquality.T">T</span>]</span>, <span name="expectedDS">expectedDS: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetContentEquality.T">T</span>]</span>, <span name="orderedComparison">orderedComparison: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="truncate">truncate: <span class="extype" name="scala.Int">Int</span></span>, <span name="equals">equals: (<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetContentEquality.T">T</span>, <span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetContentEquality.T">T</span>) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DatasetComparer.html" class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer">DatasetComparer</a></dd></dl></div>
     </li><li name="com.github.mrpowers.spark.fast.tests.DatasetComparer#assertSmallDatasetEquality" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="assertSmallDatasetEquality[T](actualDS:org.apache.spark.sql.Dataset[T],expectedDS:org.apache.spark.sql.Dataset[T],ignoreNullable:Boolean,ignoreColumnNames:Boolean,orderedComparison:Boolean,ignoreColumnOrder:Boolean,truncate:Int):Unit"></a><a id="assertSmallDatasetEquality[T](Dataset[T],Dataset[T],Boolean,Boolean,Boolean,Boolean,Int):Unit"></a>
+      <a id="assertSmallDatasetEquality[T](actualDS:org.apache.spark.sql.Dataset[T],expectedDS:org.apache.spark.sql.Dataset[T],ignoreNullable:Boolean,ignoreColumnNames:Boolean,orderedComparison:Boolean,ignoreColumnOrder:Boolean,truncate:Int,equals:(T,T)=&gt;Boolean):Unit"></a><a id="assertSmallDatasetEquality[T](Dataset[T],Dataset[T],Boolean,Boolean,Boolean,Boolean,Int,(T,T)⇒Boolean):Unit"></a>
       <span class="permalink">
-      <a href="../../../../../../com/github/mrpowers/spark/fast/tests/DataFrameComparer.html#assertSmallDatasetEquality[T](actualDS:org.apache.spark.sql.Dataset[T],expectedDS:org.apache.spark.sql.Dataset[T],ignoreNullable:Boolean,ignoreColumnNames:Boolean,orderedComparison:Boolean,ignoreColumnOrder:Boolean,truncate:Int):Unit" title="Permalink">
+      <a href="../../../../../../com/github/mrpowers/spark/fast/tests/DataFrameComparer.html#assertSmallDatasetEquality[T](actualDS:org.apache.spark.sql.Dataset[T],expectedDS:org.apache.spark.sql.Dataset[T],ignoreNullable:Boolean,ignoreColumnNames:Boolean,orderedComparison:Boolean,ignoreColumnOrder:Boolean,truncate:Int,equals:(T,T)=&gt;Boolean):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -526,7 +564,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">assertSmallDatasetEquality</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="actualDS">actualDS: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetEquality.T">T</span>]</span>, <span name="expectedDS">expectedDS: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetEquality.T">T</span>]</span>, <span name="ignoreNullable">ignoreNullable: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="ignoreColumnNames">ignoreColumnNames: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="orderedComparison">orderedComparison: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="ignoreColumnOrder">ignoreColumnOrder: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="truncate">truncate: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">500</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">assertSmallDatasetEquality</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="actualDS">actualDS: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetEquality.T">T</span>]</span>, <span name="expectedDS">expectedDS: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetEquality.T">T</span>]</span>, <span name="ignoreNullable">ignoreNullable: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="ignoreColumnNames">ignoreColumnNames: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="orderedComparison">orderedComparison: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>, <span name="ignoreColumnOrder">ignoreColumnOrder: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="truncate">truncate: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">500</span></span>, <span name="equals">equals: (<span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetEquality.T">T</span>, <span class="extype" name="com.github.mrpowers.spark.fast.tests.DatasetComparer.assertSmallDatasetEquality.T">T</span>) ⇒ <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">(o1: T, o2: T) =&gt; o1.equals(o2)</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
       <p class="shortcomment cmt">Raises an error unless <code>actualDS</code> and <code>expectedDS</code> are equal
