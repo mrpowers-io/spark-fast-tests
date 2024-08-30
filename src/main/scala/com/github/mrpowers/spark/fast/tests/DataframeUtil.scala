@@ -1,37 +1,61 @@
 package com.github.mrpowers.spark.fast.tests
 
 import com.github.mrpowers.spark.fast.tests.ufansi.Color.{DarkGray, Green, Red}
+import com.github.mrpowers.spark.fast.tests.ufansi.Str
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.Row
 
 object DataframeUtil {
 
   def showDataframeDiff(
-                         header: (String, String),
-                         actual: Array[Row],
-                         expected: Array[Row],
-                         truncate: Int = 20
-                       ): String = {
+      header: (String, String),
+      actual: Array[Row],
+      expected: Array[Row],
+      truncate: Int = 20
+  ): String = {
 
     val sb = new StringBuilder
-    val diff = actual.zip(expected).map { case (a, e) =>
+
+    val a = actual.zipAll(expected, Row(), Row())
+    val diff = a.map { case (a, e) =>
       if (equals(a, e)) {
         List(ufansi.Color.DarkGray(a.toString()), ufansi.Color.DarkGray(e.toString()))
       } else {
-        val d = a.toSeq
-          .zip(e.toSeq)
-          .map { case (a1, e1) =>
-            if (a1 == e1)
-              (DarkGray(a1.toString()), DarkGray(e1.toString))
-            else (Red(a1.toString()), Green(e1.toString))
+        val actual   = a.toSeq
+        val expected = e.toSeq
+        if (actual.isEmpty)
+          List(
+            Red("[]"),
+            Green(expected.mkString("[", ",", "]"))
+          )
+        else if (expected.isEmpty)
+          List(Red(actual.mkString("[", ",", "]")), Green("[]"))
+        else {
+          val withEquals = actual
+            .zip(expected)
+            .map { case (a1, e1) => (a1, e1, a1 == e1) }
+          val allFieldsAreNotEqual = !withEquals.exists(_._3)
+          if (allFieldsAreNotEqual) {
+            List(
+              Red(actual.mkString("[", ",", "]")),
+              Green(expected.mkString("[", ",", "]"))
+            )
+          } else {
+            val d = withEquals
+              .map { case (a1, e1, equal) =>
+                if (equal)
+                  (DarkGray(a1.toString()), DarkGray(e1.toString))
+                else (Red(a1.toString()), Green(e1.toString))
+              }
+            List(
+              DarkGray("[") ++ d.map(_._1).reduce(_ ++ DarkGray(",") ++ _) ++ DarkGray("]"),
+              DarkGray("[") ++ d.map(_._2).reduce(_ ++ DarkGray(",") ++ _) ++ DarkGray("]")
+            )
           }
-        List(
-          DarkGray("[") ++ d.map(_._1).reduce(_ ++ DarkGray(",") ++ _) ++ DarkGray("]"),
-          DarkGray("[") ++ d.map(_._2).reduce(_ ++ DarkGray(",") ++ _) ++ DarkGray("]")
-        )
+        }
       }
     }
-    val rows = Array(List(header._1, header._2))
+    val rows    = Array(List(header._1, header._2))
     val numCols = 2
 
     // Initialise the width of each column to a minimum value of '3'
@@ -87,6 +111,5 @@ object DataframeUtil {
 
     sb.toString()
   }
-
 
 }
