@@ -52,8 +52,8 @@ object DataframeUtil {
             val sep   = DarkGray(",")
             val end   = DarkGray("]")
             List(
-              coloredDiff.map(_._1).mkStr(start, sep, end),
-              coloredDiff.map(_._2).mkStr(start, sep, end)
+              coloredDiff.map(_._1).mkStrFoldLeft(start, sep, end),
+              coloredDiff.map(_._2).mkStrFoldLeft(start, sep, end)
             )
           }
         }

@@ -21,6 +21,16 @@ crossScalaVersions := {
     case versionRegex("3", _, _)                 => Seq(scala2_12)
   }
 }
+resolvers += "Sonatype OSS Snapshots" at
+  "https://oss.sonatype.org/content/repositories/releases"
+
+libraryDependencies += "com.storm-enroute" %% "scalameter" % "0.18"
+// https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-core" % "2.17.2"
+
+testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework")
+
+parallelExecution in Test := false
 
 scalaVersion := crossScalaVersions.value.head
 
