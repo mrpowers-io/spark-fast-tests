@@ -11,41 +11,42 @@ object DataframeUtil {
       header: (String, String),
       actual: Array[Row],
       expected: Array[Row],
-      truncate: Int = 20
+      truncate: Int = 20,
+      minColWidth: Int = 3
   ): String = {
 
     val sb = new StringBuilder
 
-    val a = actual.zipAll(expected, Row(), Row())
-    val diff = a.map { case (a, e) =>
-      if (equals(a, e)) {
-        List(ufansi.Color.DarkGray(a.toString()), ufansi.Color.DarkGray(e.toString()))
+    val fullJoin = actual.zipAll(expected, Row(), Row())
+    val diff = fullJoin.map { case (actualRow, expectedRow) =>
+      if (equals(actualRow, expectedRow)) {
+        List(DarkGray(actualRow.toString), DarkGray(expectedRow.toString))
       } else {
-        val actual   = a.toSeq
-        val expected = e.toSeq
-        if (actual.isEmpty)
+        val actualSeq   = actualRow.toSeq
+        val expectedSeq = expectedRow.toSeq
+        if (actualSeq.isEmpty)
           List(
             Red("[]"),
-            Green(expected.mkString("[", ",", "]"))
+            Green(expectedSeq.mkString("[", ",", "]"))
           )
-        else if (expected.isEmpty)
-          List(Red(actual.mkString("[", ",", "]")), Green("[]"))
+        else if (expectedSeq.isEmpty)
+          List(Red(actualSeq.mkString("[", ",", "]")), Green("[]"))
         else {
-          val withEquals = actual
-            .zip(expected)
+          val withEquals = actualSeq
+            .zip(expectedSeq)
             .map { case (a1, e1) => (a1, e1, a1 == e1) }
           val allFieldsAreNotEqual = !withEquals.exists(_._3)
           if (allFieldsAreNotEqual) {
             List(
-              Red(actual.mkString("[", ",", "]")),
-              Green(expected.mkString("[", ",", "]"))
+              Red(actualSeq.mkString("[", ",", "]")),
+              Green(expectedSeq.mkString("[", ",", "]"))
             )
           } else {
             val d = withEquals
               .map { case (a1, e1, equal) =>
                 if (equal)
-                  (DarkGray(a1.toString()), DarkGray(e1.toString))
-                else (Red(a1.toString()), Green(e1.toString))
+                  (DarkGray(a1.toString), DarkGray(e1.toString))
+                else (Red(a1.toString), Green(e1.toString))
               }
             List(
               DarkGray("[") ++ d.map(_._1).reduce(_ ++ DarkGray(",") ++ _) ++ DarkGray("]"),
@@ -55,17 +56,15 @@ object DataframeUtil {
         }
       }
     }
-    val rows    = Array(List(header._1, header._2))
-    val numCols = 2
+    val headerSeq = List(header._1, header._2)
+    val numCols   = 2
 
-    // Initialise the width of each column to a minimum value of '3'
-    val colWidths = Array.fill(numCols)(3)
+    // Initialise the width of each column to a minimum value
+    val colWidths = Array.fill(numCols)(minColWidth)
 
     // Compute the width of each column
-    for (row <- rows) {
-      for ((cell, i) <- row.zipWithIndex) {
-        colWidths(i) = math.max(colWidths(i), cell.length)
-      }
+    for ((cell, i) <- headerSeq.zipWithIndex) {
+      colWidths(i) = math.max(colWidths(i), cell.length)
     }
     for (row <- diff) {
       for ((cell, i) <- row.zipWithIndex) {
@@ -78,17 +77,18 @@ object DataframeUtil {
       colWidths
         .map("-" * _)
         .addString(sb, "+", "+", "+\n")
-        .toString()
+        .toString
 
     // column names
-    val h: Seq[(String, Int)] = rows.head.zipWithIndex
-    h.map { case (cell, i) =>
-      if (truncate > 0) {
-        StringUtils.leftPad(cell, colWidths(i))
-      } else {
-        StringUtils.rightPad(cell, colWidths(i))
+    headerSeq.zipWithIndex
+      .map { case (cell, i) =>
+        if (truncate > 0) {
+          StringUtils.leftPad(cell, colWidths(i))
+        } else {
+          StringUtils.rightPad(cell, colWidths(i))
+        }
       }
-    }.addString(sb, "|", "|", "|\n")
+      .addString(sb, "|", "|", "|\n")
 
     sb.append(sep)
 
@@ -109,7 +109,7 @@ object DataframeUtil {
 
     sb.append(sep)
 
-    sb.toString()
+    sb.toString
   }
 
 }
