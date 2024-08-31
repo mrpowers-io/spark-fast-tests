@@ -1,10 +1,9 @@
 package com.github.mrpowers.spark.fast.tests
 
 import com.github.mrpowers.spark.fast.tests.ufansi.Color.{DarkGray, Green, Red}
-import com.github.mrpowers.spark.fast.tests.ufansi.Str
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.Row
-
+import com.github.mrpowers.spark.fast.tests.ufansi.FansiExtensions.StrOps
 object DataframeUtil {
 
   def showDataframeDiff(
@@ -42,15 +41,19 @@ object DataframeUtil {
               Green(expectedSeq.mkString("[", ",", "]"))
             )
           } else {
+
             val coloredDiff = withEquals
               .map { case (actualRowField, expectedRowField, equal) =>
                 if (equal)
                   (DarkGray(actualRowField.toString), DarkGray(expectedRowField.toString))
                 else (Red(actualRowField.toString), Green(expectedRowField.toString))
               }
+            val start = DarkGray("[")
+            val sep   = DarkGray(",")
+            val end   = DarkGray("]")
             List(
-              DarkGray("[") ++ coloredDiff.map(_._1).reduce(_ ++ DarkGray(",") ++ _) ++ DarkGray("]"),
-              DarkGray("[") ++ coloredDiff.map(_._2).reduce(_ ++ DarkGray(",") ++ _) ++ DarkGray("]")
+              coloredDiff.map(_._1).mkStr(start, sep, end),
+              coloredDiff.map(_._2).mkStr(start, sep, end)
             )
           }
         }
