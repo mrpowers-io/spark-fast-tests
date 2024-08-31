@@ -34,7 +34,7 @@ object DataframeUtil {
         else {
           val withEquals = actualSeq
             .zip(expectedSeq)
-            .map { case (a1, e1) => (a1, e1, a1 == e1) }
+            .map { case (actualRowField, expectedRowField) => (actualRowField, expectedRowField, actualRowField == expectedRowField) }
           val allFieldsAreNotEqual = !withEquals.exists(_._3)
           if (allFieldsAreNotEqual) {
             List(
@@ -42,15 +42,15 @@ object DataframeUtil {
               Green(expectedSeq.mkString("[", ",", "]"))
             )
           } else {
-            val d = withEquals
-              .map { case (a1, e1, equal) =>
+            val coloredDiff = withEquals
+              .map { case (actualRowField, expectedRowField, equal) =>
                 if (equal)
-                  (DarkGray(a1.toString), DarkGray(e1.toString))
-                else (Red(a1.toString), Green(e1.toString))
+                  (DarkGray(actualRowField.toString), DarkGray(expectedRowField.toString))
+                else (Red(actualRowField.toString), Green(expectedRowField.toString))
               }
             List(
-              DarkGray("[") ++ d.map(_._1).reduce(_ ++ DarkGray(",") ++ _) ++ DarkGray("]"),
-              DarkGray("[") ++ d.map(_._2).reduce(_ ++ DarkGray(",") ++ _) ++ DarkGray("]")
+              DarkGray("[") ++ coloredDiff.map(_._1).reduce(_ ++ DarkGray(",") ++ _) ++ DarkGray("]"),
+              DarkGray("[") ++ coloredDiff.map(_._2).reduce(_ ++ DarkGray(",") ++ _) ++ DarkGray("]")
             )
           }
         }
