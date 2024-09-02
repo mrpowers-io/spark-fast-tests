@@ -33,7 +33,8 @@ object DataframeUtil {
         else {
           val withEquals = actualSeq
             .zip(expectedSeq)
-            .map { case (actualRowField, expectedRowField) => (actualRowField, expectedRowField, actualRowField == expectedRowField) }
+            .map { case (actualRowField, expectedRowField) =>
+              (actualRowField, expectedRowField, actualRowField == expectedRowField) }
           val allFieldsAreNotEqual = !withEquals.exists(_._3)
           if (allFieldsAreNotEqual) {
             List(
@@ -43,10 +44,11 @@ object DataframeUtil {
           } else {
 
             val coloredDiff = withEquals
-              .map { case (actualRowField, expectedRowField, equal) =>
-                if (equal)
+              .map {
+                case (actualRowField, expectedRowField, true)  =>
                   (DarkGray(actualRowField.toString), DarkGray(expectedRowField.toString))
-                else (Red(actualRowField.toString), Green(expectedRowField.toString))
+                case (actualRowField, expectedRowField, false) =>
+                  (Red(actualRowField.toString), Green(expectedRowField.toString))
               }
             val start = DarkGray("[")
             val sep   = DarkGray(",")
