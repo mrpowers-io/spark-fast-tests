@@ -6,7 +6,7 @@ import org.apache.spark.sql.Row
 import com.github.mrpowers.spark.fast.tests.ufansi.FansiExtensions.StrOps
 object DataframeUtil {
 
-  def showDataframeDiff(
+  private[mrpowers] def showDataframeDiff(
       header: (String, String),
       actual: Array[Row],
       expected: Array[Row],
