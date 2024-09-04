@@ -50,7 +50,7 @@ object SeqLikesExtensions {
     // scala2.13 optimization: check number of element if it can be cheaply computed
     private def getKnownSize(s: Seq[T]): Int = Try(s.getClass.getMethod("knownSize").invoke(s).asInstanceOf[Int]).getOrElse(s.length)
 
-    def asRows: Seq[Row] = seq1.map {
+    private[mrpowers] def asRows: Seq[Row] = seq1.map {
       case x: Row     => x
       case y: Product => Row(y.productIterator.toSeq: _*)
       case a          => Row(a)
