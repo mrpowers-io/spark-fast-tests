@@ -8,8 +8,8 @@ object DataframeUtil {
 
   private[mrpowers] def showDataframeDiff(
       header: (String, String),
-      actual: Array[Row],
-      expected: Array[Row],
+      actual: Seq[Row],
+      expected: Seq[Row],
       truncate: Int = 20,
       minColWidth: Int = 3
   ): String = {

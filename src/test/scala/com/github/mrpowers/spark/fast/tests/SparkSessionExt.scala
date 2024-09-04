@@ -1,19 +1,12 @@
 package com.github.mrpowers.spark.fast.tests
 
+import com.github.mrpowers.spark.fast.tests.SeqLikesExtensions.SeqExtensions
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.types.{DataType, StructField, StructType}
 
 object SparkSessionExt {
 
   implicit class SparkSessionMethods(spark: SparkSession) {
-
-    private def asRows[U](values: List[U]): List[Row] = {
-      values.map {
-        case x: Row     => x.asInstanceOf[Row]
-        case y: Product => Row(y.productIterator.toList: _*)
-        case a          => Row(a)
-      }
-    }
 
     private def asSchema[U](fields: List[U]): List[StructField] = {
       fields.map {
@@ -36,7 +29,7 @@ object SparkSessionExt {
      */
     def createDF[U, T](rowData: List[U], fields: List[T]): DataFrame = {
       spark.createDataFrame(
-        spark.sparkContext.parallelize(asRows(rowData)),
+        spark.sparkContext.parallelize(rowData.asRows),
         StructType(asSchema(fields))
       )
     }

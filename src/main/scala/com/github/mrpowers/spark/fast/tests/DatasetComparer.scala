@@ -19,12 +19,6 @@ Expected DataFrame Row Count: '$expectedCount'
 """
   }
 
-  private def betterContentMismatchMessage[T](a: Array[T], e: Array[T], truncate: Int): String = {
-    // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
-    val arr = Array(("Actual Content", "Expected Content")) ++ a.zipAll(e, "": Any, "": Any)
-    "Diffs\n" ++ ArrayUtil.showTwoColumnString(arr, truncate)
-  }
-
   private def unequalRDDMessage[T](unequalRDD: RDD[(Long, (T, T))], length: Int): String = {
     "\nRow Index | Actual Row | Expected Row\n" + unequalRDD
       .take(length)
@@ -67,10 +61,12 @@ Expected DataFrame Row Count: '$expectedCount'
   }
 
   def assertSmallDatasetContentEquality[T](actualDS: Dataset[T], expectedDS: Dataset[T], truncate: Int, equals: (T, T) => Boolean): Unit = {
-    val a = actualDS.collect()
-    val e = expectedDS.collect()
-    if (!a.toSeq.approximateSameElements(e, equals)) {
-      throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
+    val a = actualDS.collect().toSeq
+    val e = expectedDS.collect().toSeq
+    if (!a.approximateSameElements(e, equals)) {
+      val arr = ("Actual Content", "Expected Content")
+      val msg = "Diffs\n" ++ DataframeUtil.showDataframeDiff(arr, a.asRows, e.asRows, truncate)
+      throw DatasetContentMismatch(msg)
     }
   }
 
