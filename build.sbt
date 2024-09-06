@@ -30,7 +30,11 @@ libraryDependencies += "org.scalatest"    %% "scalatest" % "3.2.18"           % 
 credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
 
 Test / fork := true
-javaOptions ++= Seq("-Xms512M", "-Xmx2048M", "-XX:+CMSClassUnloadingEnabled", "-Duser.timezone=GMT")
+javaOptions ++= {
+  if (System.getProperty("java.version").startsWith("1.8.0"))
+    Seq("-Xms512M", "-Xmx2048M", "-XX:+CMSClassUnloadingEnabled", "-Duser.timezone=GMT")
+  else Seq("-Xms512M", "-Xmx2048M", "-Duser.timezone=GMT")
+}
 
 licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
 homepage := Some(url("https://github.com/mrpowers-io/spark-fast-tests"))
