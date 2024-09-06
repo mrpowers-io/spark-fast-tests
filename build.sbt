@@ -10,9 +10,8 @@ val versionRegex = """^(.*)\.(.*)\.(.*)$""".r
 
 val sparkVersion = settingKey[String]("Spark version")
 
-val scala2_13 = "2.13.13"
-val scala2_12 = "2.12.15"
-val scala2_11 = "2.11.17"
+val scala2_13 = "2.13.14"
+val scala2_12 = "2.12.20"
 
 sparkVersion := System.getProperty("spark.testVersion", "3.5.1")
 crossScalaVersions := {
@@ -53,7 +52,7 @@ import laika.format.Markdown
 import laika.config.SyntaxHighlighting
 import laika.ast.Path.Root
 import laika.ast.{Image, ExternalTarget}
-import laika.helium.config._
+import laika.helium.config.*
 import laika.helium.Helium
 
 laikaTheme := Helium.defaults.site
