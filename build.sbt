@@ -1,12 +1,16 @@
 enablePlugins(GitVersioning)
 Compile / scalafmtOnCompile := true
 
+resolvers +=
+  "Apache Snapshots" at "https://repository.apache.org/content/groups/snapshots"
+
 organization := "com.github.mrpowers"
 name         := "spark-fast-tests"
 
 version := "1.10.1"
 
 val versionRegex = """^(.*)\.(.*)\.(.*)$""".r
+val versionRegexSnapshot = """^(.*)\.(.*)\.(.*)-20240826\.001610-362$""".r
 
 val sparkVersion = settingKey[String]("Spark version")
 
@@ -17,10 +21,16 @@ val scala2_11 = "2.11.17"
 sparkVersion := System.getProperty("spark.testVersion", "3.5.1")
 crossScalaVersions := {
   sparkVersion.value match {
+    case versionRegexSnapshot("4", _, _)                 => Seq(scala2_13)
     case versionRegex("3", m, _) if m.toInt >= 2 => Seq(scala2_12, scala2_13)
     case versionRegex("3", _, _)                 => Seq(scala2_12)
   }
 }
+
+scalacOptions ++= Seq(
+  "-deprecation",
+  //other options
+)
 
 scalaVersion := crossScalaVersions.value.head
 
@@ -30,7 +40,7 @@ libraryDependencies += "org.scalatest"    %% "scalatest" % "3.2.18"           % 
 credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
 
 Test / fork := true
-javaOptions ++= Seq("-Xms512M", "-Xmx2048M", "-XX:+CMSClassUnloadingEnabled", "-Duser.timezone=GMT")
+javaOptions ++= Seq("-Xms512M", "-Xmx2048M", "-Duser.timezone=GMT")
 
 licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
 homepage := Some(url("https://github.com/mrpowers-io/spark-fast-tests"))
@@ -53,7 +63,7 @@ import laika.format.Markdown
 import laika.config.SyntaxHighlighting
 import laika.ast.Path.Root
 import laika.ast.{Image, ExternalTarget}
-import laika.helium.config._
+import laika.helium.config.*
 import laika.helium.Helium
 
 laikaTheme := Helium.defaults.site
