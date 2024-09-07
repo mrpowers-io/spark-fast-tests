@@ -11,5 +11,7 @@ object StringExt {
       .toSeq
       .groupBy(_._1)
       .mapValues(_.map(_._2))
+      .view
+      .toMap
   }
 }
