@@ -3,6 +3,7 @@ package com.github.mrpowers.spark.fast.tests
 import org.apache.spark.sql.types.{DoubleType, IntegerType, StringType}
 import SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
+import com.github.mrpowers.spark.fast.tests.StringExt.StringOps
 import org.scalatest.freespec.AnyFreeSpec
 
 class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with SparkSessionTestWrapper {
@@ -37,6 +38,44 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     }
     assert(e.getMessage.indexOf("bob") >= 0)
     assert(e.getMessage.indexOf("camila") >= 0)
+  }
+
+  "Correctly mark unequal elements" in {
+    val sourceDF = spark.createDF(
+      List(
+        ("bob", 1, "uk"),
+        ("camila", 5, "peru"),
+        ("steve", 10, "aus")
+      ),
+      List(
+        ("name", StringType, true),
+        ("age", IntegerType, true),
+        ("country", StringType, true)
+      )
+    )
+
+    val expectedDF = spark.createDF(
+      List(
+        ("bob", 1, "france"),
+        ("camila", 5, "peru"),
+        ("mark", 11, "usa")
+      ),
+      List(
+        ("name", StringType, true),
+        ("age", IntegerType, true),
+        ("country", StringType, true)
+      )
+    )
+
+    val e = intercept[DatasetContentMismatch] {
+      assertSmallDataFrameEquality(expectedDF, sourceDF)
+    }
+
+    val colourGroup         = e.getMessage.extractColorGroup
+    val expectedColourGroup = colourGroup.get(Console.GREEN)
+    val actualColourGroup   = colourGroup.get(Console.RED)
+    assert(expectedColourGroup.contains(Seq("uk", "[steve,10,aus]")))
+    assert(actualColourGroup.contains(Seq("france", "[mark,11,usa]")))
   }
 
   "works well for wide DataFrames" in {

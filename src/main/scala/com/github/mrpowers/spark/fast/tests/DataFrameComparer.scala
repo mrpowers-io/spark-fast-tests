@@ -13,7 +13,7 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreColumnNames: Boolean = false,
       orderedComparison: Boolean = true,
       ignoreColumnOrder: Boolean = false,
-      truncate: Int = 500,
+      truncate: Int = 500
   ): Unit = {
     assertSmallDatasetEquality(
       actualDF,

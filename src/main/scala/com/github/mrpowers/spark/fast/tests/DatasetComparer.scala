@@ -29,8 +29,8 @@ Expected DataFrame Row Count: '$expectedCount'
   }
 
   /**
-   *  order ds1 column according to ds2 column order
-   *  */
+   * order ds1 column according to ds2 column order
+   */
   def orderColumns[T](ds1: Dataset[T], ds2: Dataset[T]): Dataset[T] = {
     ds1.select(ds2.columns.map(col).toIndexedSeq: _*).as[T](ds2.encoder)
   }
@@ -53,7 +53,13 @@ Expected DataFrame Row Count: '$expectedCount'
     assertSmallDatasetContentEquality(actual, expectedDS, orderedComparison, truncate, equals)
   }
 
-  def assertSmallDatasetContentEquality[T](actualDS: Dataset[T], expectedDS: Dataset[T], orderedComparison: Boolean, truncate: Int, equals: (T, T) => Boolean): Unit = {
+  def assertSmallDatasetContentEquality[T](
+      actualDS: Dataset[T],
+      expectedDS: Dataset[T],
+      orderedComparison: Boolean,
+      truncate: Int,
+      equals: (T, T) => Boolean
+  ): Unit = {
     if (orderedComparison)
       assertSmallDatasetContentEquality(actualDS, expectedDS, truncate, equals)
     else
@@ -100,10 +106,12 @@ Expected DataFrame Row Count: '$expectedCount'
     assertLargeDatasetContentEquality(actual, expectedDS, equals, orderedComparison)
   }
 
-  def assertLargeDatasetContentEquality[T: ClassTag](actualDS: Dataset[T],
-                                                     expectedDS: Dataset[T],
-                                                     equals: (T, T) => Boolean,
-                                                     orderedComparison: Boolean): Unit = {
+  def assertLargeDatasetContentEquality[T: ClassTag](
+      actualDS: Dataset[T],
+      expectedDS: Dataset[T],
+      equals: (T, T) => Boolean,
+      orderedComparison: Boolean
+  ): Unit = {
     if (orderedComparison) {
       assertLargeDatasetContentEquality(actualDS, expectedDS, equals)
     } else {
@@ -123,7 +131,7 @@ Expected DataFrame Row Count: '$expectedCount'
         throw DatasetCountMismatch(countMismatchMessage(actualCount, expectedCount))
       }
       val expectedIndexValue = RddHelpers.zipWithIndex(ds1RDD)
-      val resultIndexValue = RddHelpers.zipWithIndex(ds2RDD)
+      val resultIndexValue   = RddHelpers.zipWithIndex(ds2RDD)
       val unequalRDD = expectedIndexValue
         .join(resultIndexValue)
         .filter { case (_, (o1, o2)) =>

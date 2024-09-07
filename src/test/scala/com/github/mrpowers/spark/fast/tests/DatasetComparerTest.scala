@@ -40,7 +40,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       }
     }
 
-    "Correctly mark unequal column" in {
+    "Correctly mark unequal elements" in {
       val sourceDS = Seq(
         Person("juan", 5),
         Person("bob", 1),
@@ -59,9 +59,9 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         assertSmallDatasetEquality(sourceDS, expectedDS)
       }
 
-      val colourGroup = e.getMessage.extractColorGroup
+      val colourGroup         = e.getMessage.extractColorGroup
       val expectedColourGroup = colourGroup.get(Console.GREEN)
-      val actualColourGroup = colourGroup.get(Console.RED)
+      val actualColourGroup   = colourGroup.get(Console.RED)
       assert(expectedColourGroup.contains(Seq("[frank,10]", "lucy")))
       assert(actualColourGroup.contains(Seq("[bob,1]", "alice")))
     }
