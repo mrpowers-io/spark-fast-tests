@@ -31,9 +31,9 @@ credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
 
 Test / fork := true
 javaOptions ++= {
-  if (System.getProperty("java.version").startsWith("1.8.0"))
-    Seq("-Xms512M", "-Xmx2048M", "-XX:+CMSClassUnloadingEnabled", "-Duser.timezone=GMT")
-  else Seq("-Xms512M", "-Xmx2048M", "-Duser.timezone=GMT")
+  Seq("-Xms512M", "-Xmx2048M", "-Duser.timezone=GMT")  ++ (if (System.getProperty("java.version").startsWith("1.8.0"))
+    Seq("-XX:+CMSClassUnloadingEnabled")
+  else Seq.empty)
 }
 
 licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
