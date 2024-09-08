@@ -8,14 +8,12 @@ version := "1.10.1"
 
 val versionRegex = """^(.*)\.(.*)\.(.*)$""".r
 
-val sparkVersion = settingKey[String]("Spark version")
-
 val scala2_13 = "2.13.14"
 val scala2_12 = "2.12.20"
 
-sparkVersion := System.getProperty("spark.testVersion", "3.5.1")
+val sparkVersion = System.getProperty("spark.testVersion", "3.5.1")
 crossScalaVersions := {
-  sparkVersion.value match {
+  sparkVersion match {
     case versionRegex("3", m, _) if m.toInt >= 2 => Seq(scala2_12, scala2_13)
     case versionRegex("3", _, _)                 => Seq(scala2_12)
   }
@@ -23,17 +21,37 @@ crossScalaVersions := {
 
 scalaVersion := crossScalaVersions.value.head
 
-libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion.value % "provided"
-libraryDependencies += "org.scalatest"    %% "scalatest" % "3.2.18"           % "test"
+Test / fork := true
+
+lazy val commonSettings = Seq(
+  javaOptions ++= {
+    Seq("-Xms512M", "-Xmx2048M", "-Duser.timezone=GMT")  ++ (if (System.getProperty("java.version").startsWith("1.8.0"))
+      Seq("-XX:+CMSClassUnloadingEnabled")
+    else Seq.empty)
+  },
+  libraryDependencies ++= Seq(
+    "org.apache.spark" %% "spark-sql" % sparkVersion % "compile",
+    "org.scalatest"    %% "scalatest" % "3.2.18"     % "test"
+  ),
+)
+
+lazy val core = (project in file("core"))
+  .settings(
+    commonSettings,
+    name            := "core",
+  )
+
+lazy val benchmarks = (project in file("benchmarks"))
+  .dependsOn(core)
+  .settings(commonSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.37" //required for jmh IDEA plugin. Make sure this version matches sbt-jmh version!
+    ),
+    name            := "benchmarks",
+  ).enablePlugins(JmhPlugin)
 
 credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
-
-Test / fork := true
-javaOptions ++= {
-  Seq("-Xms512M", "-Xmx2048M", "-Duser.timezone=GMT")  ++ (if (System.getProperty("java.version").startsWith("1.8.0"))
-    Seq("-XX:+CMSClassUnloadingEnabled")
-  else Seq.empty)
-}
 
 licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
 homepage := Some(url("https://github.com/mrpowers-io/spark-fast-tests"))
