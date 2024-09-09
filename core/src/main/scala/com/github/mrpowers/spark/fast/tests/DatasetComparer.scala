@@ -143,7 +143,6 @@ Expected DataFrame Row Count: '$expectedCount'
           unequalRDDMessage(unequalRDD, maxUnequalRowsToShow)
         )
       }
-      unequalRDD.take(maxUnequalRowsToShow)
 
     } finally {
       ds1.rdd.unpersist()

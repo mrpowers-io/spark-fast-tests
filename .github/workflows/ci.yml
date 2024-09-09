@@ -17,3 +17,5 @@ jobs:
       - uses: olafurpg/setup-scala@v10
       - name: Test
         run: sbt -Dspark.testVersion=${{ matrix.spark  }} +test
+      - name: Benchmark
+        run: sbt -Dspark.testVersion=${{ matrix.spark  }} +benchmarks/Jmh/run
