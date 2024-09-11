@@ -32,7 +32,7 @@ object SchemaComparer {
       ignoreNullable: Boolean = false,
       ignoreColumnNames: Boolean = false,
       ignoreColumnOrder: Boolean = true
-  ) = {
+  ): Unit = {
     require((ignoreColumnNames, ignoreColumnOrder) != (true, true), "Cannot set both ignoreColumnNames and ignoreColumnOrder to true.")
     if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)) {
       throw DatasetSchemaMismatch(
