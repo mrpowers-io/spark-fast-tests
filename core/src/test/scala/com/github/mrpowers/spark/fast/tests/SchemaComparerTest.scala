@@ -156,7 +156,8 @@ class SchemaComparerTest extends AnyFreeSpec {
                   StructField("mood", ArrayType(StringType, containsNull = false), true),
                   StructField("something", StringType, false)
                 )
-              )),
+              )
+            ),
             true
           )
         )
@@ -174,7 +175,8 @@ class SchemaComparerTest extends AnyFreeSpec {
                   StructField("something", StringType, false),
                   StructField("mood", ArrayType(StringType, containsNull = false), true)
                 )
-              )),
+              )
+            ),
             true
           )
         )

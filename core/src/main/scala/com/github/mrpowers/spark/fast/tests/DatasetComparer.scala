@@ -19,12 +19,6 @@ Expected DataFrame Row Count: '$expectedCount'
 """
   }
 
-  private def betterContentMismatchMessage[T](a: Array[T], e: Array[T], truncate: Int): String = {
-    // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
-    val arr = Array(("Actual Content", "Expected Content")) ++ a.zipAll(e, "": Any, "": Any)
-    "Diffs\n" ++ ArrayUtil.showTwoColumnString(arr, truncate)
-  }
-
   private def unequalRDDMessage[T](unequalRDD: RDD[(Long, (T, T))], length: Int): String = {
     "\nRow Index | Actual Row | Expected Row\n" + unequalRDD
       .take(length)
@@ -35,8 +29,8 @@ Expected DataFrame Row Count: '$expectedCount'
   }
 
   /**
-   *  order ds1 column according to ds2 column order
-   *  */
+   * order ds1 column according to ds2 column order
+   */
   def orderColumns[T](ds1: Dataset[T], ds2: Dataset[T]): Dataset[T] = {
     ds1.select(ds2.columns.map(col).toIndexedSeq: _*).as[T](ds2.encoder)
   }
@@ -59,7 +53,13 @@ Expected DataFrame Row Count: '$expectedCount'
     assertSmallDatasetContentEquality(actual, expectedDS, orderedComparison, truncate, equals)
   }
 
-  def assertSmallDatasetContentEquality[T](actualDS: Dataset[T], expectedDS: Dataset[T], orderedComparison: Boolean, truncate: Int, equals: (T, T) => Boolean): Unit = {
+  def assertSmallDatasetContentEquality[T](
+      actualDS: Dataset[T],
+      expectedDS: Dataset[T],
+      orderedComparison: Boolean,
+      truncate: Int,
+      equals: (T, T) => Boolean
+  ): Unit = {
     if (orderedComparison)
       assertSmallDatasetContentEquality(actualDS, expectedDS, truncate, equals)
     else
@@ -67,10 +67,12 @@ Expected DataFrame Row Count: '$expectedCount'
   }
 
   def assertSmallDatasetContentEquality[T](actualDS: Dataset[T], expectedDS: Dataset[T], truncate: Int, equals: (T, T) => Boolean): Unit = {
-    val a = actualDS.collect()
-    val e = expectedDS.collect()
-    if (!a.toSeq.approximateSameElements(e, equals)) {
-      throw DatasetContentMismatch(betterContentMismatchMessage(a, e, truncate))
+    val a = actualDS.collect().toSeq
+    val e = expectedDS.collect().toSeq
+    if (!a.approximateSameElements(e, equals)) {
+      val arr = ("Actual Content", "Expected Content")
+      val msg = "Diffs\n" ++ DataframeUtil.showDataframeDiff(arr, a.asRows, e.asRows, truncate)
+      throw DatasetContentMismatch(msg)
     }
   }
 
@@ -104,10 +106,12 @@ Expected DataFrame Row Count: '$expectedCount'
     assertLargeDatasetContentEquality(actual, expectedDS, equals, orderedComparison)
   }
 
-  def assertLargeDatasetContentEquality[T: ClassTag](actualDS: Dataset[T],
-                                                     expectedDS: Dataset[T],
-                                                     equals: (T, T) => Boolean,
-                                                     orderedComparison: Boolean): Unit = {
+  def assertLargeDatasetContentEquality[T: ClassTag](
+      actualDS: Dataset[T],
+      expectedDS: Dataset[T],
+      equals: (T, T) => Boolean,
+      orderedComparison: Boolean
+  ): Unit = {
     if (orderedComparison) {
       assertLargeDatasetContentEquality(actualDS, expectedDS, equals)
     } else {
@@ -127,7 +131,7 @@ Expected DataFrame Row Count: '$expectedCount'
         throw DatasetCountMismatch(countMismatchMessage(actualCount, expectedCount))
       }
       val expectedIndexValue = RddHelpers.zipWithIndex(ds1RDD)
-      val resultIndexValue = RddHelpers.zipWithIndex(ds2RDD)
+      val resultIndexValue   = RddHelpers.zipWithIndex(ds2RDD)
       val unequalRDD = expectedIndexValue
         .join(resultIndexValue)
         .filter { case (_, (o1, o2)) =>

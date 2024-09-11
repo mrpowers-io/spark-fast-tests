@@ -1,6 +1,5 @@
 package com.github.mrpowers.spark.fast.tests
 
-import com.github.mrpowers.spark.fast.tests.SeqLikesExtensions.SeqExtensions
 import org.apache.spark.sql.{DataFrame, Row}
 trait DataFrameComparer extends DatasetComparer {
 
@@ -14,24 +13,17 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreColumnNames: Boolean = false,
       orderedComparison: Boolean = true,
       ignoreColumnOrder: Boolean = false,
-      truncate: Int = 500,
+      truncate: Int = 500
   ): Unit = {
-    SchemaComparer.assertSchemaEqual(actualDF, expectedDF, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)
-    val actual = if (ignoreColumnOrder) orderColumns(actualDF, expectedDF) else actualDF
-    if (orderedComparison)
-      assertSmallDataFrameEquality(actual, expectedDF, truncate)
-    else
-      assertSmallDataFrameEquality(defaultSortDataset(actual), defaultSortDataset(expectedDF), truncate)
-  }
-
-  def assertSmallDataFrameEquality(actualDF: DataFrame, expectedDF: DataFrame, truncate: Int): Unit = {
-    val a = actualDF.collect()
-    val e = expectedDF.collect()
-    if (!a.toSeq.approximateSameElements(e, (o1: Row, o2: Row) => o1.equals(o2))) {
-      val arr = ("Actual Content", "Expected Content")
-      val msg = "Diffs\n" ++ DataframeUtil.showDataframeDiff(arr, a, e, truncate)
-      throw DatasetContentMismatch(msg)
-    }
+    assertSmallDatasetEquality(
+      actualDF,
+      expectedDF,
+      ignoreNullable,
+      ignoreColumnNames,
+      orderedComparison,
+      ignoreColumnOrder,
+      truncate
+    )
   }
 
   /**

@@ -8,8 +8,8 @@ object DataframeUtil {
 
   private[mrpowers] def showDataframeDiff(
       header: (String, String),
-      actual: Array[Row],
-      expected: Array[Row],
+      actual: Seq[Row],
+      expected: Seq[Row],
       truncate: Int = 20,
       minColWidth: Int = 3
   ): String = {
@@ -34,7 +34,8 @@ object DataframeUtil {
           val withEquals = actualSeq
             .zip(expectedSeq)
             .map { case (actualRowField, expectedRowField) =>
-              (actualRowField, expectedRowField, actualRowField == expectedRowField) }
+              (actualRowField, expectedRowField, actualRowField == expectedRowField)
+            }
           val allFieldsAreNotEqual = !withEquals.exists(_._3)
           if (allFieldsAreNotEqual) {
             List(
@@ -45,7 +46,7 @@ object DataframeUtil {
 
             val coloredDiff = withEquals
               .map {
-                case (actualRowField, expectedRowField, true)  =>
+                case (actualRowField, expectedRowField, true) =>
                   (DarkGray(actualRowField.toString), DarkGray(expectedRowField.toString))
                 case (actualRowField, expectedRowField, false) =>
                   (Red(actualRowField.toString), Green(expectedRowField.toString))

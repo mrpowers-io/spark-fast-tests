@@ -298,13 +298,8 @@ object Str {
    * An [[ufansi.Str]]'s `color`s array is filled with Long, each representing the ANSI state of one character encoded in its bits. Each [[Attr]]
    * belongs to a [[Category]] that occupies a range of bits within each long:
    *
-   * 61... 55 54 53 52 51 .... 31 30 29 28 27 26 25 ..... 6 5 4 3 2 1 0
-   * \|--------| |-----------------------| |-----------------------| | | |bold
-   * \| | | | |reversed
-   * \| | | |underlined
-   * \| | |foreground-color
-   * \| |background-color
-   * \|unused
+   * 61... 55 54 53 52 51 .... 31 30 29 28 27 26 25 ..... 6 5 4 3 2 1 0 \|--------| |-----------------------| |-----------------------| | | |bold \| |
+   * \| | |reversed \| | | |underlined \| | |foreground-color \| |background-color \|unused
    *
    * The `0000 0000 0000 0000` long corresponds to plain text with no decoration
    */

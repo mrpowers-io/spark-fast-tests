@@ -26,11 +26,13 @@ object SchemaComparer {
       .mkString("\n")
   }
 
-  def assertSchemaEqual[T](actualDS: Dataset[T],
-                           expectedDS: Dataset[T],
-                           ignoreNullable: Boolean = false,
-                           ignoreColumnNames: Boolean = false,
-                           ignoreColumnOrder: Boolean = true) = {
+  def assertSchemaEqual[T](
+      actualDS: Dataset[T],
+      expectedDS: Dataset[T],
+      ignoreNullable: Boolean = false,
+      ignoreColumnNames: Boolean = false,
+      ignoreColumnOrder: Boolean = true
+  ) = {
     require((ignoreColumnNames, ignoreColumnOrder) != (true, true), "Cannot set both ignoreColumnNames and ignoreColumnOrder to true.")
     if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)) {
       throw DatasetSchemaMismatch(
@@ -39,11 +41,13 @@ object SchemaComparer {
     }
   }
 
-  def equals(s1: StructType,
-             s2: StructType,
-             ignoreNullable: Boolean = false,
-             ignoreColumnNames: Boolean = false,
-             ignoreColumnOrder: Boolean = true): Boolean = {
+  def equals(
+      s1: StructType,
+      s2: StructType,
+      ignoreNullable: Boolean = false,
+      ignoreColumnNames: Boolean = false,
+      ignoreColumnOrder: Boolean = true
+  ): Boolean = {
     if (s1.length != s2.length) {
       false
     } else {
@@ -68,7 +72,7 @@ object SchemaComparer {
         equals(vdt1, vdt2, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)
       case (true, MapType(kdt1, vdt1, _), MapType(kdt2, vdt2, _)) =>
         equals(kdt1, kdt2, ignoreNullable, ignoreColumnNames, ignoreColumnOrder) &&
-          equals(vdt1, vdt2, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)
+        equals(vdt1, vdt2, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)
       case _ => dt1 == dt2
     }
   }

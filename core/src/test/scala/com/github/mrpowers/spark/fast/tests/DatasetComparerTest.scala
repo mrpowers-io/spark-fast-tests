@@ -3,6 +3,7 @@ package com.github.mrpowers.spark.fast.tests
 import org.apache.spark.sql.types._
 import SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
+import com.github.mrpowers.spark.fast.tests.StringExt.StringOps
 import org.scalatest.freespec.AnyFreeSpec
 
 object Person {
@@ -20,7 +21,26 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
     import spark.implicits._
 
     "provides a good README example" in {
+      val sourceDS = Seq(
+        Person("juan", 5),
+        Person("bob", 1),
+        Person("li", 49),
+        Person("alice", 5)
+      ).toDS
 
+      val expectedDS = Seq(
+        Person("juan", 5),
+        Person("frank", 10),
+        Person("li", 49),
+        Person("lucy", 5)
+      ).toDS
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(sourceDS, expectedDS)
+      }
+    }
+
+    "Correctly mark unequal elements" in {
       val sourceDS = Seq(
         Person("juan", 5),
         Person("bob", 1),
@@ -39,10 +59,14 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         assertSmallDatasetEquality(sourceDS, expectedDS)
       }
 
+      val colourGroup         = e.getMessage.extractColorGroup
+      val expectedColourGroup = colourGroup.get(Console.GREEN)
+      val actualColourGroup   = colourGroup.get(Console.RED)
+      assert(expectedColourGroup.contains(Seq("[frank,10]", "lucy")))
+      assert(actualColourGroup.contains(Seq("[bob,1]", "alice")))
     }
 
     "works with really long columns" in {
-
       val sourceDS = Seq(
         Person("juanisareallygoodguythatilikealotOK", 5),
         Person("bob", 1),
@@ -60,7 +84,6 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       val e = intercept[DatasetContentMismatch] {
         assertSmallDatasetEquality(sourceDS, expectedDS)
       }
-
     }
 
     "does nothing if the DataFrames have the same schemas and content" in {
