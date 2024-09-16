@@ -65,13 +65,15 @@ object ArrayUtil {
         .toString()
 
     // column names
-    rows.head.zipWithIndex.map { case (cell, i) =>
-      if (truncate > 0) {
-        StringUtils.leftPad(cell, colWidths(i))
-      } else {
-        StringUtils.rightPad(cell, colWidths(i))
+    rows.head.zipWithIndex
+      .map { case (cell, i) =>
+        if (truncate > 0) {
+          StringUtils.leftPad(cell, colWidths(i))
+        } else {
+          StringUtils.rightPad(cell, colWidths(i))
+        }
       }
-    }.addString(sb, "|", "|", "|\n")
+      .addString(sb, "|", "|", "|\n")
 
     sb.append(sep)
 
