@@ -27,7 +27,7 @@ class ArrayUtilTest extends AnyFreeSpec {
   "dumbshowTwoColumnString" in {
     val arr: Array[(Any, Any)] = Array(("word1", "word2"), ("hi", "there"), ("fun", "train"))
     val rowEqual               = Array(true, false)
-    println(ArrayUtil.showTwoColumnStringColorCustomizable(arr, rowEqual))
+    println(ArrayUtil.showTwoColumnStringColorCustomizable(arr, Some(rowEqual)))
   }
 
 }

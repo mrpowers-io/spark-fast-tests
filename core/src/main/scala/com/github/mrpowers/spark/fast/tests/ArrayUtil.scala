@@ -32,70 +32,16 @@ object ArrayUtil {
   }
 
   def showTwoColumnString(arr: Array[(Any, Any)], truncate: Int = 20): String = {
-    val rows    = weirdTypesToStrings(arr, truncate)
-    val numCols = 2
-
-    // Initialise the width of each column to a minimum value of '3'
-    val colWidths = Array.fill(numCols)(3)
-
-    // Compute the width of each column
-    for (row <- rows) {
-      for ((cell, i) <- row.zipWithIndex) {
-        colWidths(i) = math.max(colWidths(i), cell.length)
-      }
-    }
-
-    val sb = new StringBuilder
-
-    // Create SeparateLine
-    val sep: String =
-      colWidths
-        .map("-" * _)
-        .addString(sb, "+", "+", "+\n")
-        .toString()
-
-    // column names
-    val h: Seq[(String, Int)] = rows.head.zipWithIndex
-    h.map { case (cell, i) =>
-      if (truncate > 0) {
-        StringUtils.leftPad(cell, colWidths(i))
-      } else {
-        StringUtils.rightPad(cell, colWidths(i))
-      }
-    }.addString(sb, "|", "|", "|\n")
-
-    sb.append(sep)
-
-    // data
-    rows.tail.map { row =>
-      val color = if (row(0) == row(1)) "blue" else "red"
-      row.zipWithIndex
-        .map { case (cell, i) =>
-          val r = if (truncate > 0) {
-            StringUtils.leftPad(cell.toString, colWidths(i))
-          } else {
-            StringUtils.rightPad(cell.toString, colWidths(i))
-          }
-          if (color == "blue") {
-            ufansi.Color.DarkGray(r)
-          } else {
-            ufansi.Color.Red(r)
-          }
-        }
-        .addString(sb, "|", "|", "|\n")
-    }
-
-    sb.append(sep)
-
-    sb.toString()
+    showTwoColumnStringColorCustomizable(arr, truncate = truncate)
   }
 
   def showTwoColumnStringColorCustomizable(
       arr: Array[(Any, Any)],
-      rowEqual: Array[Boolean],
+      rowEqual: Option[Array[Boolean]] = None,
       truncate: Int = 20,
       equalColor: EscapeAttr = ufansi.Color.Blue,
-      unequalColor: EscapeAttr = ufansi.Color.Red
+      unequalColorLeft: EscapeAttr = ufansi.Color.Red,
+      unequalColorRight: EscapeAttr = ufansi.Color.Green
   ): String = {
     val sb      = new StringBuilder
     val numCols = 2
@@ -119,8 +65,7 @@ object ArrayUtil {
         .toString()
 
     // column names
-    val h: Seq[(String, Int)] = rows.head.zipWithIndex
-    h.map { case (cell, i) =>
+    rows.head.zipWithIndex.map { case (cell, i) =>
       if (truncate > 0) {
         StringUtils.leftPad(cell, colWidths(i))
       } else {
@@ -135,14 +80,16 @@ object ArrayUtil {
       row.zipWithIndex
         .map { case (cell, i) =>
           val r = if (truncate > 0) {
-            StringUtils.leftPad(cell.toString, colWidths(i))
+            StringUtils.leftPad(cell, colWidths(i))
           } else {
-            StringUtils.rightPad(cell.toString, colWidths(i))
+            StringUtils.rightPad(cell, colWidths(i))
           }
-          if (rowEqual(j)) {
+          if (rowEqual.fold(row.head == row(1))(_(j))) {
             equalColor(r)
+          } else if (i == 0) {
+            unequalColorLeft(r)
           } else {
-            unequalColor(r)
+            unequalColorRight(r)
           }
         }
         .addString(sb, "|", "|", "|\n")

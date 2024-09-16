@@ -89,7 +89,7 @@ trait ColumnComparer {
       // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
       val mismatchMessage = "Diffs\n" + ArrayUtil.showTwoColumnStringColorCustomizable(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements),
-        rowsEqual.toArray
+        Some(rowsEqual.toArray)
       )
       throw ColumnMismatch(mismatchMessage)
     }
@@ -136,7 +136,7 @@ trait ColumnComparer {
       // Diffs\n is a hack, but a newline isn't added in ScalaTest unless we add "Diffs"
       val mismatchMessage = "Diffs\n" + ArrayUtil.showTwoColumnStringColorCustomizable(
         Array((colName1, colName2)) ++ colName1Elements.zip(colName2Elements),
-        rowsEqual.toArray
+        Some(rowsEqual.toArray)
       )
       throw ColumnMismatch(mismatchMessage)
     }
