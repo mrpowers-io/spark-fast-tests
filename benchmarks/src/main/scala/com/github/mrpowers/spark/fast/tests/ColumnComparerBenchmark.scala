@@ -24,16 +24,7 @@ private class ColumnComparerBenchmark extends ColumnComparer {
     spark.sparkContext.setLogLevel("ERROR")
 
     import spark.implicits._
-    val ds1 = Seq(
-      ("1", "2"),
-      ("1", "2"),
-      ("1", "2"),
-      ("1", "2"),
-      ("1", "2"),
-      ("1", "2"),
-      ("1", "2"),
-      ("2", "3")
-    ).toDF("col_B", "col_A")
+    val ds1 = (Seq.fill(100)(("1", "2")) ++ Seq.fill(100)(("3", "4"))).toDF("col_B", "col_A")
 
     val result = Try(assertColumnEquality(ds1, "col_B", "col_A"))
 
