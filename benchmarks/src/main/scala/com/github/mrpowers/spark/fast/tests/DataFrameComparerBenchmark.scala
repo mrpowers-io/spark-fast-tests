@@ -9,7 +9,7 @@ import scala.util.Try
 
 private class DataFrameComparerBenchmark extends DataFrameComparer {
   @Benchmark
-  @BenchmarkMode(Array(Mode.AverageTime, Mode.SingleShotTime))
+  @BenchmarkMode(Array(Mode.SingleShotTime))
   @Fork(value = 2)
   @Warmup(iterations = 10)
   @Measurement(iterations = 10)
@@ -25,8 +25,8 @@ private class DataFrameComparerBenchmark extends DataFrameComparer {
 
     import spark.implicits._
     val sameData = Seq.fill(50)("1", "10/01/2019", 26.762499999999996)
-    val ds1Data = sameData ++ Seq.fill(50)("1", "11/01/2019", 26.76249999999991)
-    val ds2Data = sameData ++ Seq.fill(50)("3", "12/01/2019", 26.76249999999991)
+    val ds1Data  = sameData ++ Seq.fill(50)("1", "11/01/2019", 26.76249999999991)
+    val ds2Data  = sameData ++ Seq.fill(50)("3", "12/01/2019", 26.76249999999991)
 
     val ds1 = ds1Data.toDF("col_B", "col_C", "col_A")
     val ds2 = ds2Data.toDF("col_B", "col_C", "col_A")

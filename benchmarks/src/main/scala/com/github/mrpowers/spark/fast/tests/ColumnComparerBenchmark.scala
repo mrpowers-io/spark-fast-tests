@@ -9,7 +9,7 @@ import scala.util.Try
 
 private class ColumnComparerBenchmark extends ColumnComparer {
   @Benchmark
-  @BenchmarkMode(Array(Mode.AverageTime, Mode.SingleShotTime))
+  @BenchmarkMode(Array(Mode.SingleShotTime))
   @Fork(value = 2)
   @Warmup(iterations = 10)
   @Measurement(iterations = 10)
