@@ -7,14 +7,14 @@ import org.openjdk.jmh.infra.Blackhole
 import java.util.concurrent.TimeUnit
 import scala.util.Try
 
-private class MyBenchmark extends DataFrameComparer {
+private class ColumnComparerBenchmark extends ColumnComparer {
   @Benchmark
-  @BenchmarkMode(Array(Mode.AverageTime, Mode.SingleShotTime))
+  @BenchmarkMode(Array(Mode.SingleShotTime))
   @Fork(value = 2)
   @Warmup(iterations = 10)
   @Measurement(iterations = 10)
   @OutputTimeUnit(TimeUnit.NANOSECONDS)
-  def assertApproximateDataFrameEqualityWithPrecision(blackHole: Blackhole): Boolean = {
+  def assertColumnEqualityBenchmarks(blackHole: Blackhole): Boolean = {
     val spark = SparkSession
       .builder()
       .master("local")
@@ -24,16 +24,9 @@ private class MyBenchmark extends DataFrameComparer {
     spark.sparkContext.setLogLevel("ERROR")
 
     import spark.implicits._
-    val ds1 = Seq(
-      ("1", "10/01/2019", 26.762499999999996),
-      ("1", "11/01/2019", 26.762499999999996)
-    ).toDF("col_B", "col_C", "col_A")
+    val ds1 = (Seq.fill(100)(("1", "2")) ++ Seq.fill(100)(("3", "4"))).toDF("col_B", "col_A")
 
-    val ds2 = Seq(
-      ("1", "10/01/2019", 26.762499999999946),
-      ("1", "11/01/2019", 26.76249999999991)
-    ).toDF("col_B", "col_C", "col_A")
-    val result = Try(assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false))
+    val result = Try(assertColumnEquality(ds1, "col_B", "col_A"))
 
     blackHole.consume(result)
     result.isSuccess
