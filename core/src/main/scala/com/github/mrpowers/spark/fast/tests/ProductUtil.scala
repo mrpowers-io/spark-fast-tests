@@ -29,7 +29,7 @@ object ProductUtil {
     val className                        = runTimeClass.getSimpleName
     val border                           = if (runTimeClass == classOf[Row]) ("[", "]") else ("(", ")")
     val prodToString: Seq[Any] => String = s => s.mkString(s"$className${border._1}", ",", border._2)
-    val emptyProd                        = s"$className${border._1}${border._2}"
+    val emptyProd                        = "MISSING"
 
     val sb = new StringBuilder
 
