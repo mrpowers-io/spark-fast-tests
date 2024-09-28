@@ -1,29 +1,20 @@
 package com.github.mrpowers.spark.fast.tests
 
+import com.github.mrpowers.spark.fast.tests.ProductUtil.showProductDiff
 import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.types.{ArrayType, DataType, MapType, StructType}
+import org.apache.spark.sql.types.{ArrayType, DataType, MapType, NullType, StructField, StructType}
 
 object SchemaComparer {
-
   case class DatasetSchemaMismatch(smth: String) extends Exception(smth)
   private def betterSchemaMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
-    "\nActual Schema Field | Expected Schema Field\n" + actualDS.schema
-      .zipAll(
-        expectedDS.schema,
-        "",
-        ""
-      )
-      .map {
-        case (sf1, sf2) if sf1 == sf2 =>
-          ufansi.Color.Blue(s"$sf1 | $sf2")
-        case ("", sf2) =>
-          ufansi.Color.Red(s"MISSING | $sf2")
-        case (sf1, "") =>
-          ufansi.Color.Red(s"$sf1 | MISSING")
-        case (sf1, sf2) =>
-          ufansi.Color.Red(s"$sf1 | $sf2")
-      }
-      .mkString("\n")
+    showProductDiff(
+      ("Actual Schema", "Expected Schema"),
+      actualDS.schema.fields,
+      expectedDS.schema.fields,
+      truncate = 200,
+      defaultVal = StructField("SPARK_FAST_TEST_MISSING_FIELD", NullType),
+      border = ("(", ")")
+    )
   }
 
   def assertSchemaEqual[T](
@@ -36,7 +27,7 @@ object SchemaComparer {
     require((ignoreColumnNames, ignoreColumnOrder) != (true, true), "Cannot set both ignoreColumnNames and ignoreColumnOrder to true.")
     if (!SchemaComparer.equals(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)) {
       throw DatasetSchemaMismatch(
-        betterSchemaMismatchMessage(actualDS, expectedDS)
+        "Diffs\n" + betterSchemaMismatchMessage(actualDS, expectedDS)
       )
     }
   }
@@ -76,5 +67,4 @@ object SchemaComparer {
       case _ => dt1 == dt2
     }
   }
-
 }
