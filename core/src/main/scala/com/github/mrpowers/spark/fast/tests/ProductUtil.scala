@@ -22,12 +22,14 @@ object ProductUtil {
       expected: Seq[T],
       truncate: Int = 20,
       minColWidth: Int = 3,
-      defaultVal: T = null.asInstanceOf[T],
-      border: (String, String) = ("[", "]")
+      defaultVal: T = null.asInstanceOf[T]
   ): String = {
-    val className                        = implicitly[ClassTag[T]].runtimeClass.getSimpleName
+
+    val runTimeClass                     = implicitly[ClassTag[T]].runtimeClass
+    val className                        = runTimeClass.getSimpleName
+    val border                           = if (runTimeClass == classOf[Row]) ("[", "]") else ("(", ")")
     val prodToString: Seq[Any] => String = s => s.mkString(s"$className${border._1}", ",", border._2)
-    val emptyProd                        = s"$className()"
+    val emptyProd                        = s"$className${border._1}${border._2}"
 
     val sb = new StringBuilder
 
