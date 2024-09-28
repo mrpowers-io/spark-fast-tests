@@ -100,6 +100,7 @@ lazy val docs = (project in file("docs"))
       import laika.config.SyntaxHighlighting
       Seq(Markdown.GitHubFlavor, SyntaxHighlighting)
     },
+    Laika / sourceDirectories := Seq((ThisBuild / baseDirectory).value / "docs")
   )
 
 credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
