@@ -51,6 +51,57 @@ lazy val benchmarks = (project in file("benchmarks"))
     name            := "benchmarks",
   ).enablePlugins(JmhPlugin)
 
+lazy val docs = (project in file("docs"))
+  .dependsOn(core)
+  .enablePlugins(LaikaPlugin)
+  .settings(
+    name := "docs",
+    laikaTheme := {
+      import laika.ast.Path.Root
+      import laika.ast.{Image, ExternalTarget}
+      import laika.helium.config.*
+      import laika.helium.Helium
+
+      Helium.defaults.site
+        .landingPage(
+          title = Some("Spark Fast Tests"),
+          subtitle = Some("Unit testing your Apache Spark application"),
+          latestReleases = Seq(
+            ReleaseInfo("Latest Stable Release", "1.0.0")
+          ),
+          license = Some("MIT"),
+          titleLinks = Seq(
+            VersionMenu.create(unversionedLabel = "Getting Started"),
+            LinkGroup.create(
+              IconLink.external("https://github.com/mrpowers-io/spark-fast-tests", HeliumIcon.github)
+            )
+          ),
+          linkPanel = Some(
+            LinkPanel(
+              "Documentation",
+              TextLink.internal(Root / "about" / "README.md", "Spark Fast Tests")
+            )
+          ),
+          projectLinks = Seq(
+            LinkGroup.create(
+              TextLink.internal(Root / "api" / "com" / "github" / "mrpowers" / "spark" / "fast" / "tests" / "index.html", "API (Scaladoc)")
+            )
+          ),
+          teasers = Seq(
+            Teaser("Fast", "Handle small dataframes effectively and provide column assertions"),
+            Teaser("Flexible", "Works fine with scalatest, uTest, munit")
+          )
+        )
+        .build
+    },
+    laikaIncludeAPI := true,
+    laikaExtensions ++= {
+      import laika.format.Markdown
+      import laika.config.SyntaxHighlighting
+      Seq(Markdown.GitHubFlavor, SyntaxHighlighting)
+    },
+  )
+
 credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
 
 licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
@@ -67,48 +118,3 @@ publishMavenStyle := true
 publishTo := sonatypePublishToBundle.value
 
 Global / useGpgPinentry := true
-
-enablePlugins(LaikaPlugin)
-
-import laika.format.Markdown
-import laika.config.SyntaxHighlighting
-import laika.ast.Path.Root
-import laika.ast.{Image, ExternalTarget}
-import laika.helium.config.*
-import laika.helium.Helium
-
-laikaTheme := Helium.defaults.site
-  .landingPage(
-    title = Some("Spark Fast Tests"),
-    subtitle = Some("Unit testing your Apache Spark application"),
-    latestReleases = Seq(
-      ReleaseInfo("Latest Stable Release", "1.0.0")
-    ),
-    license = Some("MIT"),
-    titleLinks = Seq(
-      VersionMenu.create(unversionedLabel = "Getting Started"),
-      LinkGroup.create(
-        IconLink.external("https://github.com/mrpowers-io/spark-fast-tests", HeliumIcon.github)
-      )
-    ),
-    linkPanel = Some(
-      LinkPanel(
-        "Documentation",
-        TextLink.internal(Root / "about" / "README.md", "Spark Fast Tests")
-      )
-    ),
-    projectLinks = Seq(
-      LinkGroup.create(
-        TextLink.internal(Root / "api" / "com" / "github" / "mrpowers" / "spark" / "fast" / "tests" / "index.html", "API (Scaladoc)")
-      )
-    ),
-    teasers = Seq(
-      Teaser("Fast", "Handle small dataframes effectively and provide column assertions"),
-      Teaser("Flexible", "Works fine with scalatest, uTest, munit")
-    )
-  )
-  .build
-
-laikaIncludeAPI := true
-laikaExtensions ++= Seq(Markdown.GitHubFlavor, SyntaxHighlighting)
-Laika / sourceDirectories := Seq((ThisBuild / baseDirectory).value / "docs")
