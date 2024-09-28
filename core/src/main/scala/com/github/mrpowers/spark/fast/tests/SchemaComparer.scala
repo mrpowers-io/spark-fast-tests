@@ -11,8 +11,7 @@ object SchemaComparer {
       ("Actual Schema", "Expected Schema"),
       actualDS.schema.fields,
       expectedDS.schema.fields,
-      truncate = 200,
-      defaultVal = StructField("SPARK_FAST_TEST_MISSING_FIELD", NullType)
+      truncate = 200
     )
   }
 
