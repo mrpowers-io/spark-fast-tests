@@ -154,31 +154,70 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
     }
 
     "throws an error if the DataFrames have different schemas" in {
+      val nestedSchema = StructType(
+        Seq(
+          StructField(
+            "attributes",
+            StructType(
+              Seq(
+                StructField("PostCode", IntegerType, nullable = true)
+              )
+            ),
+            nullable = true
+          )
+        )
+      )
+
+      val nestedSchema2 = StructType(
+        Seq(
+          StructField(
+            "attributes",
+            StructType(
+              Seq(
+                StructField("PostCode", StringType, nullable = true)
+              )
+            ),
+            nullable = true
+          )
+        )
+      )
+
       val sourceDF = spark.createDF(
         List(
-          (1),
-          (5)
+          (1, 2.0, null),
+          (5, 3.0, null)
         ),
-        List(("number", IntegerType, true))
+        List(
+          ("number", IntegerType, true),
+          ("float", DoubleType, true),
+          ("nestedField", nestedSchema, true)
+        )
       )
 
       val expectedDF = spark.createDF(
         List(
-          (1, "word"),
-          (5, "word")
+          (1, "word", null, 1L),
+          (5, "word", null, 2L)
         ),
         List(
           ("number", IntegerType, true),
-          ("word", StringType, true)
+          ("word", StringType, true),
+          ("nestedField", nestedSchema2, true),
+          ("long", LongType, true)
         )
       )
 
       val e = intercept[DatasetSchemaMismatch] {
         assertLargeDatasetEquality(sourceDF, expectedDF)
       }
+      println(e)
       val e2 = intercept[DatasetSchemaMismatch] {
         assertSmallDatasetEquality(sourceDF, expectedDF)
       }
+      println(e2)
+
+      sourceDF.schema.printTreeString()
+      expectedDF.schema.printTreeString()
     }
 
     "throws an error if the DataFrames content is different" in {
