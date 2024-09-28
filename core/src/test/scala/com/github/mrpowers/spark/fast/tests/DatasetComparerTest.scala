@@ -207,17 +207,13 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         )
       )
 
-      val e = intercept[DatasetSchemaMismatch] {
+      intercept[DatasetSchemaMismatch] {
         assertLargeDatasetEquality(sourceDF, expectedDF)
       }
-      println(e)
-      val e2 = intercept[DatasetSchemaMismatch] {
+
+      intercept[DatasetSchemaMismatch] {
         assertSmallDatasetEquality(sourceDF, expectedDF)
       }
-      println(e2)
-
-      sourceDF.schema.printTreeString()
-      expectedDF.schema.printTreeString()
     }
 
     "throws an error if the DataFrames content is different" in {
@@ -446,6 +442,41 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       assertLargeDatasetEquality(ds1, ds2, ignoreColumnOrder = true)
       assertLargeDatasetEquality(ds2, ds1, ignoreColumnOrder = true)
     }
+
+    "correctly mark unequal schema field" in {
+      val sourceDF = spark.createDF(
+        List(
+          (1, 2.0),
+          (5, 3.0)
+        ),
+        List(
+          ("number", IntegerType, true),
+          ("float", DoubleType, true)
+        )
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          (1, "word", 1L),
+          (5, "word", 2L)
+        ),
+        List(
+          ("number", IntegerType, true),
+          ("word", StringType, true),
+          ("long", LongType, true)
+        )
+      )
+
+      val e = intercept[DatasetSchemaMismatch] {
+        assertLargeDatasetEquality(sourceDF, expectedDF)
+      }
+
+      val colourGroup         = e.getMessage.extractColorGroup
+      val expectedColourGroup = colourGroup.get(Console.GREEN)
+      val actualColourGroup   = colourGroup.get(Console.RED)
+      assert(expectedColourGroup.contains(Seq("word", "StringType", "StructField(long,LongType,true,{})")))
+      assert(actualColourGroup.contains(Seq("float", "DoubleType", "MISSING")))
+    }
   }
 
   "assertSmallDatasetEquality" - {
@@ -605,8 +636,42 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         Person("alice", 5)
       ).toDS.select("age", "name").as(ds1.encoder)
 
-      assertSmallDatasetEquality(ds1, ds2, ignoreColumnOrder = true)
       assertSmallDatasetEquality(ds2, ds1, ignoreColumnOrder = true)
+    }
+
+    "correctly mark unequal schema field" in {
+      val sourceDF = spark.createDF(
+        List(
+          (1, 2.0),
+          (5, 3.0)
+        ),
+        List(
+          ("number", IntegerType, true),
+          ("float", DoubleType, true)
+        )
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          (1, "word", 1L),
+          (5, "word", 2L)
+        ),
+        List(
+          ("number", IntegerType, true),
+          ("word", StringType, true),
+          ("long", LongType, true)
+        )
+      )
+
+      val e = intercept[DatasetSchemaMismatch] {
+        assertSmallDatasetEquality(sourceDF, expectedDF)
+      }
+
+      val colourGroup         = e.getMessage.extractColorGroup
+      val expectedColourGroup = colourGroup.get(Console.GREEN)
+      val actualColourGroup   = colourGroup.get(Console.RED)
+      assert(expectedColourGroup.contains(Seq("word", "StringType", "StructField(long,LongType,true,{})")))
+      assert(actualColourGroup.contains(Seq("float", "DoubleType", "MISSING")))
     }
   }
 

@@ -1,6 +1,6 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.apache.spark.sql.types.{DoubleType, IntegerType, StringType}
+import org.apache.spark.sql.types.{DoubleType, IntegerType, LongType, StringType}
 import SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
 import com.github.mrpowers.spark.fast.tests.StringExt.StringOps
@@ -309,6 +309,41 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         )
       )
       assertLargeDataFrameEquality(sourceDF, expectedDF, ignoreColumnOrder = true)
+    }
+
+    "correctly mark unequal schema field" in {
+      val sourceDF = spark.createDF(
+        List(
+          (1, 2.0),
+          (5, 3.0)
+        ),
+        List(
+          ("number", IntegerType, true),
+          ("float", DoubleType, true)
+        )
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          (1, "word", 1L),
+          (5, "word", 2L)
+        ),
+        List(
+          ("number", IntegerType, true),
+          ("word", StringType, true),
+          ("long", LongType, true)
+        )
+      )
+
+      val e = intercept[DatasetSchemaMismatch] {
+        assertSmallDataFrameEquality(sourceDF, expectedDF)
+      }
+
+      val colourGroup         = e.getMessage.extractColorGroup
+      val expectedColourGroup = colourGroup.get(Console.GREEN)
+      val actualColourGroup   = colourGroup.get(Console.RED)
+      assert(expectedColourGroup.contains(Seq("word", "StringType", "StructField(long,LongType,true,{})")))
+      assert(actualColourGroup.contains(Seq("float", "DoubleType", "MISSING")))
     }
   }
 
