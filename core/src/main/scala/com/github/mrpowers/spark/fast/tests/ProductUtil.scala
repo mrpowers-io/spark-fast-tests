@@ -21,7 +21,7 @@ object ProductUtil {
       actual: Seq[T],
       expected: Seq[T],
       truncate: Int = 20,
-      minColWidth: Int = 3,
+      minColWidth: Int = 3
   ): String = {
 
     val runTimeClass                     = implicitly[ClassTag[T]].runtimeClass
