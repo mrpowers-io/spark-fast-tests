@@ -71,7 +71,7 @@ Expected DataFrame Row Count: '$expectedCount'
     val e = expectedDS.collect().toSeq
     if (!a.approximateSameElements(e, equals)) {
       val arr = ("Actual Content", "Expected Content")
-      val msg = "Diffs\n" ++ ProductUtil.showProductDiff[T](arr, a, e, truncate)
+      val msg = "Diffs\n" ++ ProductUtil.showProductDiff(arr, a, e, truncate)
       throw DatasetContentMismatch(msg)
     }
   }
