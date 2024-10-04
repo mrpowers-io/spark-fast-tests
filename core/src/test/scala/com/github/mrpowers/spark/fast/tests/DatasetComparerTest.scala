@@ -153,13 +153,12 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       val e = intercept[DatasetContentMismatch] {
         assertSmallDatasetEquality(sourceDS, expectedDS)
       }
-      println(e)
 
       val colourGroup         = e.getMessage.extractColorGroup
       val expectedColourGroup = colourGroup.get(Console.GREEN)
       val actualColourGroup   = colourGroup.get(Console.RED)
-      assert(expectedColourGroup.contains(Seq("(apple, banana1)")))
-      assert(actualColourGroup.contains(Seq("(apple, banana)")))
+      assert(expectedColourGroup.contains(Seq("(apple,banana1)")))
+      assert(actualColourGroup.contains(Seq("(apple,banana)")))
     }
 
     "works with really long columns" in {
