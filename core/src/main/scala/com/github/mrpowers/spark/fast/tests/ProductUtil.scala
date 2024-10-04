@@ -10,10 +10,12 @@ import scala.reflect.ClassTag
 object ProductUtil {
   private[mrpowers] def productOrRowToSeq(product: Any): Seq[Any] = {
     product match {
-      case null       => Seq.empty
-      case r: Row     => r.toSeq
-      case p: Product => p.productIterator.toSeq
-      case s          => Seq(s)
+      case null           => Seq.empty
+      case a: Array[_]    => a
+      case i: Iterable[_] => i.toSeq
+      case r: Row         => r.toSeq
+      case p: Product     => p.productIterator.toSeq
+      case s              => Seq(s)
     }
   }
   private[mrpowers] def showProductDiff[T: ClassTag](
@@ -45,7 +47,7 @@ object ProductUtil {
           List(Red(prodToString(actualSeq)), Green(emptyProd))
         else {
           val withEquals = actualSeq
-            .zip(expectedSeq)
+            .zipAll(expectedSeq, "MISSING", "MISSING")
             .map { case (actualRowField, expectedRowField) =>
               (actualRowField, expectedRowField, actualRowField == expectedRowField)
             }
