@@ -81,8 +81,8 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       val colourGroup         = e.getMessage.extractColorGroup
       val expectedColourGroup = colourGroup.get(Console.GREEN)
       val actualColourGroup   = colourGroup.get(Console.RED)
-      assert(expectedColourGroup.contains(Seq("StructField(long,LongType2,true,{})")))
-      assert(actualColourGroup.contains(Seq("StructField(long,LongType,true,{})")))
+      assert(expectedColourGroup.contains(Seq("String(StructField(long,LongType2,true,{}))")))
+      assert(actualColourGroup.contains(Seq("String(StructField(long,LongType,true,{}))")))
     }
 
     "correctly mark unequal element for Dataset[Seq[String]]" in {
