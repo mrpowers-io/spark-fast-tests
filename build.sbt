@@ -30,7 +30,7 @@ lazy val commonSettings = Seq(
     else Seq.empty)
   },
   libraryDependencies ++= Seq(
-    "org.apache.spark" %% "spark-sql" % sparkVersion % "compile",
+    "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
     "org.scalatest"    %% "scalatest" % "3.2.18"     % "test"
   ),
 )
