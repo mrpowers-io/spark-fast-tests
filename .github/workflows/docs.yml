@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v1
       - uses: olafurpg/setup-scala@v10
       - name: Build docs
-        run: sbt laikaSite
+        run: sbt "project docs" laikaSite
       - name: Deploy to GH Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
