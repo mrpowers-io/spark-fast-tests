@@ -74,8 +74,8 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     val colourGroup         = e.getMessage.extractColorGroup
     val expectedColourGroup = colourGroup.get(Console.GREEN)
     val actualColourGroup   = colourGroup.get(Console.RED)
-    assert(expectedColourGroup.contains(Seq("uk", "Row[steve,10,aus]")))
-    assert(actualColourGroup.contains(Seq("france", "Row[mark,11,usa]")))
+    assert(expectedColourGroup.contains(Seq("uk", "[steve,10,aus]")))
+    assert(actualColourGroup.contains(Seq("france", "[mark,11,usa]")))
   }
 
   "works well for wide DataFrames" in {

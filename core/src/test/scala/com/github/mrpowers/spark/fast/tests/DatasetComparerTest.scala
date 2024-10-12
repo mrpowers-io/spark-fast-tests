@@ -62,8 +62,8 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       val colourGroup         = e.getMessage.extractColorGroup
       val expectedColourGroup = colourGroup.get(Console.GREEN)
       val actualColourGroup   = colourGroup.get(Console.RED)
-      assert(expectedColourGroup.contains(Seq("Person(frank,10)", "lucy")))
-      assert(actualColourGroup.contains(Seq("Person(bob,1)", "alice")))
+      assert(expectedColourGroup.contains(Seq("[frank,10]", "lucy")))
+      assert(actualColourGroup.contains(Seq("[bob,1]", "alice")))
     }
 
     "works with really long columns" in {
