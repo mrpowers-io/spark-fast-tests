@@ -2,10 +2,9 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.types._
 import SparkSessionExt._
-import com.github.mrpowers.spark.fast.tests.ProductUtil.showProductDiff
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
 import com.github.mrpowers.spark.fast.tests.StringExt.StringOps
-import org.apache.spark.sql.Row
+import org.apache.spark.sql.functions.col
 import org.scalatest.freespec.AnyFreeSpec
 
 object Person {
@@ -595,6 +594,52 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       assert(expectedColourGroup.contains(Seq("word", "StringType", "StructField(long,LongType,true,{})")))
       assert(actualColourGroup.contains(Seq("float", "DoubleType", "MISSING")))
     }
+
+    "can performed Dataset comparisons and ignore metadata" in {
+      val ds1 = Seq(
+        Person("juan", 5),
+        Person("bob", 1),
+        Person("li", 49),
+        Person("alice", 5)
+      ).toDS
+        .withColumn("name", col("name").as("name", new MetadataBuilder().putString("description", "name of the person").build()))
+        .as[Person]
+
+      val ds2 = Seq(
+        Person("juan", 5),
+        Person("bob", 1),
+        Person("li", 49),
+        Person("alice", 5)
+      ).toDS
+        .withColumn("name", col("name").as("name", new MetadataBuilder().putString("description", "name of the individual").build()))
+        .as[Person]
+
+      assertLargeDatasetEquality(ds2, ds1)
+    }
+
+    "can performed Dataset comparisons and compare metadata" in {
+      val ds1 = Seq(
+        Person("juan", 5),
+        Person("bob", 1),
+        Person("li", 49),
+        Person("alice", 5)
+      ).toDS
+        .withColumn("name", col("name").as("name", new MetadataBuilder().putString("description", "name of the person").build()))
+        .as[Person]
+
+      val ds2 = Seq(
+        Person("juan", 5),
+        Person("bob", 1),
+        Person("li", 49),
+        Person("alice", 5)
+      ).toDS
+        .withColumn("name", col("name").as("name", new MetadataBuilder().putString("description", "name of the individual").build()))
+        .as[Person]
+
+      intercept[DatasetSchemaMismatch] {
+        assertLargeDatasetEquality(ds2, ds1, ignoreMetadata = false)
+      }
+    }
   }
 
   "assertSmallDatasetEquality" - {
@@ -807,11 +852,57 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         assertSmallDatasetEquality(sourceDF, expectedDF)
       }
 
-      val colourGroup         = e.getMessage.extractColorGroup
+      val colourGroup = e.getMessage.extractColorGroup
       val expectedColourGroup = colourGroup.get(Console.GREEN)
-      val actualColourGroup   = colourGroup.get(Console.RED)
+      val actualColourGroup = colourGroup.get(Console.RED)
       assert(expectedColourGroup.contains(Seq("word", "StringType", "StructField(long,LongType,true,{})")))
       assert(actualColourGroup.contains(Seq("float", "DoubleType", "MISSING")))
+    }
+
+    "can performed Dataset comparisons and ignore metadata" in {
+      val ds1 = Seq(
+        Person("juan", 5),
+        Person("bob", 1),
+        Person("li", 49),
+        Person("alice", 5)
+      ).toDS
+        .withColumn("name", col("name").as("name", new MetadataBuilder().putString("description", "name of the person").build()))
+        .as[Person]
+
+      val ds2 = Seq(
+        Person("juan", 5),
+        Person("bob", 1),
+        Person("li", 49),
+        Person("alice", 5)
+      ).toDS
+        .withColumn("name", col("name").as("name", new MetadataBuilder().putString("description", "name of the individual").build()))
+        .as[Person]
+
+      assertSmallDatasetEquality(ds2, ds1)
+    }
+
+    "can performed Dataset comparisons and compare metadata" in {
+      val ds1 = Seq(
+        Person("juan", 5),
+        Person("bob", 1),
+        Person("li", 49),
+        Person("alice", 5)
+      ).toDS
+        .withColumn("name", col("name").as("name", new MetadataBuilder().putString("description", "name of the person").build()))
+        .as[Person]
+
+      val ds2 = Seq(
+        Person("juan", 5),
+        Person("bob", 1),
+        Person("li", 49),
+        Person("alice", 5)
+      ).toDS
+        .withColumn("name", col("name").as("name", new MetadataBuilder().putString("description", "name of the individual").build()))
+        .as[Person]
+
+      intercept[DatasetSchemaMismatch] {
+        assertSmallDatasetEquality(ds2, ds1, ignoreMetadata = false)
+      }
     }
   }
 

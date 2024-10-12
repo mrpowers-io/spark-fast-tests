@@ -1,9 +1,10 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.apache.spark.sql.types.{DoubleType, IntegerType, LongType, StringType}
+import org.apache.spark.sql.types.{DoubleType, IntegerType, MetadataBuilder, LongType, StringType}
 import SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
 import com.github.mrpowers.spark.fast.tests.StringExt.StringOps
+import org.apache.spark.sql.functions.col
 import org.scalatest.freespec.AnyFreeSpec
 
 class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with SparkSessionTestWrapper {
@@ -360,11 +361,61 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         assertSmallDataFrameEquality(sourceDF, expectedDF)
       }
 
-      val colourGroup         = e.getMessage.extractColorGroup
+      val colourGroup = e.getMessage.extractColorGroup
       val expectedColourGroup = colourGroup.get(Console.GREEN)
-      val actualColourGroup   = colourGroup.get(Console.RED)
+      val actualColourGroup = colourGroup.get(Console.RED)
       assert(expectedColourGroup.contains(Seq("word", "StringType", "StructField(long,LongType,true,{})")))
       assert(actualColourGroup.contains(Seq("float", "DoubleType", "MISSING")))
+    }
+
+    "can performed Dataset comparisons and ignore metadata" in {
+      val sourceDF = spark
+        .createDF(
+          List(
+            1,
+            5
+          ),
+          List(("number", IntegerType, true))
+        )
+        .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small int").build()))
+
+      val expectedDF = spark
+        .createDF(
+          List(
+            1,
+            5
+          ),
+          List(("number", IntegerType, true))
+        )
+        .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small number").build()))
+
+      assertLargeDataFrameEquality(sourceDF, expectedDF)
+    }
+
+    "can performed Dataset comparisons and compare metadata" in {
+      val sourceDF = spark
+        .createDF(
+          List(
+            1,
+            5
+          ),
+          List(("number", IntegerType, true))
+        )
+        .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small int").build()))
+
+      val expectedDF = spark
+        .createDF(
+          List(
+            1,
+            5
+          ),
+          List(("number", IntegerType, true))
+        )
+        .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small number").build()))
+
+      intercept[DatasetSchemaMismatch] {
+        assertLargeDataFrameEquality(sourceDF, expectedDF, ignoreMetadata = false)
+      }
     }
   }
 
@@ -534,6 +585,56 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
 
       assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
     }
+
+    "can performed Dataset comparisons and ignore metadata" in {
+      val sourceDF = spark
+        .createDF(
+          List(
+            1,
+            5
+          ),
+          List(("number", IntegerType, true))
+        )
+        .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small int").build()))
+
+      val expectedDF = spark
+        .createDF(
+          List(
+            1,
+            5
+          ),
+          List(("number", IntegerType, true))
+        )
+        .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small number").build()))
+
+      assertApproximateDataFrameEquality(sourceDF, expectedDF, precision = 0.0000001)
+    }
+
+    "can performed Dataset comparisons and compare metadata" in {
+      val sourceDF = spark
+        .createDF(
+          List(
+            1,
+            5
+          ),
+          List(("number", IntegerType, true))
+        )
+        .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small int").build()))
+
+      val expectedDF = spark
+        .createDF(
+          List(
+            1,
+            5
+          ),
+          List(("number", IntegerType, true))
+        )
+        .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small number").build()))
+
+      intercept[DatasetSchemaMismatch] {
+        assertApproximateDataFrameEquality(sourceDF, expectedDF, precision = 0.0000001, ignoreMetadata = false)
+      }
+    }
   }
 
   "assertApproximateSmallDataFrameEquality" - {
@@ -701,6 +802,56 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       ).toDF("col_B", "col_C", "col_A", "col_D")
 
       assertApproximateSmallDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
+    }
+
+    "can performed Dataset comparisons and ignore metadata" in {
+      val sourceDF = spark
+        .createDF(
+          List(
+            1,
+            5
+          ),
+          List(("number", IntegerType, true))
+        )
+        .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small int").build()))
+
+      val expectedDF = spark
+        .createDF(
+          List(
+            1,
+            5
+          ),
+          List(("number", IntegerType, true))
+        )
+        .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small number").build()))
+
+      assertApproximateSmallDataFrameEquality(sourceDF, expectedDF, precision = 0.0000001)
+    }
+
+    "can performed Dataset comparisons and compare metadata" in {
+      val sourceDF = spark
+        .createDF(
+          List(
+            1,
+            5
+          ),
+          List(("number", IntegerType, true))
+        )
+        .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small int").build()))
+
+      val expectedDF = spark
+        .createDF(
+          List(
+            1,
+            5
+          ),
+          List(("number", IntegerType, true))
+        )
+        .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small number").build()))
+
+      intercept[DatasetSchemaMismatch] {
+        assertApproximateSmallDataFrameEquality(sourceDF, expectedDF, precision = 0.0000001, ignoreMetadata = false)
+      }
     }
   }
 }
