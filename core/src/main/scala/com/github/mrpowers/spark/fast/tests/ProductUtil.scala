@@ -26,8 +26,9 @@ object ProductUtil {
   ): String = {
 
     val runTimeClass                     = implicitly[ClassTag[T]].runtimeClass
-    val (className, lBracket, rBracket)  = if (runTimeClass == classOf[Row]) ("", "[", "]") else (runTimeClass.getSimpleName, "(", ")")
-    val prodToString: Seq[Any] => String = s => s.mkString(s"$className$lBracket", ",", rBracket)
+    val className                        = runTimeClass.getSimpleName
+    val border                           = if (runTimeClass == classOf[Row]) ("[", "]") else ("(", ")")
+    val prodToString: Seq[Any] => String = s => s.mkString(s"$className${border._1}", ",", border._2)
     val emptyProd                        = "MISSING"
 
     val sb = new StringBuilder
@@ -61,9 +62,9 @@ object ProductUtil {
                 case (actualRowField, expectedRowField, false) =>
                   (Red(actualRowField.toString), Green(expectedRowField.toString))
               }
-            val start = DarkGray(s"$className$lBracket")
+            val start = DarkGray(s"$className${border._1}")
             val sep   = DarkGray(",")
-            val end   = DarkGray(rBracket)
+            val end   = DarkGray(border._2)
             List(
               coloredDiff.map(_._1).mkStr(start, sep, end),
               coloredDiff.map(_._2).mkStr(start, sep, end)
