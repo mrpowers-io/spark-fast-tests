@@ -1,48 +1,35 @@
 package com.github.mrpowers.spark.fast.tests
 
 import com.github.mrpowers.spark.fast.tests.ufansi.Color.{DarkGray, Green, Red}
-import com.github.mrpowers.spark.fast.tests.ufansi.FansiExtensions.StrOps
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.Row
+import com.github.mrpowers.spark.fast.tests.ufansi.FansiExtensions.StrOps
+object DataframeUtil {
 
-import scala.reflect.ClassTag
-
-object ProductUtil {
-  private[mrpowers] def productOrRowToSeq(product: Any): Seq[Any] = {
-    product match {
-      case null       => Seq.empty
-      case r: Row     => r.toSeq
-      case p: Product => p.productIterator.toSeq
-      case _          => throw new IllegalArgumentException("Only Row and Product types are supported")
-    }
-  }
-  private[mrpowers] def showProductDiff[T: ClassTag](
+  private[mrpowers] def showDataframeDiff(
       header: (String, String),
-      actual: Seq[T],
-      expected: Seq[T],
+      actual: Seq[Row],
+      expected: Seq[Row],
       truncate: Int = 20,
-      minColWidth: Int = 3,
-      defaultVal: T = null.asInstanceOf[T],
-      border: (String, String) = ("[", "]")
+      minColWidth: Int = 3
   ): String = {
-    val className                        = implicitly[ClassTag[T]].runtimeClass.getSimpleName
-    val prodToString: Seq[Any] => String = s => s.mkString(s"$className${border._1}", ",", border._2)
-    val emptyProd                        = s"$className()"
 
     val sb = new StringBuilder
 
-    val fullJoin = actual.zipAll(expected, defaultVal, defaultVal)
-
+    val fullJoin = actual.zipAll(expected, Row(), Row())
     val diff = fullJoin.map { case (actualRow, expectedRow) =>
-      if (actualRow == expectedRow) {
+      if (equals(actualRow, expectedRow)) {
         List(DarkGray(actualRow.toString), DarkGray(expectedRow.toString))
       } else {
-        val actualSeq   = productOrRowToSeq(actualRow)
-        val expectedSeq = productOrRowToSeq(expectedRow)
+        val actualSeq   = actualRow.toSeq
+        val expectedSeq = expectedRow.toSeq
         if (actualSeq.isEmpty)
-          List(Red(emptyProd), Green(prodToString(expectedSeq)))
+          List(
+            Red("[]"),
+            Green(expectedSeq.mkString("[", ",", "]"))
+          )
         else if (expectedSeq.isEmpty)
-          List(Red(prodToString(actualSeq)), Green(emptyProd))
+          List(Red(actualSeq.mkString("[", ",", "]")), Green("[]"))
         else {
           val withEquals = actualSeq
             .zip(expectedSeq)
@@ -51,8 +38,12 @@ object ProductUtil {
             }
           val allFieldsAreNotEqual = !withEquals.exists(_._3)
           if (allFieldsAreNotEqual) {
-            List(Red(prodToString(actualSeq)), Green(prodToString(expectedSeq)))
+            List(
+              Red(actualSeq.mkString("[", ",", "]")),
+              Green(expectedSeq.mkString("[", ",", "]"))
+            )
           } else {
+
             val coloredDiff = withEquals
               .map {
                 case (actualRowField, expectedRowField, true) =>
@@ -60,9 +51,9 @@ object ProductUtil {
                 case (actualRowField, expectedRowField, false) =>
                   (Red(actualRowField.toString), Green(expectedRowField.toString))
               }
-            val start = DarkGray(s"$className${border._1}")
+            val start = DarkGray("[")
             val sep   = DarkGray(",")
-            val end   = DarkGray(border._2)
+            val end   = DarkGray("]")
             List(
               coloredDiff.map(_._1).mkStr(start, sep, end),
               coloredDiff.map(_._2).mkStr(start, sep, end)
@@ -78,12 +69,11 @@ object ProductUtil {
     val colWidths = Array.fill(numCols)(minColWidth)
 
     // Compute the width of each column
-    headerSeq.zipWithIndex.foreach({ case (cell, i) =>
+    for ((cell, i) <- headerSeq.zipWithIndex) {
       colWidths(i) = math.max(colWidths(i), cell.length)
-    })
-
-    diff.foreach { row =>
-      row.zipWithIndex.foreach { case (cell, i) =>
+    }
+    for (row <- diff) {
+      for ((cell, i) <- row.zipWithIndex) {
         colWidths(i) = math.max(colWidths(i), cell.length)
       }
     }
@@ -127,4 +117,5 @@ object ProductUtil {
 
     sb.toString
   }
+
 }
