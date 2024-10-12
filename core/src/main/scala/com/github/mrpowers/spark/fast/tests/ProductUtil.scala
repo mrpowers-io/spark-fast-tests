@@ -10,10 +10,10 @@ import scala.reflect.ClassTag
 object ProductUtil {
   private[mrpowers] def productOrRowToSeq(product: Any): Seq[Any] = {
     product match {
+      case null       => Seq.empty
       case r: Row     => r.toSeq
       case p: Product => p.productIterator.toSeq
-      case null       => Seq.empty
-      case s          => Seq(s)
+      case _          => throw new IllegalArgumentException("Only Row and Product types are supported")
     }
   }
   private[mrpowers] def showProductDiff[T: ClassTag](
