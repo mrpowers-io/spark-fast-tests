@@ -10,9 +10,9 @@ import scala.reflect.ClassTag
 object ProductUtil {
   private[mrpowers] def productOrRowToSeq(product: Any): Seq[Any] = {
     product match {
-      case null       => Seq.empty
       case r: Row     => r.toSeq
       case p: Product => p.productIterator.toSeq
+      case null       => Seq.empty
       case s          => Seq(s)
     }
   }
@@ -22,6 +22,7 @@ object ProductUtil {
       expected: Seq[T],
       truncate: Int = 20,
       minColWidth: Int = 3,
+      defaultVal: T = null.asInstanceOf[T]
   ): String = {
 
     val runTimeClass                     = implicitly[ClassTag[T]].runtimeClass
@@ -31,7 +32,7 @@ object ProductUtil {
 
     val sb = new StringBuilder
 
-    val fullJoin = actual.zipAll(expected, null, null)
+    val fullJoin = actual.zipAll(expected, defaultVal, defaultVal)
 
     val diff = fullJoin.map { case (actualRow, expectedRow) =>
       if (actualRow == expectedRow) {
