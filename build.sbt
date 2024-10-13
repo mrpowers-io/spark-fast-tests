@@ -39,6 +39,8 @@ lazy val core = (project in file("core"))
   .settings(
     commonSettings,
     name            := "core",
+    Compile / packageSrc / publishArtifact := true,
+    Compile / packageDoc / publishArtifact := true
   )
 
 lazy val benchmarks = (project in file("benchmarks"))
