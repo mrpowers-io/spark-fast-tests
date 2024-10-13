@@ -620,10 +620,12 @@ class ColumnComparerTest extends AnyFreeSpec with ColumnComparer with SparkSessi
         Row(Row("Jake", 40), Row("Jake", 40)),
         Row(null, null)
       )
-      val nestedSchema = StructType(List(
-        StructField("name", StringType, true),
-        StructField("age", IntegerType, true)
-      ))
+      val nestedSchema = StructType(
+        List(
+          StructField("name", StringType, true),
+          StructField("age", IntegerType, true)
+        )
+      )
       val sourceSchema = List(
         StructField("struct1", nestedSchema, true),
         StructField("struct2", nestedSchema, true)
@@ -635,7 +637,7 @@ class ColumnComparerTest extends AnyFreeSpec with ColumnComparer with SparkSessi
       intercept[ColumnMismatch] {
         assertColumnEquality(sourceDF, "struct1", "struct2")
       }
-     }
+    }
 
     "throws an error for unequal nested StructType columns with different schema" in {
       val sourceData = Seq(
@@ -644,14 +646,18 @@ class ColumnComparerTest extends AnyFreeSpec with ColumnComparer with SparkSessi
         Row(Row("Jake", 40), Row("Jake")),
         Row(null, null)
       )
-      val nestedSchema1 = StructType(List(
-        StructField("name", StringType, true),
-        StructField("age", IntegerType, true)
-      ))
+      val nestedSchema1 = StructType(
+        List(
+          StructField("name", StringType, true),
+          StructField("age", IntegerType, true)
+        )
+      )
 
-      val nestedSchema2 = StructType(List(
-        StructField("name", StringType, true)
-      ))
+      val nestedSchema2 = StructType(
+        List(
+          StructField("name", StringType, true)
+        )
+      )
       val sourceSchema = List(
         StructField("struct1", nestedSchema1, true),
         StructField("struct2", nestedSchema2, true)
@@ -672,10 +678,12 @@ class ColumnComparerTest extends AnyFreeSpec with ColumnComparer with SparkSessi
         Row(Row("Jake", 40), Row("Jake", 40)),
         Row(null, null)
       )
-      val nestedSchema = StructType(List(
-        StructField("name", StringType, true),
-        StructField("age", IntegerType, true)
-      ))
+      val nestedSchema = StructType(
+        List(
+          StructField("name", StringType, true),
+          StructField("age", IntegerType, true)
+        )
+      )
       val sourceSchema = List(
         StructField("struct1", nestedSchema, true),
         StructField("struct2", nestedSchema, true)
