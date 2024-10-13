@@ -68,6 +68,22 @@ class SchemaComparerTest extends AnyFreeSpec {
       assert(SchemaComparer.equals(s1, s2, ignoreNullable = true))
     }
 
+    "do not ignore nullable when determining equality if ignoreNullable is true" in {
+      val s1 = StructType(
+        Seq(
+          StructField("something", StringType, true),
+          StructField("mood", StringType, true)
+        )
+      )
+      val s2 = StructType(
+        Seq(
+          StructField("something", StringType, false),
+          StructField("mood", StringType, true)
+        )
+      )
+      assert(!SchemaComparer.equals(s1, s2))
+    }
+
     "can ignore the nullable flag when determining equality on complex data types" in {
       val s1 = StructType(
         Seq(
@@ -108,6 +124,48 @@ class SchemaComparerTest extends AnyFreeSpec {
         )
       )
       assert(SchemaComparer.equals(s1, s2, ignoreNullable = true))
+    }
+
+    "do not ignore nullable when determining equality on complex data types if ignoreNullable is true" in {
+      val s1 = StructType(
+        Seq(
+          StructField("something", StringType, true),
+          StructField("array", ArrayType(StringType, containsNull = true), true),
+          StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
+          StructField(
+            "struct",
+            StructType(
+              StructType(
+                Seq(
+                  StructField("something", StringType, false),
+                  StructField("mood", ArrayType(StringType, containsNull = false), true)
+                )
+              )
+            ),
+            true
+          )
+        )
+      )
+      val s2 = StructType(
+        Seq(
+          StructField("something", StringType, false),
+          StructField("array", ArrayType(StringType, containsNull = false), true),
+          StructField("map", MapType(StringType, StringType, valueContainsNull = true), true),
+          StructField(
+            "struct",
+            StructType(
+              StructType(
+                Seq(
+                  StructField("something", StringType, false),
+                  StructField("mood", ArrayType(StringType, containsNull = true), true)
+                )
+              )
+            ),
+            false
+          )
+        )
+      )
+      assert(!SchemaComparer.equals(s1, s2))
     }
 
     "can ignore the column names flag when determining equality" in {
