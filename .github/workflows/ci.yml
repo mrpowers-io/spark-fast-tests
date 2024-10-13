@@ -21,6 +21,6 @@ jobs:
         with:
           jvm: zulu:8
       - name: Test
-        run: sbt -Dspark.testVersion=${{ matrix.spark  }} +test
+        run: sbt -Dspark.version=${{ matrix.spark  }} +test
       - name: Benchmark
-        run: sbt -Dspark.testVersion=${{ matrix.spark  }} +benchmarks/Jmh/run
+        run: sbt -Dspark.version=${{ matrix.spark  }} +benchmarks/Jmh/run

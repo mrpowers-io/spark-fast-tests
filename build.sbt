@@ -11,7 +11,7 @@ val versionRegex = """^(.*)\.(.*)\.(.*)$""".r
 val scala2_13 = "2.13.14"
 val scala2_12 = "2.12.20"
 
-val sparkVersion = System.getProperty("spark.testVersion", "3.5.1")
+val sparkVersion = System.getProperty("spark.version", "3.5.1")
 crossScalaVersions := {
   sparkVersion match {
     case versionRegex("3", m, _) if m.toInt >= 2 => Seq(scala2_12, scala2_13)
