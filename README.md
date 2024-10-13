@@ -325,7 +325,7 @@ There is a two step process for publishing.
 
 Generate Scala 2.11 JAR files:
 
-* Run `sbt -Dspark.testVersion=2.4.8`
+* Run `sbt -Dspark.version=2.4.8`
 * Run `> ; + publishSigned; sonatypeBundleRelease` to create the JAR files and release them to Maven.
 
 Generate Scala 2.12 & Scala 2.13 JAR files:
