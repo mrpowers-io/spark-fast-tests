@@ -47,7 +47,7 @@ object SchemaComparer {
       } else {
         val zipStruct = if (ignoreColumnOrder) s1.sortBy(_.name) zip s2.sortBy(_.name) else s1 zip s2
         zipStruct.forall { case (f1, f2) =>
-          (f1.nullable == f1.nullable || ignoreNullable) &&
+          (f1.nullable == f2.nullable || ignoreNullable) &&
           (f1.name == f2.name || ignoreColumnNames) &&
           (f1.metadata == f2.metadata || ignoreMetadata) &&
           equals(f1.dataType, f2.dataType, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)
