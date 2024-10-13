@@ -1,10 +1,9 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.apache.spark.sql.types.{DoubleType, IntegerType, MetadataBuilder, StringType}
+import org.apache.spark.sql.types.{DoubleType, IntegerType, StringType}
 import SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
 import com.github.mrpowers.spark.fast.tests.StringExt.StringOps
-import org.apache.spark.sql.functions.col
 import org.scalatest.freespec.AnyFreeSpec
 
 class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with SparkSessionTestWrapper {
