@@ -310,6 +310,27 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       )
       assertLargeDataFrameEquality(sourceDF, expectedDF, ignoreColumnOrder = true)
     }
+
+    "should not ignore nullable if ignoreNullable is false" in {
+      val sourceDF = spark.createDF(
+        List(
+          1.2,
+          5.1
+        ),
+        List(("number", DoubleType, false))
+      )
+      val expectedDF = spark.createDF(
+        List(
+          1.2,
+          5.1
+        ),
+        List(("number", DoubleType, true))
+      )
+
+      intercept[DatasetSchemaMismatch] {
+        assertLargeDataFrameEquality(sourceDF, expectedDF)
+      }
+    }
   }
 
   "assertApproximateDataFrameEquality" - {
@@ -371,6 +392,27 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         List(("number", DoubleType, true))
       )
       val e = intercept[DatasetCountMismatch] {
+        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+      }
+    }
+
+    "should not ignore nullable if ignoreNullable is false" in {
+      val sourceDF = spark.createDF(
+        List(
+          1.2,
+          5.1
+        ),
+        List(("number", DoubleType, false))
+      )
+      val expectedDF = spark.createDF(
+        List(
+          1.2,
+          5.1
+        ),
+        List(("number", DoubleType, true))
+      )
+
+      intercept[DatasetSchemaMismatch] {
         assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
       }
     }
@@ -538,6 +580,27 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         List(("number", DoubleType, true))
       )
       assertApproximateSmallDataFrameEquality(sourceDF, expectedDF, 0.01, ignoreNullable = true)
+    }
+
+    "should not ignore nullable if ignoreNullable is false" in {
+      val sourceDF = spark.createDF(
+        List(
+          1.2,
+          5.1
+        ),
+        List(("number", DoubleType, false))
+      )
+      val expectedDF = spark.createDF(
+        List(
+          1.2,
+          5.1
+        ),
+        List(("number", DoubleType, true))
+      )
+
+      intercept[DatasetSchemaMismatch] {
+        assertApproximateSmallDataFrameEquality(sourceDF, expectedDF, 0.01)
+      }
     }
 
     "can ignore the column names" in {

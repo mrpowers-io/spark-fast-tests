@@ -280,6 +280,29 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       assertLargeDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
     }
 
+    "should not ignore nullable if ignoreNullable is false" in {
+
+      val sourceDF = spark.createDF(
+        List(
+          (1),
+          (5)
+        ),
+        List(("number", IntegerType, false))
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          (1),
+          (5)
+        ),
+        List(("number", IntegerType, true))
+      )
+
+      intercept[DatasetSchemaMismatch] {
+        assertLargeDatasetEquality(sourceDF, expectedDF)
+      }
+    }
+
     "can performed unordered DataFrame comparisons" in {
       val sourceDF = spark.createDF(
         List(
@@ -430,6 +453,28 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       )
 
       assertSmallDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
+    }
+
+    "should not ignore nullable if ignoreNullable is false" in {
+      val sourceDF = spark.createDF(
+        List(
+          (1),
+          (5)
+        ),
+        List(("number", IntegerType, false))
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          (1),
+          (5)
+        ),
+        List(("number", IntegerType, true))
+      )
+
+      intercept[DatasetSchemaMismatch] {
+        assertSmallDatasetEquality(sourceDF, expectedDF)
+      }
     }
 
     "can performed unordered DataFrame comparisons" in {
