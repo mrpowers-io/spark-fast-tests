@@ -7,9 +7,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: coursier/cache-action@v6
-        with:
-          extraKey: ${{ matrix.spark  }}
       - uses: coursier/setup-action@v1
         with:
           jvm: zulu:8
