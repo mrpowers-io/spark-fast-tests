@@ -45,10 +45,11 @@ Expected DataFrame Row Count: '$expectedCount'
       ignoreColumnNames: Boolean = false,
       orderedComparison: Boolean = true,
       ignoreColumnOrder: Boolean = false,
+      ignoreMetadata: Boolean = true,
       truncate: Int = 500,
       equals: (T, T) => Boolean = (o1: T, o2: T) => o1.equals(o2)
   ): Unit = {
-    SchemaComparer.assertSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)
+    SchemaComparer.assertSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)
     val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
     assertSmallDatasetContentEquality(actual, expectedDS, orderedComparison, truncate, equals)
   }
@@ -98,10 +99,11 @@ Expected DataFrame Row Count: '$expectedCount'
       ignoreNullable: Boolean = false,
       ignoreColumnNames: Boolean = false,
       orderedComparison: Boolean = true,
-      ignoreColumnOrder: Boolean = false
+      ignoreColumnOrder: Boolean = false,
+      ignoreMetadata: Boolean = true
   ): Unit = {
     // first check if the schemas are equal
-    SchemaComparer.assertSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder)
+    SchemaComparer.assertSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)
     val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
     assertLargeDatasetContentEquality(actual, expectedDS, equals, orderedComparison)
   }
@@ -157,7 +159,8 @@ Expected DataFrame Row Count: '$expectedCount'
       ignoreNullable: Boolean = false,
       ignoreColumnNames: Boolean = false,
       orderedComparison: Boolean = true,
-      ignoreColumnOrder: Boolean = false
+      ignoreColumnOrder: Boolean = false,
+      ignoreMetadata: Boolean = true
   ): Unit = {
     val e = (r1: Row, r2: Row) => {
       r1.equals(r2) || RowComparer.areRowsEqual(r1, r2, precision)
@@ -169,7 +172,8 @@ Expected DataFrame Row Count: '$expectedCount'
       ignoreNullable,
       ignoreColumnNames,
       orderedComparison,
-      ignoreColumnOrder
+      ignoreColumnOrder,
+      ignoreMetadata
     )
   }
 }

@@ -13,6 +13,7 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreColumnNames: Boolean = false,
       orderedComparison: Boolean = true,
       ignoreColumnOrder: Boolean = false,
+      ignoreMetadata: Boolean = true,
       truncate: Int = 500
   ): Unit = {
     assertSmallDatasetEquality(
@@ -22,6 +23,7 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreColumnNames,
       orderedComparison,
       ignoreColumnOrder,
+      ignoreMetadata,
       truncate
     )
   }
@@ -35,7 +37,8 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreNullable: Boolean = false,
       ignoreColumnNames: Boolean = false,
       orderedComparison: Boolean = true,
-      ignoreColumnOrder: Boolean = false
+      ignoreColumnOrder: Boolean = false,
+      ignoreMetadata: Boolean = true
   ): Unit = {
     assertLargeDatasetEquality(
       actualDF,
@@ -43,7 +46,8 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreNullable = ignoreNullable,
       ignoreColumnNames = ignoreColumnNames,
       orderedComparison = orderedComparison,
-      ignoreColumnOrder = ignoreColumnOrder
+      ignoreColumnOrder = ignoreColumnOrder,
+      ignoreMetadata = ignoreMetadata
     )
   }
 
@@ -57,7 +61,8 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreNullable: Boolean = false,
       ignoreColumnNames: Boolean = false,
       orderedComparison: Boolean = true,
-      ignoreColumnOrder: Boolean = false
+      ignoreColumnOrder: Boolean = false,
+      ignoreMetadata: Boolean = true
   ): Unit = {
     assertSmallDatasetEquality[Row](
       actualDF,
@@ -66,6 +71,7 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreColumnNames,
       orderedComparison,
       ignoreColumnOrder,
+      ignoreMetadata,
       equals = RowComparer.areRowsEqual(_, _, precision)
     )
   }
@@ -80,7 +86,8 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreNullable: Boolean = false,
       ignoreColumnNames: Boolean = false,
       orderedComparison: Boolean = true,
-      ignoreColumnOrder: Boolean = false
+      ignoreColumnOrder: Boolean = false,
+      ignoreMetadata: Boolean = true
   ): Unit = {
     assertLargeDatasetEquality[Row](
       actualDF,
@@ -89,7 +96,8 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreNullable,
       ignoreColumnNames,
       orderedComparison,
-      ignoreColumnOrder
+      ignoreColumnOrder,
+      ignoreMetadata
     )
   }
 }
