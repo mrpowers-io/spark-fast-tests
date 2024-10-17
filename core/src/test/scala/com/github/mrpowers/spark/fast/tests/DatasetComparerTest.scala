@@ -852,9 +852,9 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         assertSmallDatasetEquality(sourceDF, expectedDF)
       }
 
-      val colourGroup = e.getMessage.extractColorGroup
+      val colourGroup         = e.getMessage.extractColorGroup
       val expectedColourGroup = colourGroup.get(Console.GREEN)
-      val actualColourGroup = colourGroup.get(Console.RED)
+      val actualColourGroup   = colourGroup.get(Console.RED)
       assert(expectedColourGroup.contains(Seq("word", "StringType", "StructField(long,LongType,true,{})")))
       assert(actualColourGroup.contains(Seq("float", "DoubleType", "MISSING")))
     }
