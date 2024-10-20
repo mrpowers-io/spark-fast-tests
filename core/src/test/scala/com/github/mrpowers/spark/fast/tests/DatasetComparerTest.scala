@@ -593,28 +593,6 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       assertLargeDatasetEquality(ds2, ds1)
     }
 
-    "can performed Dataset comparisons and ignore metadata" in {
-      val ds1 = Seq(
-        Person("juan", 5),
-        Person("bob", 1),
-        Person("li", 49),
-        Person("alice", 5)
-      ).toDS
-        .withColumn("name", col("name").as("name", new MetadataBuilder().putString("description", "name of the person").build()))
-        .as[Person]
-
-      val ds2 = Seq(
-        Person("juan", 5),
-        Person("bob", 1),
-        Person("li", 49),
-        Person("alice", 5)
-      ).toDS
-        .withColumn("name", col("name").as("name", new MetadataBuilder().putString("description", "name of the individual").build()))
-        .as[Person]
-
-      assertLargeDatasetEquality(ds2, ds1)
-    }
-
     "can performed Dataset comparisons and compare metadata" in {
       val ds1 = Seq(
         Person("juan", 5),
@@ -853,26 +831,39 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       e.assertColorDiff(Seq("float", "DoubleType", "MISSING"), Seq("word", "StringType", "StructField(long,LongType,true,{})"))
     }
 
-    "can performed Dataset comparisons and ignore metadata" in {
-      val ds1 = Seq(
-        Person("juan", 5),
-        Person("bob", 1),
-        Person("li", 49),
-        Person("alice", 5)
-      ).toDS
-        .withColumn("name", col("name").as("name", new MetadataBuilder().putString("description", "name of the person").build()))
-        .as[Person]
+    "correctly mark schema with unequal metadata" in {
+      val sourceDF = spark.createDF(
+        List(
+          (1, 2.0),
+          (5, 3.0)
+        ),
+        List(
+          ("number", IntegerType, true),
+          ("float", DoubleType, true)
+        )
+      )
 
-      val ds2 = Seq(
-        Person("juan", 5),
-        Person("bob", 1),
-        Person("li", 49),
-        Person("alice", 5)
-      ).toDS
-        .withColumn("name", col("name").as("name", new MetadataBuilder().putString("description", "name of the individual").build()))
-        .as[Person]
+      val expectedDF = spark
+        .createDF(
+          List(
+            (1, 2.0),
+            (5, 3.0)
+          ),
+          List(
+            ("number", IntegerType, true),
+            ("float", DoubleType, true)
+          )
+        )
+        .withColumn("float", col("float").as("float", new MetadataBuilder().putString("description", "a float").build()))
 
-      assertSmallDatasetEquality(ds2, ds1)
+      val e = intercept[DatasetSchemaMismatch] {
+        assertSmallDatasetEquality(sourceDF, expectedDF, ignoreMetadata = false)
+      }
+
+      e.assertColorDiff(
+        Seq("{}"),
+        Seq("{\"description\":\"a float\"}")
+      )
     }
 
     "can performed Dataset comparisons and ignore metadata" in {
