@@ -3,8 +3,8 @@ package com.github.mrpowers.spark.fast.tests
 import org.apache.spark.sql.types.{DoubleType, IntegerType, MetadataBuilder, LongType, StringType}
 import SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
-import com.github.mrpowers.spark.fast.tests.StringExt.StringOps
 import org.apache.spark.sql.functions.col
+import com.github.mrpowers.spark.fast.tests.TestUtilsExt.ExceptionOps
 import org.scalatest.freespec.AnyFreeSpec
 
 class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with SparkSessionTestWrapper {
@@ -72,11 +72,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       assertSmallDataFrameEquality(expectedDF, sourceDF)
     }
 
-    val colourGroup         = e.getMessage.extractColorGroup
-    val expectedColourGroup = colourGroup.get(Console.GREEN)
-    val actualColourGroup   = colourGroup.get(Console.RED)
-    assert(expectedColourGroup.contains(Seq("uk", "[steve,10,aus]")))
-    assert(actualColourGroup.contains(Seq("france", "[mark,11,usa]")))
+    e.assertColorDiff(Seq("france", "[mark,11,usa]"), Seq("uk", "[steve,10,aus]"))
   }
 
   "works well for wide DataFrames" in {
@@ -361,11 +357,10 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         assertSmallDataFrameEquality(sourceDF, expectedDF)
       }
 
-      val colourGroup         = e.getMessage.extractColorGroup
-      val expectedColourGroup = colourGroup.get(Console.GREEN)
-      val actualColourGroup   = colourGroup.get(Console.RED)
-      assert(expectedColourGroup.contains(Seq("word", "StringType", "StructField(long,LongType,true,{})")))
-      assert(actualColourGroup.contains(Seq("float", "DoubleType", "MISSING")))
+      e.assertColorDiff(
+        Seq("float", "DoubleType", "MISSING"),
+        Seq("word", "StringType", "StructField(long,LongType,true,{})")
+      )
     }
 
     "can performed Dataset comparisons and ignore metadata" in {
