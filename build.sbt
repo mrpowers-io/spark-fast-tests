@@ -1,7 +1,21 @@
+inThisBuild(
+  List(
+    organization := "io.github.zeotuan",
+    homepage := Some(url("https://github.com/mrpowers-io/spark-fast-tests")),
+    licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
+    developers ++= List(
+      Developer(
+        "MrPowers",
+        "Matthew Powers",
+        "@MrPowers",
+        url("https://github.com/MrPowers"))
+    )
+  )
+)
+
 enablePlugins(GitVersioning)
 Compile / scalafmtOnCompile := true
 
-organization := "io.github.zeotuan"
 name         := "spark-fast-tests"
 
 val versionRegex = """^(.*)\.(.*)\.(.*)$""".r
@@ -103,11 +117,6 @@ lazy val docs = (project in file("docs"))
     Laika / sourceDirectories := Seq((ThisBuild / baseDirectory).value / "docs")
   )
 
-licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
-homepage := Some(url("https://github.com/mrpowers-io/spark-fast-tests"))
-developers ++= List(
-  Developer("MrPowers", "Matthew Powers", "@MrPowers", url("https://github.com/MrPowers"))
-)
 scmInfo := Some(ScmInfo(url("https://github.com/mrpowers-io/spark-fast-tests"), "git@github.com:MrPowers/spark-fast-tests.git"))
 
 updateOptions := updateOptions.value.withLatestSnapshots(false)
