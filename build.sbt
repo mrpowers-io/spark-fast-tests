@@ -1,7 +1,7 @@
 enablePlugins(GitVersioning)
 Compile / scalafmtOnCompile := true
 
-organization := "com.github.mrpowers"
+organization := "io.github.zeotuan"
 name         := "spark-fast-tests"
 
 val versionRegex = """^(.*)\.(.*)\.(.*)$""".r
