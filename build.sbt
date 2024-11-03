@@ -121,3 +121,6 @@ publishMavenStyle := true
 publishTo := sonatypePublishToBundle.value
 
 Global / useGpgPinentry := true
+
+ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
+sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
