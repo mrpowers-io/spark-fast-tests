@@ -4,8 +4,6 @@ Compile / scalafmtOnCompile := true
 organization := "com.github.mrpowers"
 name         := "spark-fast-tests"
 
-version := "1.10.1"
-
 val versionRegex = """^(.*)\.(.*)\.(.*)$""".r
 
 val scala2_13 = "2.13.14"
@@ -105,8 +103,6 @@ lazy val docs = (project in file("docs"))
     Laika / sourceDirectories := Seq((ThisBuild / baseDirectory).value / "docs")
   )
 
-credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
-
 licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
 homepage := Some(url("https://github.com/mrpowers-io/spark-fast-tests"))
 developers ++= List(
@@ -115,10 +111,6 @@ developers ++= List(
 scmInfo := Some(ScmInfo(url("https://github.com/mrpowers-io/spark-fast-tests"), "git@github.com:MrPowers/spark-fast-tests.git"))
 
 updateOptions := updateOptions.value.withLatestSnapshots(false)
-
-publishMavenStyle := true
-
-publishTo := sonatypePublishToBundle.value
 
 Global / useGpgPinentry := true
 
