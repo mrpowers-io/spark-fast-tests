@@ -114,5 +114,6 @@ updateOptions := updateOptions.value.withLatestSnapshots(false)
 
 Global / useGpgPinentry := true
 
-ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
+import xerial.sbt.Sonatype.sonatypeCentralHost
+ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
 sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
