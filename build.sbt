@@ -63,6 +63,7 @@ lazy val benchmarks = (project in file("benchmarks"))
       "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.37" //required for jmh IDEA plugin. Make sure this version matches sbt-jmh version!
     ),
     name            := "benchmarks",
+    publish / skip := true
   ).enablePlugins(JmhPlugin)
 
 lazy val docs = (project in file("docs"))
@@ -114,6 +115,7 @@ lazy val docs = (project in file("docs"))
       import laika.config.SyntaxHighlighting
       Seq(Markdown.GitHubFlavor, SyntaxHighlighting)
     },
+    publish / skip := true,
     Laika / sourceDirectories := Seq((ThisBuild / baseDirectory).value / "docs")
   )
 
