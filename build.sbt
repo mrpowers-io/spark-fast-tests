@@ -121,7 +121,5 @@ scmInfo := Some(ScmInfo(url("https://github.com/mrpowers-io/spark-fast-tests"), 
 
 updateOptions := updateOptions.value.withLatestSnapshots(false)
 
-Global / useGpgPinentry := true
-
 import xerial.sbt.Sonatype.sonatypeCentralHost
 ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
