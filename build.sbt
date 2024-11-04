@@ -1,6 +1,6 @@
 inThisBuild(
   List(
-    organization := "io.github.zeotuan",
+    organization := "com.github.mrpowers",
     homepage := Some(url("https://github.com/mrpowers-io/spark-fast-tests")),
     licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
     developers ++= List(
