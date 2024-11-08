@@ -2,6 +2,8 @@ name: Release
 on:
   push:
     tags: [ "*" ]
+    branches:
+      - main
 jobs:
   publish:
     runs-on: ubuntu-latest
