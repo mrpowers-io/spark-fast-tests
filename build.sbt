@@ -1,17 +1,25 @@
+inThisBuild(
+  List(
+    organization := "com.github.mrpowers",
+    homepage     := Some(url("https://github.com/mrpowers-io/spark-fast-tests")),
+    licenses     := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
+    developers ++= List(
+      Developer("MrPowers", "Matthew Powers", "@MrPowers", url("https://github.com/MrPowers"))
+    )
+  )
+)
+
 enablePlugins(GitVersioning)
 Compile / scalafmtOnCompile := true
 
-organization := "com.github.mrpowers"
-name         := "spark-fast-tests"
-
-version := "1.10.1"
+name := "spark-fast-tests"
 
 val versionRegex = """^(.*)\.(.*)\.(.*)$""".r
 
 val scala2_13 = "2.13.14"
 val scala2_12 = "2.12.20"
 
-val sparkVersion = System.getProperty("spark.testVersion", "3.5.1")
+val sparkVersion = System.getProperty("spark.version", "3.5.3")
 crossScalaVersions := {
   sparkVersion match {
     case versionRegex("3", m, _) if m.toInt >= 2 => Seq(scala2_12, scala2_13)
@@ -25,20 +33,22 @@ Test / fork := true
 
 lazy val commonSettings = Seq(
   javaOptions ++= {
-    Seq("-Xms512M", "-Xmx2048M", "-Duser.timezone=GMT")  ++ (if (System.getProperty("java.version").startsWith("1.8.0"))
-      Seq("-XX:+CMSClassUnloadingEnabled")
-    else Seq.empty)
+    Seq("-Xms512M", "-Xmx2048M", "-Duser.timezone=GMT") ++ (if (System.getProperty("java.version").startsWith("1.8.0"))
+                                                              Seq("-XX:+CMSClassUnloadingEnabled")
+                                                            else Seq.empty)
   },
   libraryDependencies ++= Seq(
     "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
     "org.scalatest"    %% "scalatest" % "3.2.18"     % "test"
-  ),
+  )
 )
 
 lazy val core = (project in file("core"))
   .settings(
     commonSettings,
-    name            := "core",
+    name                                   := "core",
+    Compile / packageSrc / publishArtifact := true,
+    Compile / packageDoc / publishArtifact := true
   )
 
 lazy val benchmarks = (project in file("benchmarks"))
@@ -46,10 +56,12 @@ lazy val benchmarks = (project in file("benchmarks"))
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
-      "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.37" //required for jmh IDEA plugin. Make sure this version matches sbt-jmh version!
+      "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.37" // required for jmh IDEA plugin. Make sure this version matches sbt-jmh version!
     ),
-    name            := "benchmarks",
-  ).enablePlugins(JmhPlugin)
+    name           := "benchmarks",
+    publish / skip := true
+  )
+  .enablePlugins(JmhPlugin)
 
 lazy val docs = (project in file("docs"))
   .dependsOn(core)
@@ -58,9 +70,8 @@ lazy val docs = (project in file("docs"))
     name := "docs",
     laikaTheme := {
       import laika.ast.Path.Root
-      import laika.ast.{Image, ExternalTarget}
-      import laika.helium.config.*
       import laika.helium.Helium
+      import laika.helium.config.*
 
       Helium.defaults.site
         .landingPage(
@@ -96,26 +107,14 @@ lazy val docs = (project in file("docs"))
     },
     laikaIncludeAPI := true,
     laikaExtensions ++= {
-      import laika.format.Markdown
       import laika.config.SyntaxHighlighting
+      import laika.format.Markdown
       Seq(Markdown.GitHubFlavor, SyntaxHighlighting)
     },
+    publish / skip            := true,
     Laika / sourceDirectories := Seq((ThisBuild / baseDirectory).value / "docs")
   )
 
-credentials += Credentials(Path.userHome / ".sbt" / "sonatype_credentials")
-
-licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
-homepage := Some(url("https://github.com/mrpowers-io/spark-fast-tests"))
-developers ++= List(
-  Developer("MrPowers", "Matthew Powers", "@MrPowers", url("https://github.com/MrPowers"))
-)
 scmInfo := Some(ScmInfo(url("https://github.com/mrpowers-io/spark-fast-tests"), "git@github.com:MrPowers/spark-fast-tests.git"))
 
 updateOptions := updateOptions.value.withLatestSnapshots(false)
-
-publishMavenStyle := true
-
-publishTo := sonatypePublishToBundle.value
-
-Global / useGpgPinentry := true
