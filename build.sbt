@@ -1,14 +1,10 @@
 inThisBuild(
   List(
     organization := "com.github.mrpowers",
-    homepage := Some(url("https://github.com/mrpowers-io/spark-fast-tests")),
-    licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
+    homepage     := Some(url("https://github.com/mrpowers-io/spark-fast-tests")),
+    licenses     := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
     developers ++= List(
-      Developer(
-        "MrPowers",
-        "Matthew Powers",
-        "@MrPowers",
-        url("https://github.com/MrPowers"))
+      Developer("MrPowers", "Matthew Powers", "@MrPowers", url("https://github.com/MrPowers"))
     )
   )
 )
@@ -16,7 +12,7 @@ inThisBuild(
 enablePlugins(GitVersioning)
 Compile / scalafmtOnCompile := true
 
-name         := "spark-fast-tests"
+name := "spark-fast-tests"
 
 val versionRegex = """^(.*)\.(.*)\.(.*)$""".r
 
@@ -37,20 +33,20 @@ Test / fork := true
 
 lazy val commonSettings = Seq(
   javaOptions ++= {
-    Seq("-Xms512M", "-Xmx2048M", "-Duser.timezone=GMT")  ++ (if (System.getProperty("java.version").startsWith("1.8.0"))
-      Seq("-XX:+CMSClassUnloadingEnabled")
-    else Seq.empty)
+    Seq("-Xms512M", "-Xmx2048M", "-Duser.timezone=GMT") ++ (if (System.getProperty("java.version").startsWith("1.8.0"))
+                                                              Seq("-XX:+CMSClassUnloadingEnabled")
+                                                            else Seq.empty)
   },
   libraryDependencies ++= Seq(
     "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
     "org.scalatest"    %% "scalatest" % "3.2.18"     % "test"
-  ),
+  )
 )
 
 lazy val core = (project in file("core"))
   .settings(
     commonSettings,
-    name            := "core",
+    name                                   := "core",
     Compile / packageSrc / publishArtifact := true,
     Compile / packageDoc / publishArtifact := true
   )
@@ -60,11 +56,12 @@ lazy val benchmarks = (project in file("benchmarks"))
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
-      "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.37" //required for jmh IDEA plugin. Make sure this version matches sbt-jmh version!
+      "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.37" // required for jmh IDEA plugin. Make sure this version matches sbt-jmh version!
     ),
-    name            := "benchmarks",
+    name           := "benchmarks",
     publish / skip := true
-  ).enablePlugins(JmhPlugin)
+  )
+  .enablePlugins(JmhPlugin)
 
 lazy val docs = (project in file("docs"))
   .dependsOn(core)
@@ -73,9 +70,8 @@ lazy val docs = (project in file("docs"))
     name := "docs",
     laikaTheme := {
       import laika.ast.Path.Root
-      import laika.ast.{Image, ExternalTarget}
-      import laika.helium.config.*
       import laika.helium.Helium
+      import laika.helium.config.*
 
       Helium.defaults.site
         .landingPage(
@@ -111,17 +107,14 @@ lazy val docs = (project in file("docs"))
     },
     laikaIncludeAPI := true,
     laikaExtensions ++= {
-      import laika.format.Markdown
       import laika.config.SyntaxHighlighting
+      import laika.format.Markdown
       Seq(Markdown.GitHubFlavor, SyntaxHighlighting)
     },
-    publish / skip := true,
+    publish / skip            := true,
     Laika / sourceDirectories := Seq((ThisBuild / baseDirectory).value / "docs")
   )
 
 scmInfo := Some(ScmInfo(url("https://github.com/mrpowers-io/spark-fast-tests"), "git@github.com:MrPowers/spark-fast-tests.git"))
 
 updateOptions := updateOptions.value.withLatestSnapshots(false)
-
-import xerial.sbt.Sonatype.sonatypeCentralHost
-ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
