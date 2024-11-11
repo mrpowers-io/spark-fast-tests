@@ -3,8 +3,8 @@ package com.github.mrpowers.spark.fast.tests
 import com.github.mrpowers.spark.fast.tests.DatasetComparer.maxUnequalRowsToShow
 import com.github.mrpowers.spark.fast.tests.SeqLikesExtensions.SeqExtensions
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
 
 import scala.reflect.ClassTag
 
@@ -49,7 +49,7 @@ Expected DataFrame Row Count: '$expectedCount'
       truncate: Int = 500,
       equals: (T, T) => Boolean = (o1: T, o2: T) => o1.equals(o2)
   ): Unit = {
-    SchemaComparer.assertSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)
+    SchemaComparer.assertDatasetSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)
     val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
     assertSmallDatasetContentEquality(actual, expectedDS, orderedComparison, truncate, equals)
   }
@@ -103,7 +103,7 @@ Expected DataFrame Row Count: '$expectedCount'
       ignoreMetadata: Boolean = true
   ): Unit = {
     // first check if the schemas are equal
-    SchemaComparer.assertSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)
+    SchemaComparer.assertDatasetSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)
     val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
     assertLargeDatasetContentEquality(actual, expectedDS, equals, orderedComparison)
   }

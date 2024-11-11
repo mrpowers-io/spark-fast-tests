@@ -1,5 +1,6 @@
 package com.github.mrpowers.spark.fast.tests
 
+import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
 import org.apache.spark.sql.types._
 import org.scalatest.freespec.AnyFreeSpec
 
@@ -240,6 +241,73 @@ class SchemaComparerTest extends AnyFreeSpec {
         )
       )
       assert(SchemaComparer.equals(s1, s2))
+    }
+
+    "display schema diff as tree" in {
+      val s1 = StructType(
+        Seq(
+          StructField("array", ArrayType(StringType, containsNull = true), true),
+          StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
+          StructField("something", StringType, true),
+          StructField(
+            "struct",
+            StructType(
+              StructType(
+                Seq(
+                  StructField("mood", ArrayType(StringType, containsNull = false), true),
+                  StructField("something", StringType, false),
+                  StructField(
+                    "something2",
+                    StructType(
+                      Seq(
+                        StructField("mood2", ArrayType(DoubleType, containsNull = false), true),
+                        StructField("something2", StringType, false)
+                      )
+                    ),
+                    false
+                  )
+                )
+              )
+            ),
+            true
+          )
+        )
+      )
+      val s2 = StructType(
+        Seq(
+          StructField("something", StringType, true),
+          StructField("array", ArrayType(StringType, containsNull = true), true),
+          StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
+          StructField(
+            "struct",
+            StructType(
+              StructType(
+                Seq(
+                  StructField("something", StringType, false),
+                  StructField("mood", ArrayType(StringType, containsNull = false), true),
+                  StructField(
+                    "something3",
+                    StructType(
+                      Seq(
+                        StructField("mood3", ArrayType(StringType, containsNull = false), true)
+                      )
+                    ),
+                    false
+                  )
+                )
+              )
+            ),
+            true
+          ),
+          StructField("norma2", StringType, false)
+        )
+      )
+
+      val e = intercept[DatasetSchemaMismatch] {
+        SchemaComparer.assertSchemaEqual(s1, s2, ignoreColumnOrder = false)
+      }
+      println(e)
+
     }
   }
 }
