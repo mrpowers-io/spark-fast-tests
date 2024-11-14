@@ -1,41 +1,44 @@
 package com.github.mrpowers.spark.fast.tests
 
 import com.github.mrpowers.spark.fast.tests.ProductUtil.showProductDiff
+import com.github.mrpowers.spark.fast.tests.SchemaDiffOutputFormat.SchemaDiffOutputFormat
 import com.github.mrpowers.spark.fast.tests.ufansi.Color.{DarkGray, Green, Red}
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.types._
 
 object SchemaComparer {
   case class DatasetSchemaMismatch(smth: String) extends Exception(smth)
-  private def betterSchemaMismatchMessage[T](actualDS: Dataset[T], expectedDS: Dataset[T]): String = {
+  private def betterSchemaMismatchMessage(actualSchema: StructType, expectedSchema: StructType): String = {
     showProductDiff(
       ("Actual Schema", "Expected Schema"),
-      actualDS.schema.fields,
-      expectedDS.schema.fields,
+      actualSchema.fields,
+      expectedSchema.fields,
       truncate = 200
     )
   }
 
   private def treeSchemaMismatchMessage[T](actualSchema: StructType, expectedSchema: StructType): String = {
-    def flattenStrucType(s: StructType, indent: Int): List[(Int, Int, StructField)] = s
-      .foldLeft(List.empty[(Int, Int, StructField)]) { case (fieldPair, f) =>
+    def flattenStrucType(s: StructType, indent: Int): (Seq[(Int, StructField)], Int) = s
+      .foldLeft((Seq.empty[(Int, StructField)], Int.MinValue)) { case ((fieldPair, maxWidth), f) =>
         // 5 char for each level of indentation, 21 char for gap, and description words
-        val gap  = indent * 5 + 21 + f.name.length + f.dataType.typeName.length + f.nullable.toString.length
-        val pair = fieldPair :+ (indent, gap, f)
+        val gap         = indent * 5 + 21 + f.name.length + f.dataType.typeName.length + f.nullable.toString.length
+        val pair        = fieldPair :+ (indent, f)
+        val newMaxWidth = scala.math.max(maxWidth, gap)
         f.dataType match {
-          case st: StructType => pair ++ flattenStrucType(st, indent + 1)
-          case _              => pair
+          case st: StructType =>
+            val (flattenPair, width) = flattenStrucType(st, indent + 1)
+            (pair ++ flattenPair, scala.math.max(newMaxWidth, width))
+          case _ => (pair, newMaxWidth)
         }
       }
 
     def depthToIndentStr(depth: Int): String = Range(0, depth).map(_ => "|    ").mkString + "|--"
     val treeSpaces                           = 6
-    val treeFieldPair1                       = flattenStrucType(actualSchema, 0)
-    val treeFieldPair2                       = flattenStrucType(expectedSchema, 0)
-    val headerGap                            = treeFieldPair1.groupBy(_._2).maxBy(_._1)._1 + treeSpaces
-    val treePair = treeFieldPair1
-      .zipAll(treeFieldPair2, (0, 0, null), (0, 0, null))
-      .map { case ((indent1, _, field1), (indent2, _, field2)) =>
+    val (treeFieldPair1, headerGap)          = flattenStrucType(actualSchema, 0)
+    val (treeFieldPair2, _)                  = flattenStrucType(expectedSchema, 0)
+    val (treePair, maxWidth) = treeFieldPair1
+      .zipAll(treeFieldPair2, (0, null), (0, null))
+      .foldLeft((Seq.empty[(String, String)], 0)) { case ((acc, maxWidth), ((indent1, field1), (indent2, field2))) =>
         val prefix1 = depthToIndentStr(indent1)
         val prefix2 = depthToIndentStr(indent2)
         val (sprefix1, sprefix2) = if (indent1 != indent2) {
@@ -44,7 +47,7 @@ object SchemaComparer {
           (DarkGray(prefix1), DarkGray(prefix2))
         }
 
-        if (field1 != null && field2 != null) {
+        val pair = if (field1 != null && field2 != null) {
           val (name1, name2) =
             if (field1.name != field2.name)
               (Red(field1.name), Green(field2.name))
@@ -82,10 +85,10 @@ object SchemaComparer {
           } else ""
           (structString1, structString2)
         }
+        (acc :+ pair, math.max(maxWidth, pair._1.length))
       }
 
-    val schemaGap = treePair.groupBy(_._1.length).maxBy(_._1)._1 + treeSpaces
-
+    val schemaGap = maxWidth + treeSpaces
     treePair
       .foldLeft(new StringBuilder("\nActual Schema".padTo(headerGap, ' ') + "Expected Schema\n")) { case (sb, (s1, s2)) =>
         val gap = if (s1.isEmpty) headerGap else schemaGap
@@ -100,9 +103,10 @@ object SchemaComparer {
       ignoreNullable: Boolean = false,
       ignoreColumnNames: Boolean = false,
       ignoreColumnOrder: Boolean = true,
-      ignoreMetadata: Boolean = true
+      ignoreMetadata: Boolean = true,
+      outputFormat: SchemaDiffOutputFormat = SchemaDiffOutputFormat.Table
   ): Unit = {
-    assertSchemaEqual(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)
+    assertSchemaEqual(actualDS.schema, expectedDS.schema, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata, outputFormat)
   }
 
   def assertSchemaEqual(
@@ -111,13 +115,17 @@ object SchemaComparer {
       ignoreNullable: Boolean = false,
       ignoreColumnNames: Boolean = false,
       ignoreColumnOrder: Boolean = true,
-      ignoreMetadata: Boolean = true
+      ignoreMetadata: Boolean = true,
+      outputFormat: SchemaDiffOutputFormat = SchemaDiffOutputFormat.Table
   ): Unit = {
     require((ignoreColumnNames, ignoreColumnOrder) != (true, true), "Cannot set both ignoreColumnNames and ignoreColumnOrder to true.")
     if (!SchemaComparer.equals(actualSchema, expectedSchema, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)) {
-      throw DatasetSchemaMismatch(
-        "Diffs\n" + treeSchemaMismatchMessage(actualSchema, expectedSchema)
-      )
+      val diffString = outputFormat match {
+        case SchemaDiffOutputFormat.Tree  => treeSchemaMismatchMessage(actualSchema, expectedSchema)
+        case SchemaDiffOutputFormat.Table => betterSchemaMismatchMessage(actualSchema, expectedSchema)
+      }
+
+      throw DatasetSchemaMismatch(s"Diffs\n$diffString")
     }
   }
 
