@@ -243,7 +243,7 @@ class SchemaComparerTest extends AnyFreeSpec {
       assert(SchemaComparer.equals(s1, s2))
     }
 
-    "display schema diff as tree" in {
+    "display schema diff as tree with different depth" in {
       val s1 = StructType(
         Seq(
           StructField("array", ArrayType(StringType, containsNull = true), true),
@@ -308,7 +308,7 @@ class SchemaComparerTest extends AnyFreeSpec {
       }
       val expectedMessage = """Diffs
           |
-          |Actual Schema                                      Expected Schema
+          |Actual Schema                                            Expected Schema
           |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                       \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
           |\u001b[90m|--\u001b[39m \u001b[31mmap\u001b[39m : \u001b[31mmap\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                           \u001b[90m|--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
           |\u001b[90m|--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[31mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                  \u001b[90m|--\u001b[39m \u001b[32mmap\u001b[39m : \u001b[32mmap\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
@@ -319,6 +319,235 @@ class SchemaComparerTest extends AnyFreeSpec {
           |\u001b[90m|    |    |--\u001b[39m \u001b[31mmood2\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)             \u001b[90m|    |    |--\u001b[39m \u001b[32mmood3\u001b[39m : \u001b[32marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
           |\u001b[31m|    |    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)      \u001b[32m|--\u001b[39m \u001b[32mnorma2\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
           |""".stripMargin
+
+      assert(e.getMessage == expectedMessage)
+    }
+
+    "display schema diff for wide tree" in {
+      val s1 = StructType(
+        Seq(
+          StructField("array", ArrayType(StringType, containsNull = true), true),
+          StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
+          StructField("something", StringType, true),
+          StructField(
+            "struct",
+            StructType(
+              StructType(
+                Seq(
+                  StructField("mood", ArrayType(StringType, containsNull = false), true),
+                  StructField("something", StringType, false),
+                  StructField(
+                    "something2",
+                    StructType(
+                      Seq(
+                        StructField("mood2", ArrayType(DoubleType, containsNull = false), true),
+                        StructField(
+                          "something2",
+                          StructType(
+                            Seq(
+                              StructField("mood", ArrayType(StringType, containsNull = false), true),
+                              StructField("something", StringType, false),
+                              StructField(
+                                "something2",
+                                StructType(
+                                  Seq(
+                                    StructField("mood2", ArrayType(DoubleType, containsNull = false), true),
+                                    StructField("something2", StringType, false)
+                                  )
+                                ),
+                                false
+                              )
+                            )
+                          ),
+                          false
+                        )
+                      )
+                    ),
+                    false
+                  )
+                )
+              )
+            ),
+            true
+          )
+        )
+      )
+      val s2 = StructType(
+        Seq(
+          StructField("array", ArrayType(StringType, containsNull = true), true),
+          StructField("something", StringType, true),
+          StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
+          StructField(
+            "struct",
+            StructType(
+              StructType(
+                Seq(
+                  StructField("something", StringType, false),
+                  StructField("mood", ArrayType(StringType, containsNull = false), true),
+                  StructField(
+                    "something3",
+                    StructType(
+                      Seq(
+                        StructField("mood2", ArrayType(DoubleType, containsNull = false), true),
+                        StructField(
+                          "something2",
+                          StructType(
+                            Seq(
+                              StructField("mood", ArrayType(StringType, containsNull = false), true),
+                              StructField("something", StringType, false),
+                              StructField(
+                                "something2",
+                                StructType(
+                                  Seq(
+                                    StructField("mood2", ArrayType(DoubleType, containsNull = false), true),
+                                    StructField("something2", StringType, false)
+                                  )
+                                ),
+                                false
+                              )
+                            )
+                          ),
+                          false
+                        )
+                      )
+                    ),
+                    false
+                  )
+                )
+              )
+            ),
+            true
+          ),
+          StructField("norma2", StringType, false)
+        )
+      )
+
+      val e = intercept[DatasetSchemaMismatch] {
+        SchemaComparer.assertSchemaEqual(s1, s2, ignoreColumnOrder = false, outputFormat = SchemaDiffOutputFormat.Tree)
+      }
+      val expectedMessage = """Diffs
+          |
+          |Actual Schema                                                      Expected Schema
+          |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                                 \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
+          |\u001b[90m|--\u001b[39m \u001b[31mmap\u001b[39m : \u001b[31mmap\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                                     \u001b[90m|--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
+          |\u001b[90m|--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[31mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                            \u001b[90m|--\u001b[39m \u001b[32mmap\u001b[39m : \u001b[32mmap\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
+          |\u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[31mstruct\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                               \u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[32mstruct\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
+          |\u001b[90m|    |--\u001b[39m \u001b[31mmood\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[31mtrue\u001b[39m)                             \u001b[90m|    |--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[32mfalse\u001b[39m)
+          |\u001b[90m|    |--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[31mstring\u001b[39m (nullable = \u001b[31mfalse\u001b[39m)                      \u001b[90m|    |--\u001b[39m \u001b[32mmood\u001b[39m : \u001b[32marray\u001b[39m (nullable = \u001b[32mtrue\u001b[39m)
+          |\u001b[90m|    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[90mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)                     \u001b[90m|    |--\u001b[39m \u001b[32msomething3\u001b[39m : \u001b[90mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
+          |\u001b[90m|    |    |--\u001b[39m \u001b[90mmood2\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                       \u001b[90m|    |    |--\u001b[39m \u001b[90mmood2\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
+          |\u001b[90m|    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)                \u001b[90m|    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
+          |\u001b[90m|    |    |    |--\u001b[39m \u001b[90mmood\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                   \u001b[90m|    |    |    |--\u001b[39m \u001b[90mmood\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
+          |\u001b[90m|    |    |    |--\u001b[39m \u001b[90msomething\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)            \u001b[90m|    |    |    |--\u001b[39m \u001b[90msomething\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
+          |\u001b[90m|    |    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)           \u001b[90m|    |    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
+          |\u001b[90m|    |    |    |    |--\u001b[39m \u001b[90mmood2\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)             \u001b[90m|    |    |    |    |--\u001b[39m \u001b[90mmood2\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
+          |\u001b[90m|    |    |    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)      \u001b[90m|    |    |    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
+          |                                                                    \u001b[90m|--\u001b[39m \u001b[32mnorma2\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[32mfalse\u001b[39m)
+          |""".stripMargin
+
+      assert(e.getMessage == expectedMessage)
+    }
+
+    "display schema diff as tree with more actual Column 2" in {
+      val s1 = StructType(
+        Seq(
+          StructField("array", ArrayType(StringType, containsNull = true), true),
+          StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
+          StructField("something", StringType, true),
+          StructField(
+            "struct",
+            StructType(
+              StructType(
+                Seq(
+                  StructField("mood", ArrayType(StringType, containsNull = false), true),
+                  StructField("something", StringType, false),
+                  StructField(
+                    "something2",
+                    StructType(
+                      Seq(
+                        StructField("mood2", ArrayType(DoubleType, containsNull = false), true),
+                        StructField(
+                          "something2",
+                          StructType(
+                            Seq(
+                              StructField("mood2", ArrayType(DoubleType, containsNull = false), true),
+                              StructField(
+                                "something2",
+                                StructType(
+                                  Seq(
+                                    StructField("mood2", ArrayType(DoubleType, containsNull = false), true),
+                                    StructField("something2", StringType, false)
+                                  )
+                                ),
+                                false
+                              )
+                            )
+                          ),
+                          false
+                        )
+                      )
+                    ),
+                    false
+                  )
+                )
+              )
+            ),
+            true
+          )
+        )
+      )
+      val s2 = StructType(
+        Seq(
+          StructField("array", ArrayType(StringType, containsNull = true), true),
+          StructField("something", StringType, true),
+          StructField(
+            "struct",
+            StructType(
+              StructType(
+                Seq(
+                  StructField("something", StringType, false),
+                  StructField("mood", ArrayType(StringType, containsNull = false), true),
+                  StructField(
+                    "something3",
+                    StructType(
+                      Seq(
+                        StructField("mood3", ArrayType(StringType, containsNull = false), true)
+                      )
+                    ),
+                    false
+                  )
+                )
+              )
+            ),
+            true
+          )
+        )
+      )
+
+      val e = intercept[DatasetSchemaMismatch] {
+        SchemaComparer.assertSchemaEqual(s1, s2, ignoreColumnOrder = false, outputFormat = SchemaDiffOutputFormat.Tree)
+      }
+
+      val expectedMessage = """Diffs
+          |
+          |Actual Schema                                                      Expected Schema
+          |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                                 \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
+          |\u001b[90m|--\u001b[39m \u001b[31mmap\u001b[39m : \u001b[31mmap\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                                     \u001b[90m|--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
+          |\u001b[90m|--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[31mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                            \u001b[90m|--\u001b[39m \u001b[32mstruct\u001b[39m : \u001b[32mstruct\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
+          |\u001b[31m|--\u001b[39m \u001b[31mstruct\u001b[39m : \u001b[31mstruct\u001b[39m (nullable = \u001b[31mtrue\u001b[39m)                               \u001b[32m|    |--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[32mfalse\u001b[39m)
+          |\u001b[90m|    |--\u001b[39m \u001b[90mmood\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                             \u001b[90m|    |--\u001b[39m \u001b[90mmood\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
+          |\u001b[90m|    |--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[31mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)                      \u001b[90m|    |--\u001b[39m \u001b[32msomething3\u001b[39m : \u001b[32mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
+          |\u001b[31m|    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstruct\u001b[39m (nullable = \u001b[31mfalse\u001b[39m)                     \u001b[32m|    |    |--\u001b[39m \u001b[32mmood3\u001b[39m : \u001b[32marray\u001b[39m (nullable = \u001b[32mtrue\u001b[39m)
+          |\u001b[31m|    |    |--\u001b[39m \u001b[31mmood2\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[31mtrue\u001b[39m)
+          |\u001b[31m|    |    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstruct\u001b[39m (nullable = \u001b[31mfalse\u001b[39m)
+          |\u001b[31m|    |    |    |--\u001b[39m \u001b[31mmood2\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[31mtrue\u001b[39m)
+          |\u001b[31m|    |    |    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstruct\u001b[39m (nullable = \u001b[31mfalse\u001b[39m)
+          |\u001b[31m|    |    |    |    |--\u001b[39m \u001b[31mmood2\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[31mtrue\u001b[39m)
+          |\u001b[31m|    |    |    |    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstring\u001b[39m (nullable = \u001b[31mfalse\u001b[39m)
+          |""".stripMargin
+      val actual = e.getMessage
+      println(actual)
+      println(expectedMessage)
       assert(e.getMessage == expectedMessage)
     }
   }

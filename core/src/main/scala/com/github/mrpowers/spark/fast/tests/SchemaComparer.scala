@@ -34,7 +34,7 @@ object SchemaComparer {
 
     def depthToIndentStr(depth: Int): String = Range(0, depth).map(_ => "|    ").mkString + "|--"
     val treeSpaces                           = 6
-    val (treeFieldPair1, headerGap)          = flattenStrucType(actualSchema, 0)
+    val (treeFieldPair1, tree1MaxWidth)      = flattenStrucType(actualSchema, 0)
     val (treeFieldPair2, _)                  = flattenStrucType(expectedSchema, 0)
     val (treePair, maxWidth) = treeFieldPair1
       .zipAll(treeFieldPair2, (0, null), (0, null))
@@ -74,14 +74,14 @@ object SchemaComparer {
             val name     = Red(field1.name)
             val dtype    = Red(field1.dataType.typeName)
             val nullable = Red(field1.nullable.toString)
-            s"$prefix1 $name : $dtype (nullable = $nullable)"
+            s"$sprefix1 $name : $dtype (nullable = $nullable)"
           } else ""
 
           val structString2 = if (field2 != null) {
             val name     = Green(field2.name)
             val dtype    = Green(field2.dataType.typeName)
             val nullable = Green(field2.nullable.toString)
-            s"$prefix2 $name : $dtype (nullable = $nullable)"
+            s"$sprefix2 $name : $dtype (nullable = $nullable)"
           } else ""
           (structString1, structString2)
         }
@@ -89,10 +89,12 @@ object SchemaComparer {
       }
 
     val schemaGap = maxWidth + treeSpaces
+    val headerGap = tree1MaxWidth + treeSpaces
     treePair
       .foldLeft(new StringBuilder("\nActual Schema".padTo(headerGap, ' ') + "Expected Schema\n")) { case (sb, (s1, s2)) =>
         val gap = if (s1.isEmpty) headerGap else schemaGap
-        sb.append(s1.padTo(gap, ' ') + s2 + "\n")
+        val s   = if (s2.isEmpty) s1 else s1.padTo(gap, ' ')
+        sb.append(s + s2 + "\n")
       }
       .toString()
   }
