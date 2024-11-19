@@ -7,6 +7,8 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.types._
 
 object SchemaComparer {
+  private val INDENT_GAP      = 5
+  private val DESCRIPTION_GAP = 21
   case class DatasetSchemaMismatch(smth: String) extends Exception(smth)
   private def betterSchemaMismatchMessage(actualSchema: StructType, expectedSchema: StructType): String = {
     showProductDiff(
@@ -20,8 +22,7 @@ object SchemaComparer {
   private def treeSchemaMismatchMessage[T](actualSchema: StructType, expectedSchema: StructType): String = {
     def flattenStrucType(s: StructType, indent: Int): (Seq[(Int, StructField)], Int) = s
       .foldLeft((Seq.empty[(Int, StructField)], Int.MinValue)) { case ((fieldPair, maxWidth), f) =>
-        // 5 char for each level of indentation, 21 char for gap, and description words
-        val gap         = indent * 5 + 21 + f.name.length + f.dataType.typeName.length + f.nullable.toString.length
+        val gap         = indent * INDENT_GAP + DESCRIPTION_GAP + f.name.length + f.dataType.typeName.length + f.nullable.toString.length
         val pair        = fieldPair :+ (indent, f)
         val newMaxWidth = scala.math.max(maxWidth, gap)
         f.dataType match {
