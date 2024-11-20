@@ -9,6 +9,7 @@ import org.apache.spark.sql.types._
 object SchemaComparer {
   private val INDENT_GAP      = 5
   private val DESCRIPTION_GAP = 21
+  private val TREE_GAP        = 6
   case class DatasetSchemaMismatch(smth: String) extends Exception(smth)
   private def betterSchemaMismatchMessage(actualSchema: StructType, expectedSchema: StructType): String = {
     showProductDiff(
@@ -34,7 +35,6 @@ object SchemaComparer {
       }
 
     def depthToIndentStr(depth: Int): String = Range(0, depth).map(_ => "|    ").mkString + "|--"
-    val treeSpaces                           = 6
     val (treeFieldPair1, tree1MaxWidth)      = flattenStrucType(actualSchema, 0)
     val (treeFieldPair2, _)                  = flattenStrucType(expectedSchema, 0)
     val (treePair, maxWidth) = treeFieldPair1
@@ -89,8 +89,8 @@ object SchemaComparer {
         (acc :+ pair, math.max(maxWidth, pair._1.length))
       }
 
-    val schemaGap = maxWidth + treeSpaces
-    val headerGap = tree1MaxWidth + treeSpaces
+    val schemaGap = maxWidth + TREE_GAP
+    val headerGap = tree1MaxWidth + TREE_GAP
     treePair
       .foldLeft(new StringBuilder("\nActual Schema".padTo(headerGap, ' ') + "Expected Schema\n")) { case (sb, (s1, s2)) =>
         val gap = if (s1.isEmpty) headerGap else schemaGap
