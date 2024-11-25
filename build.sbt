@@ -118,3 +118,7 @@ lazy val docs = (project in file("docs"))
 scmInfo := Some(ScmInfo(url("https://github.com/mrpowers-io/spark-fast-tests"), "git@github.com:MrPowers/spark-fast-tests.git"))
 
 updateOptions := updateOptions.value.withLatestSnapshots(false)
+
+import xerial.sbt.Sonatype.sonatypeCentralHost
+
+ThisBuild / sonatypeCredentialHost := sonatypeCentralHost
