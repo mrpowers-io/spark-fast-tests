@@ -11,6 +11,21 @@ Use [chispa](https://github.com/MrPowers/chispa) for PySpark applications.
 Read [Testing Spark Applications](https://leanpub.com/testing-spark) for a full explanation on the best way to test
 Spark code!  Good test suites yield higher quality codebases that are easy to refactor.
 
+## Table of Contents
+- [Install](#install)
+- [Examples](#simple-examples)
+- [Why is this library fast?](#why-is-this-library-fast)
+- [Usage](#usage)
+  - [Local Testing SparkSession](#local-sparksession-for-test)
+  - [DataFrameComparer](#datasetcomparer--dataframecomparer)
+    - [Unordered DataFrames comparison](#unordered-dataframe-equality-comparisons)
+    - [Approximate DataFrames comparison](#approximate-dataframe-equality)
+    - [Ignore Nullable DataFrames comparison](#equality-comparisons-ignoring-the-nullable-flag)
+  - [ColumnComparer](#column-equality)
+  - [SchemaComparer](#schema-equality)
+- [Testing tips](#testing-tips)
+
+
 ## Install
 
 Fetch the JAR file from Maven.
@@ -149,6 +164,7 @@ slower.
 
 ## Usage
 
+### Local SparkSession for test
 The spark-fast-tests project doesn't provide a SparkSession object in your test suite, so you'll need to make one
 yourself.
 
@@ -176,6 +192,7 @@ big DataFrames in your test suite.
 Make sure to only use the `SparkSessionTestWrapper` trait in your test suite. You don't want to use test specific
 configuration (like one shuffle partition) when running production code.
 
+### DatasetComparer / DataFrameComparer
 The `DatasetComparer` trait defines the `assertSmallDatasetEquality` method. Extend your spec file with the
 `SparkSessionTestWrapper` trait to create DataFrames and the `DatasetComparer` trait to make DataFrame comparisons.
 
@@ -221,6 +238,97 @@ assertLargeDatasetEquality(actualDF, expectedDF)
 `assertSmallDatasetEquality` is faster for test suites that run on your local machine.  `assertLargeDatasetEquality`
 should only be used for DataFrames that are split across nodes in a cluster.
 
+#### Unordered DataFrame equality comparisons
+
+Suppose you have the following `actualDF`:
+
+```
++------+
+|number|
++------+
+|     1|
+|     5|
++------+
+```
+
+And suppose you have the following `expectedDF`:
+
+```
++------+
+|number|
++------+
+|     5|
+|     1|
++------+
+```
+
+The DataFrames have the same columns and rows, but the order is different.
+
+`assertSmallDataFrameEquality(sourceDF, expectedDF)` will throw a `DatasetContentMismatch` error.
+
+We can set the `orderedComparison` boolean flag to `false` and spark-fast-tests will sort the DataFrames before
+performing the comparison.
+
+`assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)` will not throw an error.
+
+#### Equality comparisons ignoring the nullable flag
+
+You might also want to make equality comparisons that ignore the nullable flags for the DataFrame columns.
+
+Here is how to use the `ignoreNullable` flag to compare DataFrames without considering the nullable property of each
+column.
+
+```scala
+val sourceDF = spark.createDF(
+  List(
+    (1),
+    (5)
+  ), List(
+    ("number", IntegerType, false)
+  )
+)
+
+val expectedDF = spark.createDF(
+  List(
+    (1),
+    (5)
+  ), List(
+    ("number", IntegerType, true)
+  )
+)
+
+assertSmallDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
+```
+
+#### Approximate DataFrame Equality
+
+The `assertApproximateDataFrameEquality` function is useful for DataFrames that contain `DoubleType` columns. The
+precision threshold must be set when using the `assertApproximateDataFrameEquality` function.
+
+```scala
+val sourceDF = spark.createDF(
+  List(
+    (1.2),
+    (5.1),
+    (null)
+  ), List(
+    ("number", DoubleType, true)
+  )
+)
+
+val expectedDF = spark.createDF(
+  List(
+    (1.2),
+    (5.1),
+    (null)
+  ), List(
+    ("number", DoubleType, true)
+  )
+)
+
+assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+```
+
 ### Column Equality
 
 The `assertColumnEquality` method can be used to assess the equality of two columns in a DataFrame.
@@ -262,97 +370,6 @@ object MySpecialClassTest
 
   // your tests
 }
-```
-
-### Unordered DataFrame equality comparisons
-
-Suppose you have the following `actualDF`:
-
-```
-+------+
-|number|
-+------+
-|     1|
-|     5|
-+------+
-```
-
-And suppose you have the following `expectedDF`:
-
-```
-+------+
-|number|
-+------+
-|     5|
-|     1|
-+------+
-```
-
-The DataFrames have the same columns and rows, but the order is different.
-
-`assertSmallDataFrameEquality(sourceDF, expectedDF)` will throw a `DatasetContentMismatch` error.
-
-We can set the `orderedComparison` boolean flag to `false` and spark-fast-tests will sort the DataFrames before
-performing the comparison.
-
-`assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)` will not throw an error.
-
-### Equality comparisons ignoring the nullable flag
-
-You might also want to make equality comparisons that ignore the nullable flags for the DataFrame columns.
-
-Here is how to use the `ignoreNullable` flag to compare DataFrames without considering the nullable property of each
-column.
-
-```scala
-val sourceDF = spark.createDF(
-  List(
-    (1),
-    (5)
-  ), List(
-    ("number", IntegerType, false)
-  )
-)
-
-val expectedDF = spark.createDF(
-  List(
-    (1),
-    (5)
-  ), List(
-    ("number", IntegerType, true)
-  )
-)
-
-assertSmallDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
-```
-
-### Approximate DataFrame Equality
-
-The `assertApproximateDataFrameEquality` function is useful for DataFrames that contain `DoubleType` columns. The
-precision threshold must be set when using the `assertApproximateDataFrameEquality` function.
-
-```scala
-val sourceDF = spark.createDF(
-  List(
-    (1.2),
-    (5.1),
-    (null)
-  ), List(
-    ("number", DoubleType, true)
-  )
-)
-
-val expectedDF = spark.createDF(
-  List(
-    (1.2),
-    (5.1),
-    (null)
-  ), List(
-    ("number", DoubleType, true)
-  )
-)
-
-assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
 ```
 
 ### Schema Equality
