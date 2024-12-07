@@ -2,11 +2,14 @@
 
 [![CI](https://github.com/MrPowers/spark-fast-tests/actions/workflows/ci.yml/badge.svg)](https://github.com/MrPowers/spark-fast-tests/actions/workflows/ci.yml)
 
-A fast Apache Spark testing helper library with beautifully formatted error messages!  Works with [scalatest](https://github.com/scalatest/scalatest), [uTest](https://github.com/lihaoyi/utest), and [munit](https://github.com/scalameta/munit).
+A fast Apache Spark testing helper library with beautifully formatted error messages!  Works
+with [scalatest](https://github.com/scalatest/scalatest), [uTest](https://github.com/lihaoyi/utest),
+and [munit](https://github.com/scalameta/munit).
 
 Use [chispa](https://github.com/MrPowers/chispa) for PySpark applications.
 
-Read [Testing Spark Applications](https://leanpub.com/testing-spark) for a full explanation on the best way to test Spark code!  Good test suites yield higher quality codebases that are easy to refactor.
+Read [Testing Spark Applications](https://leanpub.com/testing-spark) for a full explanation on the best way to test
+Spark code!  Good test suites yield higher quality codebases that are easy to refactor.
 
 ## Install
 
@@ -14,9 +17,11 @@ Fetch the JAR file from Maven.
 
 ```scala
 // for Spark 3
-libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "1.1.0" % "test"
+libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "1.3.0" % "test"
 ```
-**Important: Future versions of spark-fast-test will no longer support Spark 2.x. We recommend upgrading to Spark 3.x to ensure compatibility with upcoming releases.**
+
+**Important: Future versions of spark-fast-test will no longer support Spark 2.x. We recommend upgrading to Spark 3.x to
+ensure compatibility with upcoming releases.**
 
 Here's a link to the releases for different Scala versions:
 
@@ -29,7 +34,7 @@ You should use Scala 2.11 with Spark 2 and Scala 2.12 / 2.13 with Spark 3.
 
 ## Simple examples
 
-The `assertSmallDatasetEquality` method can be used to compare two Datasets (or two DataFrames).
+The `assertSmallDataFrameEquality` method can be used to compare two DataFrames.
 
 ```scala
 val sourceDF = Seq(
@@ -38,15 +43,17 @@ val sourceDF = Seq(
 ).toDF("number")
 
 val expectedDF = Seq(
-  (1, "word"),
-  (5, "word")
-).toDF("number", "word")
+  (1),
+  (3)
+).toDF("number")
 
 assertSmallDataFrameEquality(sourceDF, expectedDF)
-// throws a DatasetSchemaMismatch exception
 ```
 
-The `assertSmallDatasetEquality` method can also be used to compare Datasets.
+![assert_small_dataset_equality_error_message](./images/assertSmallDataFrameEquality_DatasetContentMissmatch_message.png)
+
+The `assertSmallDatasetEquality` method can be used to compare two Datasets or DataFrames(Dataset[Row]).
+Nicely formatted error messages are displayed when the Datasets are not equal. Here is an example of content mismatch:
 
 ```scala
 val sourceDS = Seq(
@@ -57,20 +64,53 @@ val sourceDS = Seq(
 ).toDS
 
 val expectedDS = Seq(
-  Person("juan", 5),
+  Person("juan", 6),
   Person("frank", 10),
   Person("li", 49),
   Person("lucy", 5)
 ).toDS
 ```
 
-![assert_small_dataset_equality_error_message](https://raw.githubusercontent.com/mrpowers-io/spark-fast-tests/main/images/assertSmallDatasetEquality_error_message.png)
+![assert_small_dataset_equality_error_message](./images/assertSmallDatasetEquality_error_message.png)
 
-The colors in the error message make it easy to identify the rows that aren't equal.
+The colors in the error message make it easy to identify the rows that aren't equal. These method also supports
+comparing DataFrames with different schemas.
 
-The `DatasetComparer` has `assertSmallDatasetEquality` and `assertLargeDatasetEquality` methods to compare either Datasets or DataFrames.
+```scala
+val sourceDF = spark.createDF(
+  List(
+    (1, 2.0),
+    (5, 3.0)
+  ),
+  List(
+    ("number", IntegerType, true),
+    ("float", DoubleType, true)
+  )
+)
 
-If you only need to compare DataFrames, you can use `DataFrameComparer` with the associated `assertSmallDataFrameEquality` and `assertLargeDataFrameEquality` methods.  Under the hood, `DataFrameComparer` uses the `assertSmallDatasetEquality` and `assertLargeDatasetEquality`.
+val expectedDF = spark.createDF(
+  List(
+    (1, "word", 1L),
+    (5, "word", 2L)
+  ),
+  List(
+    ("number", IntegerType, true),
+    ("word", StringType, true),
+    ("long", LongType, true)
+  )
+)
+
+assertSmallDataFrameEquality(sourceDF, expectedDF)
+```
+
+![assert_small_dataset_equality_error_message](images/assertSmallDataFrameEquality_DatasetContentMissmatch_message.png)
+
+The `DatasetComparer` has `assertSmallDatasetEquality` and `assertLargeDatasetEquality` methods to compare either
+Datasets or DataFrames.
+
+If you only need to compare DataFrames, you can use `DataFrameComparer` with the associated
+`assertSmallDataFrameEquality` and `assertLargeDataFrameEquality` methods. Under the hood, `DataFrameComparer` uses the
+`assertSmallDatasetEquality` and `assertLargeDatasetEquality`.
 
 *Note : comparing Datasets can be tricky since some column names might be given by Spark when applying transformations.
 Use the `ignoreColumnNames` boolean to skip name verification.*
@@ -89,7 +129,6 @@ def myLowerClean(col: Column): Column = {
 
 Here's how long the tests take to execute:
 
-
 | test method                    | runtime          |
 |--------------------------------|------------------|
 | `assertLargeDataFrameEquality` | 709 milliseconds |
@@ -97,14 +136,15 @@ Here's how long the tests take to execute:
 | `assertColumnEquality`         | 108 milliseconds |
 | `evalString`                   | 26 milliseconds  |
 
-
 `evalString` isn't as robust, but is the fastest.  `assertColumnEquality` is robust and saves a lot of time.
 
-Other testing libraries don't have methods like `assertSmallDataFrameEquality` or `assertColumnEquality` so they run slower.
+Other testing libraries don't have methods like `assertSmallDataFrameEquality` or `assertColumnEquality` so they run
+slower.
 
 ## Usage
 
-The spark-fast-tests project doesn't provide a SparkSession object in your test suite, so you'll need to make one yourself.
+The spark-fast-tests project doesn't provide a SparkSession object in your test suite, so you'll need to make one
+yourself.
 
 ```scala
 import org.apache.spark.sql.SparkSession
@@ -123,11 +163,15 @@ trait SparkSessionTestWrapper {
 }
 ```
 
-It's best set the number of shuffle partitions to a small number like one or four in your test suite.  This configuration can make your tests run up to 70% faster.  You can remove this configuration option or adjust it if you're working with big DataFrames in your test suite.
+It's best set the number of shuffle partitions to a small number like one or four in your test suite. This configuration
+can make your tests run up to 70% faster. You can remove this configuration option or adjust it if you're working with
+big DataFrames in your test suite.
 
-Make sure to only use the `SparkSessionTestWrapper` trait in your test suite.  You don't want to use test specific configuration (like one shuffle partition) when running production code.
+Make sure to only use the `SparkSessionTestWrapper` trait in your test suite. You don't want to use test specific
+configuration (like one shuffle partition) when running production code.
 
-The `DatasetComparer` trait defines the `assertSmallDatasetEquality` method.  Extend your spec file with the `SparkSessionTestWrapper` trait to create DataFrames and the `DatasetComparer` trait to make DataFrame comparisons.
+The `DatasetComparer` trait defines the `assertSmallDatasetEquality` method. Extend your spec file with the
+`SparkSessionTestWrapper` trait to create DataFrames and the `DatasetComparer` trait to make DataFrame comparisons.
 
 ```scala
 import org.apache.spark.sql.types._
@@ -161,13 +205,15 @@ class DatasetSpec extends FunSpec with SparkSessionTestWrapper with DatasetCompa
 }
 ```
 
-To compare large DataFrames that are partitioned across different nodes in a cluster, use the `assertLargeDatasetEquality` method.
+To compare large DataFrames that are partitioned across different nodes in a cluster, use the
+`assertLargeDatasetEquality` method.
 
 ```scala
 assertLargeDatasetEquality(actualDF, expectedDF)
 ```
 
-`assertSmallDatasetEquality` is faster for test suites that run on your local machine.  `assertLargeDatasetEquality` should only be used for DataFrames that are split across nodes in a cluster.
+`assertSmallDatasetEquality` is faster for test suites that run on your local machine.  `assertLargeDatasetEquality`
+should only be used for DataFrames that are split across nodes in a cluster.
 
 ### Column Equality
 
@@ -194,7 +240,7 @@ The following code will throw a `ColumnMismatch` error message:
 assertColumnEquality(df, "name", "expected_name")
 ```
 
-![assert_column_equality_error_message](https://raw.githubusercontent.com/mrpowers-io/spark-fast-tests/main/images/assertColumnEquality_error_message.png)
+![assert_column_equality_error_message](./images/assertColumnEquality_error_message.png)
 
 Mix in the `ColumnComparer` trait to your test class to access the `assertColumnEquality` method:
 
@@ -202,11 +248,11 @@ Mix in the `ColumnComparer` trait to your test class to access the `assertColumn
 import com.github.mrpowers.spark.fast.tests.ColumnComparer
 
 object MySpecialClassTest
-    extends TestSuite
+  extends TestSuite
     with ColumnComparer
     with SparkSessionTestWrapper {
 
-    // your tests
+  // your tests
 }
 ```
 
@@ -238,7 +284,8 @@ The DataFrames have the same columns and rows, but the order is different.
 
 `assertSmallDataFrameEquality(sourceDF, expectedDF)` will throw a `DatasetContentMismatch` error.
 
-We can set the `orderedComparison` boolean flag to `false` and spark-fast-tests will sort the DataFrames before performing the comparison.
+We can set the `orderedComparison` boolean flag to `false` and spark-fast-tests will sort the DataFrames before
+performing the comparison.
 
 `assertSmallDataFrameEquality(sourceDF, expectedDF, orderedComparison = false)` will not throw an error.
 
@@ -246,7 +293,8 @@ We can set the `orderedComparison` boolean flag to `false` and spark-fast-tests 
 
 You might also want to make equality comparisons that ignore the nullable flags for the DataFrame columns.
 
-Here is how to use the `ignoreNullable` flag to compare DataFrames without considering the nullable property of each column.
+Here is how to use the `ignoreNullable` flag to compare DataFrames without considering the nullable property of each
+column.
 
 ```scala
 val sourceDF = spark.createDF(
@@ -272,7 +320,8 @@ assertSmallDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
 
 ### Approximate DataFrame Equality
 
-The `assertApproximateDataFrameEquality` function is useful for DataFrames that contain `DoubleType` columns.  The precision threshold must be set when using the `assertApproximateDataFrameEquality` function.
+The `assertApproximateDataFrameEquality` function is useful for DataFrames that contain `DoubleType` columns. The
+precision threshold must be set when using the `assertApproximateDataFrameEquality` function.
 
 ```scala
 val sourceDF = spark.createDF(
@@ -298,15 +347,100 @@ val expectedDF = spark.createDF(
 assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
 ```
 
+### Schema Equality
+
+The SchemaComparer provide `assertSchemaEqual` API which is useful for comparing schema of dataframe schema
+
+Consider the following two schemas:
+
+```scala
+val s1 = StructType(
+  Seq(
+    StructField("array", ArrayType(StringType, containsNull = true), true),
+    StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
+    StructField("something", StringType, true),
+    StructField(
+      "struct",
+      StructType(
+        StructType(
+          Seq(
+            StructField("mood", ArrayType(StringType, containsNull = false), true),
+            StructField("something", StringType, false),
+            StructField(
+              "something2",
+              StructType(
+                Seq(
+                  StructField("mood2", ArrayType(DoubleType, containsNull = false), true),
+                  StructField("something2", StringType, false)
+                )
+              ),
+              false
+            )
+          )
+        )
+      ),
+      true
+    )
+  )
+)
+val s2 = StructType(
+  Seq(
+    StructField("array", ArrayType(StringType, containsNull = true), true),
+    StructField("something", StringType, true),
+    StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
+    StructField(
+      "struct",
+      StructType(
+        StructType(
+          Seq(
+            StructField("something", StringType, false),
+            StructField("mood", ArrayType(StringType, containsNull = false), true),
+            StructField(
+              "something3",
+              StructType(
+                Seq(
+                  StructField("mood3", ArrayType(StringType, containsNull = false), true)
+                )
+              ),
+              false
+            )
+          )
+        )
+      ),
+      true
+    ),
+    StructField("norma2", StringType, false)
+  )
+)
+
+```
+
+The `assertSchemaEqual` support two output format `SchemaDiffOutputFormat.Tree` and `SchemaDiffOutputFormat.Table`. Tree
+output
+format is useful when the schema is large and contains multi level nested fields.
+
+```scala
+SchemaComparer.assertSchemaEqual(s1, s2, ignoreColumnOrder = false, outputFormat = SchemaDiffOutputFormat.Tree)
+```
+
+![assert_column_equality_error_message](./images/assertSchemaEquality_tree_message.png)
+
+By default `SchemaDiffOutputFormat.Table` is used internally by all dataframe/dataset comparison APIs.
+
 ## Testing Tips
 
-* Use column functions instead of UDFs as described in [this blog post](https://medium.com/@mrpowers/spark-user-defined-functions-udfs-6c849e39443b)
-* Try to organize your code as [custom transformations](https://medium.com/@mrpowers/chaining-custom-dataframe-transformations-in-spark-a39e315f903c) so it's easy to test the logic elegantly
-* Don't write tests that read from files or write files.  Dependency injection is a great way to avoid file I/O in you test suite.
+* Use column functions instead of UDFs as described
+  in [this blog post](https://medium.com/@mrpowers/spark-user-defined-functions-udfs-6c849e39443b)
+* Try to organize your code
+  as [custom transformations](https://medium.com/@mrpowers/chaining-custom-dataframe-transformations-in-spark-a39e315f903c)
+  so it's easy to test the logic elegantly
+* Don't write tests that read from files or write files. Dependency injection is a great way to avoid file I/O in you
+  test suite.
 
 ## Alternatives
 
-The [spark-testing-base](https://github.com/holdenk/spark-testing-base) project has more features (e.g. streaming support) and is compiled to support a variety of Scala and Spark versions.
+The [spark-testing-base](https://github.com/holdenk/spark-testing-base) project has more features (e.g. streaming
+support) and is compiled to support a variety of Scala and Spark versions.
 
 You might want to use spark-fast-tests instead of spark-testing-base in these cases:
 
@@ -317,9 +451,11 @@ You might want to use spark-fast-tests instead of spark-testing-base in these ca
 
 ## Publishing
 
-GPG & Sonatype need to be setup properly before running these commands.  See the [spark-daria](https://github.com/MrPowers/spark-daria) README for more information.
+GPG & Sonatype need to be setup properly before running these commands. See
+the [spark-daria](https://github.com/MrPowers/spark-daria) README for more information.
 
-It's a good idea to always run `clean` before running any publishing commands.  It's also important to run `clean` before different publishing commands as well.
+It's a good idea to always run `clean` before running any publishing commands. It's also important to run `clean` before
+different publishing commands as well.
 
 There is a two step process for publishing.
 
@@ -333,7 +469,8 @@ Generate Scala 2.12 & Scala 2.13 JAR files:
 * Run `sbt`
 * Run `> ; + publishSigned; sonatypeBundleRelease`
 
-The `publishSigned` and `sonatypeBundleRelease` commands are made available by the [sbt-sonatype](https://github.com/xerial/sbt-sonatype) plugin.
+The `publishSigned` and `sonatypeBundleRelease` commands are made available by
+the [sbt-sonatype](https://github.com/xerial/sbt-sonatype) plugin.
 
 When the release command is run, you'll be prompted to enter your GPG passphrase.
 
@@ -355,7 +492,8 @@ password=$PASSWORD
 
 ## Contributing
 
-Open an issue or send a pull request to contribute.  Anyone that makes good contributions to the project will be promoted to project maintainer status.
+Open an issue or send a pull request to contribute. Anyone that makes good contributions to the project will be promoted
+to project maintainer status.
 
 ## uTest settings to display color output
 
@@ -366,12 +504,17 @@ package com.github.mrpowers.spark.fast.tests
 
 class CustomFramework extends utest.runner.Framework {
   override def formatWrapWidth: Int = 300
+
   // turn off the default exception message color, so spark-fast-tests
   // can send messages with custom colors
   override def exceptionMsgColor = toggledColor(utest.ufansi.Attrs.Empty)
+
   override def exceptionPrefixColor = toggledColor(utest.ufansi.Attrs.Empty)
+
   override def exceptionMethodColor = toggledColor(utest.ufansi.Attrs.Empty)
+
   override def exceptionPunctuationColor = toggledColor(utest.ufansi.Attrs.Empty)
+
   override def exceptionLineNumberColor = toggledColor(utest.ufansi.Attrs.Empty)
 }
 ```
