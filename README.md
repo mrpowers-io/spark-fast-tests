@@ -50,7 +50,7 @@ val expectedDF = Seq(
 assertSmallDataFrameEquality(sourceDF, expectedDF)
 ```
 
-![assert_small_dataset_equality_error_message](./images/assertSmallDataFrameEquality_DatasetContentMissmatch_message.png)
+![assert_small_dataset_equality_error_message](/images/assertSmallDataFrameEquality_DatasetContentMissmatch_message.png)
 
 The `assertSmallDatasetEquality` method can be used to compare two Datasets or DataFrames(Dataset[Row]).
 Nicely formatted error messages are displayed when the Datasets are not equal. Here is an example of content mismatch:
@@ -71,7 +71,7 @@ val expectedDS = Seq(
 ).toDS
 ```
 
-![assert_small_dataset_equality_error_message](./images/assertSmallDatasetEquality_error_message.png)
+![assert_small_dataset_equality_error_message](/images/assertSmallDatasetEquality_error_message.png)
 
 The colors in the error message make it easy to identify the rows that aren't equal. These method also supports
 comparing DataFrames with different schemas.
@@ -103,7 +103,7 @@ val expectedDF = spark.createDF(
 assertSmallDataFrameEquality(sourceDF, expectedDF)
 ```
 
-![assert_small_dataset_equality_error_message](images/assertSmallDataFrameEquality_DatasetContentMissmatch_message.png)
+![assert_small_dataset_equality_error_message](images/assertSmallDataFrameEquality_DatasetSchemaMisMatch_message.png)
 
 The `DatasetComparer` has `assertSmallDatasetEquality` and `assertLargeDatasetEquality` methods to compare either
 Datasets or DataFrames.
@@ -240,7 +240,7 @@ The following code will throw a `ColumnMismatch` error message:
 assertColumnEquality(df, "name", "expected_name")
 ```
 
-![assert_column_equality_error_message](./images/assertColumnEquality_error_message.png)
+![assert_column_equality_error_message](/images/assertColumnEquality_error_message.png)
 
 Mix in the `ColumnComparer` trait to your test class to access the `assertColumnEquality` method:
 
@@ -423,7 +423,7 @@ format is useful when the schema is large and contains multi level nested fields
 SchemaComparer.assertSchemaEqual(s1, s2, ignoreColumnOrder = false, outputFormat = SchemaDiffOutputFormat.Tree)
 ```
 
-![assert_column_equality_error_message](./images/assertSchemaEquality_tree_message.png)
+![assert_column_equality_error_message](/images/assertSchemaEquality_tree_message.png)
 
 By default `SchemaDiffOutputFormat.Table` is used internally by all dataframe/dataset comparison APIs.
 
