@@ -25,7 +25,7 @@ private class DatasetComparerBenchmark extends DatasetComparer {
     val ds1 = spark.range(0, 1000000, 1, 8)
     val ds3 = ds1
 
-    val result = Try(assertLargeDatasetContentEqualityV2(ds1, ds3))
+    val result = Try(assertLargeDatasetEqualityV2(ds1, ds3))
 
     blackHole.consume(result)
     result.isSuccess
