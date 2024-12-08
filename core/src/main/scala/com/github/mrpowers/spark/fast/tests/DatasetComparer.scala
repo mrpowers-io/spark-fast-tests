@@ -1,10 +1,11 @@
 package com.github.mrpowers.spark.fast.tests
 
+import com.github.mrpowers.spark.fast.tests.DataframeUtils.DatasetUtils
 import com.github.mrpowers.spark.fast.tests.DatasetComparer.maxUnequalRowsToShow
 import com.github.mrpowers.spark.fast.tests.SeqLikesExtensions.SeqExtensions
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{DataFrame, Dataset, Row}
+import org.apache.spark.sql.{Column, DataFrame, Dataset, Row}
 
 import scala.reflect.ClassTag
 
@@ -149,6 +150,76 @@ Expected DataFrame Row Count: '$expectedCount'
     } finally {
       ds1.rdd.unpersist()
       ds2.rdd.unpersist()
+    }
+  }
+
+  def assertLargeDatasetEqualityV2[T: ClassTag](
+      actualDS: Dataset[T],
+      expectedDS: Dataset[T],
+      ignoreNullable: Boolean = false,
+      ignoreColumnNames: Boolean = false,
+      ignoreColumnOrder: Boolean = false,
+      ignoreMetadata: Boolean = true,
+      primaryKeys: Seq[String] = Seq.empty,
+      equals: Map[(String, String), Column] = Map.empty,
+      truncate: Int = 500
+  ): Unit = {
+    // first check if the schemas are equal
+    SchemaComparer.assertDatasetSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)
+    val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
+    assertLargeDatasetContentEqualityV2(actual, expectedDS, primaryKeys, equals, truncate)
+  }
+
+  def assertLargeDatasetContentEqualityV2[T: ClassTag](
+      ds1: Dataset[T],
+      ds2: Dataset[T],
+      primaryKeys: Seq[String],
+      equals: Map[(String, String), Column],
+      truncate: Int
+  ): Unit = {
+    try {
+      ds1.cache()
+      ds2.cache()
+
+      val actualCount   = ds1.count
+      val expectedCount = ds2.count
+
+      if (actualCount != expectedCount) {
+        throw DatasetCountMismatch(countMismatchMessage(actualCount, expectedCount))
+      }
+
+      val id                 = java.util.UUID.randomUUID.toString
+      val indexName          = s"index_$id"
+      val allEqualColumnName = s"all_equal_$id"
+
+      val equalExpr = ds1.columns.zip(ds2.columns).map { case (ac, ec) => ((ac, ec), col(s"actual.$ac") === col(s"expected.$ec")) }.toMap ++ equals
+
+      val (resultIndexValue, expectedIndexValue, finalKeys) =
+        if (primaryKeys.isEmpty)
+          (ds1.zipWithIndex(indexName), ds2.zipWithIndex(indexName), Seq(indexName))
+        else
+          (ds1, ds2, primaryKeys)
+
+      val joinedDf = expectedIndexValue
+        .as("actual")
+        .join(resultIndexValue.as("expected"), finalKeys)
+
+      val unequalDf = joinedDf
+        .withColumn(allEqualColumnName, equalExpr.values.reduce(_ && _))
+        .where(!col(allEqualColumnName))
+
+      if (!unequalDf.isEmpty) {
+        val unequalDfLimited = unequalDf.limit(maxUnequalRowsToShow)
+        val a                = unequalDfLimited.select("actual.*").collect().toSeq
+        val e                = unequalDfLimited.select("expected.*").collect().toSeq
+        val arr              = ("Actual Content", "Expected Content")
+        val msg              = "Diffs\n" ++ ProductUtil.showProductDiff(arr, a, e, truncate)
+        throw DatasetContentMismatch(msg)
+      }
+
+    } finally {
+      ds1.unpersist()
+      ds2.unpersist()
     }
   }
 
