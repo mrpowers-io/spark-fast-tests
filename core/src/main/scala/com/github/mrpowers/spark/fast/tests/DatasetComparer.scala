@@ -1,11 +1,11 @@
 package com.github.mrpowers.spark.fast.tests
 
-import com.github.mrpowers.spark.fast.tests.DataframeUtils.DatasetUtils
+import com.github.mrpowers.spark.fast.tests.DatasetUtils.DatasetOps
 import com.github.mrpowers.spark.fast.tests.DatasetComparer.maxUnequalRowsToShow
 import com.github.mrpowers.spark.fast.tests.SeqLikesExtensions.SeqExtensions
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{Column, DataFrame, Dataset, Row}
+import org.apache.spark.sql.{DataFrame, Dataset, Encoder, Row}
 
 import scala.reflect.ClassTag
 
@@ -153,28 +153,35 @@ Expected DataFrame Row Count: '$expectedCount'
     }
   }
 
+  /**
+   * Raises an error unless `actualDS` and `expectedDS` are equal. It is recommended to provide `primaryKeys` to ensure accurate and efficient
+   * comparison of rows. If primary key is not provided, will try to compare the rows based on their row number. This requires both datasets to be
+   * partitioned in the same way and become unreliable when shuffling is involved.
+   * @param primaryKeys
+   *   unique identifier for each row to ensure accurate comparison of rows
+   */
   def assertLargeDatasetEqualityV2[T: ClassTag](
       actualDS: Dataset[T],
       expectedDS: Dataset[T],
+      equals: (T, T) => Boolean = (o1: T, o2: T) => o1.equals(o2),
       ignoreNullable: Boolean = false,
       ignoreColumnNames: Boolean = false,
       ignoreColumnOrder: Boolean = false,
       ignoreMetadata: Boolean = true,
       primaryKeys: Seq[String] = Seq.empty,
-      equals: Map[(String, String), Column] = Map.empty,
       truncate: Int = 500
   ): Unit = {
     // first check if the schemas are equal
     SchemaComparer.assertDatasetSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)
     val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
-    assertLargeDatasetContentEqualityV2(actual, expectedDS, primaryKeys, equals, truncate)
+    assertLargeDatasetContentEqualityV2(actual, expectedDS, equals, primaryKeys, truncate)
   }
 
   def assertLargeDatasetContentEqualityV2[T: ClassTag](
       ds1: Dataset[T],
       ds2: Dataset[T],
+      customEquals: (T, T) => Boolean,
       primaryKeys: Seq[String],
-      equals: Map[(String, String), Column],
       truncate: Int
   ): Unit = {
     try {
@@ -188,32 +195,14 @@ Expected DataFrame Row Count: '$expectedCount'
         throw DatasetCountMismatch(countMismatchMessage(actualCount, expectedCount))
       }
 
-      val id                 = java.util.UUID.randomUUID.toString
-      val indexName          = s"index_$id"
-      val allEqualColumnName = s"all_equal_$id"
-
-      val equalExpr = ds1.columns.zip(ds2.columns).map { case (ac, ec) => ((ac, ec), col(s"actual.$ac") === col(s"expected.$ec")) }.toMap ++ equals
-
-      val (resultIndexValue, expectedIndexValue, finalKeys) =
-        if (primaryKeys.isEmpty)
-          (ds1.zipWithIndex(indexName), ds2.zipWithIndex(indexName), Seq(indexName))
-        else
-          (ds1, ds2, primaryKeys)
-
-      val joinedDf = expectedIndexValue
-        .as("actual")
-        .join(resultIndexValue.as("expected"), finalKeys)
-
-      val unequalDf = joinedDf
-        .withColumn(allEqualColumnName, equalExpr.values.reduce(_ && _))
-        .where(!col(allEqualColumnName))
+      val unequalDf = ds1
+        .joinPair(ds2, primaryKeys)
+        .filter((p: (T, T)) => !customEquals(p._1, p._2))
 
       if (!unequalDf.isEmpty) {
-        val unequalDfLimited = unequalDf.limit(maxUnequalRowsToShow)
-        val a                = unequalDfLimited.select("actual.*").collect().toSeq
-        val e                = unequalDfLimited.select("expected.*").collect().toSeq
-        val arr              = ("Actual Content", "Expected Content")
-        val msg              = "Diffs\n" ++ ProductUtil.showProductDiff(arr, a, e, truncate)
+        val (a, e) = unequalDf.take(maxUnequalRowsToShow).toSeq.unzip
+        val arr    = ("Actual Content", "Expected Content")
+        val msg    = "Diffs\n" ++ ProductUtil.showProductDiff(arr, a, e, truncate)
         throw DatasetContentMismatch(msg)
       }
 

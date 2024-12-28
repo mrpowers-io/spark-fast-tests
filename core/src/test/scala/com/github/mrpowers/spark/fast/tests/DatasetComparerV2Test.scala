@@ -4,32 +4,73 @@ import org.apache.spark.sql.types._
 import SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
 import com.github.mrpowers.spark.fast.tests.TestUtilsExt.ExceptionOps
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.{col, lower}
 import org.scalatest.freespec.AnyFreeSpec
 
-class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer with SparkSessionTestWrapper {
+class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
+  lazy val spark: SparkSession = {
+    val session = SparkSession
+      .builder()
+      .master("local")
+      .appName("spark session")
+      .config("spark.sql.shuffle.partitions", "3")
+      .getOrCreate()
+    session.sparkContext.setLogLevel("ERROR")
+    session
+  }
 
   "checkDatasetEquality" - {
     import spark.implicits._
 
-    "does nothing if the DataFrames have the same schemas and content" in {
+    "can compare DataFrame" in {
       val sourceDF = spark.createDF(
         List(
-          (1),
-          (5)
+          (1, "text"),
+          (5, "text")
         ),
-        List(("number", IntegerType, true))
+        List(("number", IntegerType, true), ("text", StringType, true))
       )
 
       val expectedDF = spark.createDF(
         List(
-          (1),
-          (5)
+          (1, "text"),
+          (5, "text")
         ),
-        List(("number", IntegerType, true))
+        List(("number", IntegerType, true), ("text", StringType, true))
       )
 
       assertLargeDatasetEqualityV2(sourceDF, expectedDF)
+    }
+
+    "can compare Dataset[Array[_]]" in {
+      val sourceDS = Seq(
+        Array("apple", "banana", "cherry"),
+        Array("dog", "cat"),
+        Array("red", "green", "blue")
+      ).toDS
+
+      val expectedDS = Seq(
+        Array("apple", "banana", "cherry"),
+        Array("dog", "cat"),
+        Array("red", "green", "blue")
+      ).toDS
+
+      assertLargeDatasetEqualityV2(sourceDS, expectedDS, equals = (a1: Array[String], a2: Array[String]) => a1.mkString == a2.mkString)
+    }
+
+    "can compare Dataset[Map[_]]" in {
+      val sourceDS = Seq(
+        Map("apple" -> "banana", "apple1" -> "banana1"),
+        Map("apple" -> "banana", "apple1" -> "banana1")
+      ).toDS
+
+      val expectedDS = Seq(
+        Map("apple" -> "banana", "apple1" -> "banana1"),
+        Map("apple" -> "banana", "apple1" -> "banana1")
+      ).toDS
+
+      assertLargeDatasetEqualityV2(sourceDS, expectedDS)
     }
 
     "does nothing if the Datasets have the same schemas and content" in {
@@ -182,8 +223,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer with SparkS
           Person("Alice", 5)
         )
       )
-      val ignoreCaseEqual = lower(col("actual.name")) === lower(col("expected.name"))
-      assertLargeDatasetEqualityV2(sourceDS, expectedDS, equals = Map(("name", "name") -> ignoreCaseEqual))
+      assertLargeDatasetEqualityV2(sourceDS, expectedDS, equals = Person.caseInsensitivePersonEquals)
     }
 
     "fails if custom comparator for returns false" in {
@@ -200,10 +240,8 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer with SparkS
         )
       )
 
-      val ignoreCaseEqual = lower(col("actual.name")) === lower(col("expected.name"))
-
       intercept[DatasetContentMismatch] {
-        assertLargeDatasetEqualityV2(sourceDS, expectedDS, equals = Map(("name", "name") -> ignoreCaseEqual))
+        assertLargeDatasetEqualityV2(sourceDS, expectedDS, equals = Person.caseInsensitivePersonEquals)
       }
     }
 
