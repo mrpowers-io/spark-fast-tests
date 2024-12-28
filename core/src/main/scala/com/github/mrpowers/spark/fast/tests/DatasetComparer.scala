@@ -180,7 +180,7 @@ Expected DataFrame Row Count: '$expectedCount'
   def assertLargeDatasetContentEqualityV2[T: ClassTag](
       ds1: Dataset[T],
       ds2: Dataset[T],
-      customEquals: (T, T) => Boolean,
+      equals: (T, T) => Boolean,
       primaryKeys: Seq[String],
       truncate: Int
   ): Unit = {
@@ -197,7 +197,7 @@ Expected DataFrame Row Count: '$expectedCount'
 
       val unequalDf = ds1
         .joinPair(ds2, primaryKeys)
-        .filter((p: (T, T)) => !customEquals(p._1, p._2))
+        .filter((p: (T, T)) => !equals(p._1, p._2))
 
       if (!unequalDf.isEmpty) {
         val (a, e) = unequalDf.take(maxUnequalRowsToShow).toSeq.unzip

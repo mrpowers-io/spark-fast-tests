@@ -2,7 +2,7 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{DataFrame, Dataset, Encoder}
+import org.apache.spark.sql.{DataFrame, Dataset, Encoder, Row}
 
 import scala.reflect.ClassTag
 
@@ -33,7 +33,7 @@ private object DatasetUtils {
         val leftCols            = columns.map(n => col(s"l.$n"))
         val rightCols           = columns.map(n => col(s"r.$n"))
         val (pair1, pair2) =
-          if (columns.length == 1)
+          if (columns.length == 1 && !(implicitly[ClassTag[T]].runtimeClass == classOf[Row]))
             (leftCols.head, rightCols.head)
           else
             (struct(leftCols: _*), struct(rightCols: _*))
