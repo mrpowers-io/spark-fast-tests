@@ -5,23 +5,25 @@ import com.github.mrpowers.spark.fast.tests.ufansi.FansiExtensions.StrOps
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.Row
 
+import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
 object ProductUtil {
+  @tailrec
   private[mrpowers] def productOrRowToSeq(product: Any): Seq[Any] = {
     product match {
-      case null           => Seq.empty
-      case a: Array[_]    => a
-      case i: Iterable[_] => i.toSeq
-      case r: Row         => r.toSeq
-      case p: Product     => p.productIterator.toSeq
-      case s              => Seq(s)
+      case null | None                             => Seq.empty
+      case a: Array[_]                             => a
+      case i: Iterable[_]                          => i.toSeq
+      case r: Row                                  => r.toSeq
+      case p: Product                              => p.productIterator.toSeq
+      case Some(ov) if !ov.isInstanceOf[Option[_]] => productOrRowToSeq(ov)
+      case s                                       => Seq(s)
     }
   }
   private[mrpowers] def showProductDiff[T: ClassTag](
       header: (String, String),
-      actual: Seq[T],
-      expected: Seq[T],
+      data: Either[(Seq[T], Seq[T]), Seq[(Option[T], Option[T])]],
       truncate: Int = 20,
       minColWidth: Int = 3
   ): String = {
@@ -33,7 +35,10 @@ object ProductUtil {
 
     val sb = new StringBuilder
 
-    val fullJoin = actual.zipAll(expected, null, null)
+    val fullJoin = data match {
+      case Left((actual, expected)) => actual.zipAll(expected, null, null)
+      case Right(joined)            => joined
+    }
 
     val diff = fullJoin.map { case (actualRow, expectedRow) =>
       if (actualRow == expectedRow) {

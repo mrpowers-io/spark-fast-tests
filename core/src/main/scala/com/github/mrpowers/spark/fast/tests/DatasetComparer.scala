@@ -4,10 +4,12 @@ import com.github.mrpowers.spark.fast.tests.DatasetUtils.DatasetOps
 import com.github.mrpowers.spark.fast.tests.DatasetComparer.maxUnequalRowsToShow
 import com.github.mrpowers.spark.fast.tests.SeqLikesExtensions.SeqExtensions
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{DataFrame, Dataset, Encoder, Row}
+import org.apache.spark.sql.{Column, DataFrame, Dataset, Row}
 
 import scala.reflect.ClassTag
+import scala.reflect.runtime.universe.TypeTag
 
 case class DatasetContentMismatch(smth: String) extends Exception(smth)
 case class DatasetCountMismatch(smth: String)   extends Exception(smth)
@@ -73,7 +75,7 @@ Expected DataFrame Row Count: '$expectedCount'
     val e = expectedDS.collect().toSeq
     if (!a.approximateSameElements(e, equals)) {
       val arr = ("Actual Content", "Expected Content")
-      val msg = "Diffs\n" ++ ProductUtil.showProductDiff(arr, a, e, truncate)
+      val msg = "Diffs\n" ++ ProductUtil.showProductDiff(arr, Left(a -> e), truncate)
       throw DatasetContentMismatch(msg)
     }
   }
@@ -159,29 +161,33 @@ Expected DataFrame Row Count: '$expectedCount'
    * partitioned in the same way and become unreliable when shuffling is involved.
    * @param primaryKeys
    *   unique identifier for each row to ensure accurate comparison of rows
+   * @param checkKeyUniqueness
+   *   if true, will check if the primary key is actually unique
    */
-  def assertLargeDatasetEqualityV2[T: ClassTag](
+  def assertLargeDatasetEqualityV2[T: ClassTag: TypeTag](
       actualDS: Dataset[T],
       expectedDS: Dataset[T],
-      equals: (T, T) => Boolean = (o1: T, o2: T) => o1.equals(o2),
+      equals: Either[(T, T) => Boolean, Option[Column]] = Right(None),
       ignoreNullable: Boolean = false,
       ignoreColumnNames: Boolean = false,
       ignoreColumnOrder: Boolean = false,
       ignoreMetadata: Boolean = true,
+      checkKeyUniqueness: Boolean = false,
       primaryKeys: Seq[String] = Seq.empty,
       truncate: Int = 500
   ): Unit = {
     // first check if the schemas are equal
     SchemaComparer.assertDatasetSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)
     val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
-    assertLargeDatasetContentEqualityV2(actual, expectedDS, equals, primaryKeys, truncate)
+    assertLargeDatasetContentEqualityV2(actual, expectedDS, equals, primaryKeys, checkKeyUniqueness, truncate)
   }
 
-  def assertLargeDatasetContentEqualityV2[T: ClassTag](
+  def assertLargeDatasetContentEqualityV2[T: ClassTag: TypeTag](
       ds1: Dataset[T],
       ds2: Dataset[T],
-      equals: (T, T) => Boolean,
+      equals: Either[(T, T) => Boolean, Option[Column]],
       primaryKeys: Seq[String],
+      checkKeyUniqueness: Boolean,
       truncate: Int
   ): Unit = {
     try {
@@ -195,14 +201,32 @@ Expected DataFrame Row Count: '$expectedCount'
         throw DatasetCountMismatch(countMismatchMessage(actualCount, expectedCount))
       }
 
-      val unequalDf = ds1
-        .joinPair(ds2, primaryKeys)
-        .filter((p: (T, T)) => !equals(p._1, p._2))
+      if (primaryKeys.nonEmpty && checkKeyUniqueness) {
+        assert(ds1.isKeyUnique(primaryKeys), "Primary key is not unique in actual dataset")
+        assert(ds2.isKeyUnique(primaryKeys), "Primary key is not unique in expected dataset")
+      }
 
-      if (!unequalDf.isEmpty) {
-        val (a, e) = unequalDf.take(maxUnequalRowsToShow).toSeq.unzip
+      val joinedDf = ds1
+        .outerJoinWith(ds2, primaryKeys)
+
+      val unequalDS = equals match {
+        case Left(customEquals) =>
+          joinedDf.filter((p: (Option[T], Option[T])) =>
+            p match {
+              case (Some(l), Some(r)) => !customEquals(l, r)
+              case (None, None)       => false
+              case _                  => true
+            }
+          )
+
+        case Right(equalExprOption) =>
+          joinedDf.filter(equalExprOption.getOrElse(col("l") =!= col("r")))
+      }
+
+      if (!unequalDS.isEmpty) {
+        val joined = Right(unequalDS.take(truncate).toSeq)
         val arr    = ("Actual Content", "Expected Content")
-        val msg    = "Diffs\n" ++ ProductUtil.showProductDiff(arr, a, e, truncate)
+        val msg    = "Diffs\n" ++ ProductUtil.showProductDiff(arr, joined, truncate)
         throw DatasetContentMismatch(msg)
       }
 

@@ -2,10 +2,11 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.types._
 import SparkSessionExt._
+import com.github.mrpowers.spark.fast.tests.DatasetUtils.DatasetOps
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
 import com.github.mrpowers.spark.fast.tests.TestUtilsExt.ExceptionOps
-import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.{col, lower}
+import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.functions.col
 import org.scalatest.freespec.AnyFreeSpec
 
 class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
@@ -56,7 +57,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
         Array("red", "green", "blue")
       ).toDS
 
-      assertLargeDatasetEqualityV2(sourceDS, expectedDS, equals = (a1: Array[String], a2: Array[String]) => a1.mkString == a2.mkString)
+      assertLargeDatasetEqualityV2(sourceDS, expectedDS, equals = Left((a1: Array[String], a2: Array[String]) => a1.mkString == a2.mkString))
     }
 
     "can compare Dataset[Map[_]]" in {
@@ -70,7 +71,11 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
         Map("apple" -> "banana", "apple1" -> "banana1")
       ).toDS
 
-      assertLargeDatasetEqualityV2(sourceDS, expectedDS)
+      assertLargeDatasetEqualityV2(
+        sourceDS,
+        expectedDS,
+        equals = Left((a1: Map[String, String], a2: Map[String, String]) => a1.mkString == a2.mkString)
+      )
     }
 
     "does nothing if the Datasets have the same schemas and content" in {
@@ -223,7 +228,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
           Person("Alice", 5)
         )
       )
-      assertLargeDatasetEqualityV2(sourceDS, expectedDS, equals = Person.caseInsensitivePersonEquals)
+      assertLargeDatasetEqualityV2(sourceDS, expectedDS, equals = Left((p1: Person, p2: Person) => Person.caseInsensitivePersonEquals(p1, p2)))
     }
 
     "fails if custom comparator for returns false" in {
@@ -241,7 +246,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
       )
 
       intercept[DatasetContentMismatch] {
-        assertLargeDatasetEqualityV2(sourceDS, expectedDS, equals = Person.caseInsensitivePersonEquals)
+        assertLargeDatasetEqualityV2(sourceDS, expectedDS, equals = Left((p1: Person, p2: Person) => Person.caseInsensitivePersonEquals(p1, p2)))
       }
     }
 
@@ -432,6 +437,27 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
       intercept[DatasetSchemaMismatch] {
         assertLargeDatasetEqualityV2(ds2, ds1, ignoreMetadata = false)
       }
+    }
+
+    "join test2" in {
+      val joinedOuterDS =
+        spark.range(0, 1000000, 1, 8).outerJoinWith(spark.range(0, 1000000, 2, 8), Seq("id"))
+      println("joinedOuterDS")
+      joinedOuterDS.explain()
+      joinedOuterDS.show(false)
+      val filteredDs = joinedOuterDS.filter(p => p._1 == p._2)
+      filteredDs.explain()
+      filteredDs.show(false)
+
+      val joinedOuterDF =
+        spark.range(0, 1000000, 1, 8).toDF().outerJoinWith(spark.range(0, 1000000, 2, 8).toDF(), Seq("id"))
+      println("joinedOuterDF")
+      joinedOuterDF.explain()
+      joinedOuterDF.show(false)
+
+      val filtedDf = joinedOuterDF.filter((p: (Option[Row], Option[Row])) => { p._1 == p._2 })
+      filtedDf.explain()
+      filtedDf.show(false)
     }
   }
 }
