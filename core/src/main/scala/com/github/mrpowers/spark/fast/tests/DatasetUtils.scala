@@ -1,17 +1,14 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.apache.spark.sql.catalyst.encoders.AgnosticEncoders.OptionEncoder
-import org.apache.spark.sql.catalyst.encoders.{AgnosticEncoder, ExpressionEncoder, RowEncoder}
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.{DataFrame, Dataset, Encoder, Encoders, Row, TypedColumn}
+import org.apache.spark.sql.{DataFrame, Dataset, Encoder, Row, TypedColumn}
 
 import scala.reflect.ClassTag
-import scala.reflect.runtime.universe.TypeTag
 
 private object DatasetUtils {
-  implicit class DatasetOps[T: ClassTag: TypeTag](ds: Dataset[T]) {
+  implicit class DatasetOps[T: ClassTag](ds: Dataset[T]) {
     def zipWithIndex(indexName: String): DataFrame = ds
       .orderBy()
       .withColumn(indexName, row_number().over(Window.orderBy(monotonically_increasing_id())))
@@ -23,32 +20,32 @@ private object DatasetUtils {
     def isKeyUnique(primaryKey: Seq[String]): Boolean =
       ds.select(primaryKey.map(col): _*).distinct.count == ds.count
 
-    def outerJoinWith[P: ClassTag: TypeTag](
+    def joinPair[P: ClassTag](
         other: Dataset[P],
-        primaryKeys: Seq[String],
-        outerJoinType: String = "full"
-    ): Dataset[(Option[T], Option[P])] = {
-      val (ds1, ds2, key) = if (primaryKeys.nonEmpty) {
-        (ds, other, primaryKeys)
+        primaryKeys: Seq[String]
+    ): Dataset[(T, P)] = {
+      if (primaryKeys.nonEmpty) {
+        ds
+          .as("l")
+          .joinWith(other.as("r"), primaryKeys.map(k => col(s"l.$k") === col(s"r.$k")).reduce(_ && _), "full_outer")
       } else {
         val indexName = s"index_${java.util.UUID.randomUUID}"
-        (ds.zipWithIndex(indexName), other.zipWithIndex(indexName), Seq(indexName))
+        val joined = ds
+          .zipWithIndex(indexName)
+          .alias("l")
+          .joinWith(other.zipWithIndex(indexName).alias("r"), col(s"l.$indexName") === col(s"r.$indexName"), "full_outer")
+
+        joined
+          .select(
+            encoderToCol("_1", ds.schema, ds.encoder, Seq(indexName)),
+            encoderToCol("_2", other.schema, other.encoder, Seq(indexName))
+          )
       }
-
-      val joined = ds1
-        .as("l")
-        .join(ds2.as("r"), key, s"${outerJoinType}_outer")
-
-      joined.select(colOptionTypedCol[T]("l", ds.schema, key), colOptionTypedCol[P]("r", other.schema, key))
     }
   }
 
-  private def colOptionTypedCol[P: ClassTag: TypeTag](
-      colName: String,
-      schema: StructType,
-      key: Seq[String]
-  ): TypedColumn[Any, Option[P]] = {
-    val columns   = schema.names.map(n => col(s"$colName.$n"))
+  private def encoderToCol[P: ClassTag](colName: String, schema: StructType, encoder: Encoder[P], key: Seq[String]): TypedColumn[Any, P] = {
+    val columns   = schema.names.map(n => col(s"$colName.$n")) // name from encoder is not reliable
     val isRowType = implicitly[ClassTag[P]].runtimeClass == classOf[Row]
     val unTypedColumn =
       if (columns.length == 1 && !isRowType)
@@ -56,19 +53,6 @@ private object DatasetUtils {
       else
         when(key.map(k => col(s"$colName.$k").isNull).reduce(_ && _), lit(null)).otherwise(struct(columns: _*))
 
-    val enc: Encoder[Option[P]] = if (isRowType) {
-      ExpressionEncoder(OptionEncoder(RowEncoder.encoderFor(schema).asInstanceOf[AgnosticEncoder[P]]))
-    } else {
-      ExpressionEncoder()
-    }
-    unTypedColumn.as(colName).as[Option[P]](enc)
-  }
-
-  def colToRowCol(
-      colName: String,
-      schema: StructType
-  ): TypedColumn[Any, Row] = {
-    val columns = schema.names.map(n => col(s"$colName.$n"))
-    struct(columns: _*).as(colName).as[Row](ExpressionEncoder()) // Encoders.row(schema)
+    unTypedColumn.as(colName).as[P](encoder)
   }
 }

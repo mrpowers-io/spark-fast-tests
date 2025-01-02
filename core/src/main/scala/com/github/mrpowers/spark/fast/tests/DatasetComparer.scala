@@ -4,12 +4,10 @@ import com.github.mrpowers.spark.fast.tests.DatasetUtils.DatasetOps
 import com.github.mrpowers.spark.fast.tests.DatasetComparer.maxUnequalRowsToShow
 import com.github.mrpowers.spark.fast.tests.SeqLikesExtensions.SeqExtensions
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Column, DataFrame, Dataset, Row}
 
 import scala.reflect.ClassTag
-import scala.reflect.runtime.universe.TypeTag
 
 case class DatasetContentMismatch(smth: String) extends Exception(smth)
 case class DatasetCountMismatch(smth: String)   extends Exception(smth)
@@ -164,7 +162,7 @@ Expected DataFrame Row Count: '$expectedCount'
    * @param checkKeyUniqueness
    *   if true, will check if the primary key is actually unique
    */
-  def assertLargeDatasetEqualityV2[T: ClassTag: TypeTag](
+  def assertLargeDatasetEqualityV2[T: ClassTag](
       actualDS: Dataset[T],
       expectedDS: Dataset[T],
       equals: Either[(T, T) => Boolean, Option[Column]] = Right(None),
@@ -182,7 +180,7 @@ Expected DataFrame Row Count: '$expectedCount'
     assertLargeDatasetContentEqualityV2(actual, expectedDS, equals, primaryKeys, checkKeyUniqueness, truncate)
   }
 
-  def assertLargeDatasetContentEqualityV2[T: ClassTag: TypeTag](
+  def assertLargeDatasetContentEqualityV2[T: ClassTag](
       ds1: Dataset[T],
       ds2: Dataset[T],
       equals: Either[(T, T) => Boolean, Option[Column]],
@@ -207,20 +205,22 @@ Expected DataFrame Row Count: '$expectedCount'
       }
 
       val joinedDf = ds1
-        .outerJoinWith(ds2, primaryKeys)
+        .joinPair(ds2, primaryKeys)
 
       val unequalDS = equals match {
         case Left(customEquals) =>
-          joinedDf.filter((p: (Option[T], Option[T])) =>
+          joinedDf.filter((p: (T, T)) =>
+            // dataset joinWith implicitly return null each side for missing values from outer join even for primitive types
             p match {
-              case (Some(l), Some(r)) => !customEquals(l, r)
-              case (None, None)       => false
-              case _                  => true
+              case (null, null) => false
+              case (null, _)    => true
+              case (_, null)    => true
+              case (l, r)       => !customEquals(l, r)
             }
           )
 
         case Right(equalExprOption) =>
-          joinedDf.filter(equalExprOption.getOrElse(col("l") =!= col("r")))
+          joinedDf.filter(equalExprOption.getOrElse(col("_1") =!= col("_2")))
       }
 
       if (!unequalDS.isEmpty) {

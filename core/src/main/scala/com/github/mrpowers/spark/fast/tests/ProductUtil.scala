@@ -9,21 +9,19 @@ import scala.annotation.tailrec
 import scala.reflect.ClassTag
 
 object ProductUtil {
-  @tailrec
   private[mrpowers] def productOrRowToSeq(product: Any): Seq[Any] = {
     product match {
-      case null | None                             => Seq.empty
-      case a: Array[_]                             => a
-      case i: Iterable[_]                          => i.toSeq
-      case r: Row                                  => r.toSeq
-      case p: Product                              => p.productIterator.toSeq
-      case Some(ov) if !ov.isInstanceOf[Option[_]] => productOrRowToSeq(ov)
-      case s                                       => Seq(s)
+      case null           => Seq.empty
+      case a: Array[_]    => a
+      case i: Iterable[_] => i.toSeq
+      case r: Row         => r.toSeq
+      case p: Product     => p.productIterator.toSeq
+      case s              => Seq(s)
     }
   }
   private[mrpowers] def showProductDiff[T: ClassTag](
       header: (String, String),
-      data: Either[(Seq[T], Seq[T]), Seq[(Option[T], Option[T])]],
+      data: Either[(Seq[T], Seq[T]), Seq[(T, T)]],
       truncate: Int = 20,
       minColWidth: Int = 3
   ): String = {

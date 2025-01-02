@@ -2,7 +2,6 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.types._
 import SparkSessionExt._
-import com.github.mrpowers.spark.fast.tests.DatasetUtils.DatasetOps
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
 import com.github.mrpowers.spark.fast.tests.TestUtilsExt.ExceptionOps
 import org.apache.spark.sql.{Row, SparkSession}
@@ -439,25 +438,45 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
       }
     }
 
-    "join test2" in {
-      val joinedOuterDS =
-        spark.range(0, 1000000, 1, 8).outerJoinWith(spark.range(0, 1000000, 2, 8), Seq("id"))
-      println("joinedOuterDS")
-      joinedOuterDS.explain()
-      joinedOuterDS.show(false)
-      val filteredDs = joinedOuterDS.filter(p => p._1 == p._2)
-      filteredDs.explain()
-      filteredDs.show(false)
+    "can handle when there are unmatched row of Product Type" in {
+      val sourceDS = spark.createDataset[Person](
+        Seq(
+          Person("Alice", 12),
+          Person("Bob", 17)
+        )
+      )
 
-      val joinedOuterDF =
-        spark.range(0, 1000000, 1, 8).toDF().outerJoinWith(spark.range(0, 1000000, 2, 8).toDF(), Seq("id"))
-      println("joinedOuterDF")
-      joinedOuterDF.explain()
-      joinedOuterDF.show(false)
+      val expectedDS = spark.createDataset[Person](
+        Seq(
+          Person("Alice", 12),
+          Person("Bob1", 17)
+        )
+      )
 
-      val filtedDf = joinedOuterDF.filter((p: (Option[Row], Option[Row])) => { p._1 == p._2 })
-      filtedDf.explain()
-      filtedDf.show(false)
+      intercept[DatasetContentMismatch] {
+        assertLargeDatasetEqualityV2(
+          sourceDS,
+          expectedDS,
+          ignoreMetadata = false,
+          equals = Left((p1: Person, p2: Person) => p1.age == p2.age && p1.name == p2.name)
+        )
+      }
+
+    }
+
+    "can handle when there are unmatched rows of Primitive Type" in {
+      val sourceDS   = spark.range(0, 10, 1)
+      val expectedDS = spark.range(0, 20, 2)
+
+      intercept[DatasetContentMismatch] {
+        assertLargeDatasetEqualityV2(
+          sourceDS,
+          expectedDS,
+          ignoreMetadata = false,
+          equals = Left((p1: java.lang.Long, p2: java.lang.Long) => p1 == p2)
+        )
+      }
+
     }
   }
 }
