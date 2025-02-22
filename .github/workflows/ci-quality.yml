@@ -20,6 +20,8 @@ jobs:
           jvm: zulu:8
       - name: Setup sbt launcher
         uses: sbt/setup-sbt@v1
+        with:
+          sbt-version: 1.10.1
       - name: ScalaFmt
         id: fmt
         run: sbt scalafmtCheckAll
