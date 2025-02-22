@@ -18,6 +18,8 @@ jobs:
       - uses: coursier/setup-action@v1
         with:
           jvm: zulu:8
+      - name: Setup sbt launcher
+        uses: sbt/setup-sbt@v1
       - name: ScalaFmt
         id: fmt
         run: sbt scalafmtCheckAll
