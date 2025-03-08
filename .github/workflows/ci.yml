@@ -17,6 +17,10 @@ jobs:
       - uses: coursier/setup-action@v1
         with:
           jvm: zulu:8
+      - name: Setup sbt launcher
+        uses: sbt/setup-sbt@v1
+        with :
+          sbt-version: 1.10.1
       - name: Test
         run: sbt -Dspark.version=${{ matrix.spark  }} +test
       - name: Benchmark
