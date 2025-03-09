@@ -1,3 +1,12 @@
+val versionRegex = """^(.*)\.(.*)\.(.*)$""".r
+val scala2_13    = "2.13.14"
+val scala2_12    = "2.12.20"
+val sparkVersion = System.getProperty("spark.version", "3.5.3")
+val noPublish = Seq(
+  (publish / skip) := true,
+  publishArtifact  := false
+)
+
 inThisBuild(
   List(
     organization := "com.github.mrpowers",
@@ -5,31 +14,20 @@ inThisBuild(
     licenses     := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
     developers ++= List(
       Developer("MrPowers", "Matthew Powers", "@MrPowers", url("https://github.com/MrPowers"))
-    )
+    ),
+    Compile / scalafmtOnCompile := true,
+    Test / fork                 := true,
+    crossScalaVersions := {
+      sparkVersion match {
+        case versionRegex("3", m, _) if m.toInt >= 2 => Seq(scala2_12, scala2_13)
+        case versionRegex("3", _, _)                 => Seq(scala2_12)
+      }
+    },
+    scalaVersion := crossScalaVersions.value.head
   )
 )
 
 enablePlugins(GitVersioning)
-Compile / scalafmtOnCompile := true
-
-name := "spark-fast-tests"
-
-val versionRegex = """^(.*)\.(.*)\.(.*)$""".r
-
-val scala2_13 = "2.13.14"
-val scala2_12 = "2.12.20"
-
-val sparkVersion = System.getProperty("spark.version", "3.5.3")
-crossScalaVersions := {
-  sparkVersion match {
-    case versionRegex("3", m, _) if m.toInt >= 2 => Seq(scala2_12, scala2_13)
-    case versionRegex("3", _, _)                 => Seq(scala2_12)
-  }
-}
-
-scalaVersion := crossScalaVersions.value.head
-
-Test / fork := true
 
 lazy val commonSettings = Seq(
   javaOptions ++= {
@@ -46,7 +44,8 @@ lazy val commonSettings = Seq(
 lazy val core = (project in file("core"))
   .settings(
     commonSettings,
-    name                                   := "core",
+    moduleName                             := "spark-fast-tests",
+    name                                   := moduleName.value,
     Compile / packageSrc / publishArtifact := true,
     Compile / packageDoc / publishArtifact := true
   )
@@ -58,9 +57,9 @@ lazy val benchmarks = (project in file("benchmarks"))
     libraryDependencies ++= Seq(
       "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.37" // required for jmh IDEA plugin. Make sure this version matches sbt-jmh version!
     ),
-    name           := "benchmarks",
-    publish / skip := true
+    name := "benchmarks"
   )
+  .settings(noPublish)
   .enablePlugins(JmhPlugin)
 
 lazy val docs = (project in file("docs"))
@@ -111,9 +110,17 @@ lazy val docs = (project in file("docs"))
       import laika.format.Markdown
       Seq(Markdown.GitHubFlavor, SyntaxHighlighting)
     },
-    publish / skip            := true,
     Laika / sourceDirectories := Seq((ThisBuild / baseDirectory).value / "docs")
   )
+  .settings(noPublish)
+
+lazy val root = (project in file("."))
+  .settings(
+    name := "spark-fast-tests-root",
+    commonSettings,
+    noPublish
+  )
+  .aggregate(core, benchmarks, docs)
 
 scmInfo := Some(ScmInfo(url("https://github.com/mrpowers-io/spark-fast-tests"), "git@github.com:MrPowers/spark-fast-tests.git"))
 
