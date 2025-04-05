@@ -566,6 +566,24 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
     }
 
+    "throw error when exceed precision" in {
+      import spark.implicits._
+      val ds1 = Seq(
+        ("1", "10/01/2019", 26.762499999999996),
+        ("1", "11/01/2019", 26.762499999999996)
+      ).toDF("col_B", "col_C", "col_A")
+
+      val ds2 = Seq(
+        ("1", "10/01/2019", 26.762499999999946),
+        ("1", "11/01/2019", 28.76249999999991)
+      ).toDF("col_B", "col_C", "col_A")
+
+      val e = intercept[DatasetContentMismatch] {
+        assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
+      }
+
+    }
+
     "can work with precision and unordered comparison on nested column" in {
       import spark.implicits._
       val ds1 = Seq(
