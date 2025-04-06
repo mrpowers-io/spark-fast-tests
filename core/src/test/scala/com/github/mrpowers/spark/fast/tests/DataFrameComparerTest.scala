@@ -1,11 +1,13 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.apache.spark.sql.types.{DoubleType, IntegerType, MetadataBuilder, LongType, StringType}
+import org.apache.spark.sql.types.{DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType}
 import SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
 import org.apache.spark.sql.functions.col
 import com.github.mrpowers.spark.fast.tests.TestUtilsExt.ExceptionOps
 import org.scalatest.freespec.AnyFreeSpec
+
+import java.time.Instant
 
 class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with SparkSessionTestWrapper {
 
@@ -564,6 +566,57 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       ).toDF("col_B", "col_C", "col_A", "col_D")
 
       assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
+    }
+
+    "throw error when exceed precision" in {
+      import spark.implicits._
+      val ds1 = Seq(
+        ("1", "10/01/2019", 26.762499999999996),
+        ("1", "11/01/2019", 26.762499999999996)
+      ).toDF("col_B", "col_C", "col_A")
+
+      val ds2 = Seq(
+        ("1", "10/01/2019", 26.762499999999946),
+        ("1", "11/01/2019", 28.76249999999991)
+      ).toDF("col_B", "col_C", "col_A")
+
+      intercept[DatasetContentMismatch] {
+        assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
+      }
+    }
+
+    "throw error when exceed precision for TimestampType" in {
+      import spark.implicits._
+      val ds1 = Seq(
+        ("1", Instant.parse("2019-10-01T00:00:00Z")),
+        ("2", Instant.parse("2019-11-01T00:00:00Z"))
+      ).toDF("col_B", "col_A")
+
+      val ds2 = Seq(
+        ("1", Instant.parse("2019-10-01T00:00:00Z")),
+        ("2", Instant.parse("2019-12-01T00:00:00Z"))
+      ).toDF("col_B", "col_A")
+
+      intercept[DatasetContentMismatch] {
+        assertApproximateDataFrameEquality(ds1, ds2, precision = 100, orderedComparison = false)
+      }
+    }
+
+    "throw error when exceed precision for BigDecimal" in {
+      import spark.implicits._
+      val ds1 = Seq(
+        ("1", BigDecimal(101)),
+        ("2", BigDecimal(200))
+      ).toDF("col_B", "col_A")
+
+      val ds2 = Seq(
+        ("1", BigDecimal(101)),
+        ("2", BigDecimal(203))
+      ).toDF("col_B", "col_A")
+
+      intercept[DatasetContentMismatch] {
+        assertApproximateDataFrameEquality(ds1, ds2, precision = 2, orderedComparison = false)
+      }
     }
 
     "can work with precision and unordered comparison on nested column" in {
