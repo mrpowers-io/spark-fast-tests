@@ -19,12 +19,7 @@ object ProductUtil {
     }
   }
 
-  private def rowFieldToString(fieldValue: Any): String = {
-    fieldValue match {
-      case null => "null"
-      case _    => fieldValue.toString
-    }
-  }
+  private def rowFieldToString(fieldValue: Any): String = s"$fieldValue"
 
   private[mrpowers] def showProductDiff[T: ClassTag](
       header: (String, String),
