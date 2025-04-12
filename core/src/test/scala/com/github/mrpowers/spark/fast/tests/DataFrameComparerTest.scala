@@ -75,6 +75,40 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     e.assertColorDiff(Seq("france", "[mark,11,usa]"), Seq("uk", "[steve,10,aus]"))
   }
 
+  "Can handle unequal Dataframe containing null" in {
+    val sourceDF = spark.createDF(
+      List(
+        ("bob", 1, "uk"),
+        (null, 5, "peru"),
+        ("steve", 10, "aus")
+      ),
+      List(
+        ("name", StringType, true),
+        ("age", IntegerType, true),
+        ("country", StringType, true)
+      )
+    )
+
+    val expectedDF = spark.createDF(
+      List(
+        ("bob", 1, "uk"),
+        (null, 5, "peru"),
+        (null, 10, "aus")
+      ),
+      List(
+        ("name", StringType, true),
+        ("age", IntegerType, true),
+        ("country", StringType, true)
+      )
+    )
+
+    val e = intercept[DatasetContentMismatch] {
+      assertSmallDataFrameEquality(expectedDF, sourceDF)
+    }
+
+    e.assertColorDiff(Seq("null"), Seq("steve"))
+  }
+
   "works well for wide DataFrames" in {
     val sourceDF = spark.createDF(
       List(
