@@ -41,6 +41,17 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       }
     }
 
+    "can compare unequal Dataset containing null in column" in {
+      val sourceDS   = Seq(Person(null, 5), Person(null, 1)).toDS
+      val expectedDS = Seq(Person("juan", 5), Person(null, 1)).toDS
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(sourceDS, expectedDS, ignoreNullable = true, orderedComparison = false)
+      }
+
+      e.assertColorDiff(Seq("null"), Seq("juan"))
+    }
+
     "Correctly mark unequal elements" in {
       val sourceDS = Seq(
         Person("juan", 5),

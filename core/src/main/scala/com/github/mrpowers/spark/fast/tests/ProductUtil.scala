@@ -19,6 +19,9 @@ object ProductUtil {
       case s              => Seq(s)
     }
   }
+
+  private def rowFieldToString(fieldValue: Any): String = s"$fieldValue"
+
   private[mrpowers] def showProductDiff[T: ClassTag](
       header: (String, String),
       data: Either[(Seq[T], Seq[T]), Seq[(T, T)]],
@@ -58,13 +61,12 @@ object ProductUtil {
           if (allFieldsAreNotEqual) {
             List(Red(prodToString(actualSeq)), Green(prodToString(expectedSeq)))
           } else {
-            val coloredDiff = withEquals
-              .map {
-                case (actualRowField, expectedRowField, true) =>
-                  (DarkGray(actualRowField.toString), DarkGray(expectedRowField.toString))
-                case (actualRowField, expectedRowField, false) =>
-                  (Red(actualRowField.toString), Green(expectedRowField.toString))
-              }
+            val coloredDiff = withEquals.map {
+              case (actualRowField, expectedRowField, true) =>
+                (DarkGray(rowFieldToString(actualRowField)), DarkGray(rowFieldToString(expectedRowField)))
+              case (actualRowField, expectedRowField, false) =>
+                (Red(rowFieldToString(actualRowField)), Green(rowFieldToString(expectedRowField)))
+            }
             val start = DarkGray(s"$className$lBracket")
             val sep   = DarkGray(",")
             val end   = DarkGray(rBracket)
