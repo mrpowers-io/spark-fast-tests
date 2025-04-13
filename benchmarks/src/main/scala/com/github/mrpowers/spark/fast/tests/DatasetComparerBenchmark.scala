@@ -8,7 +8,7 @@ import org.openjdk.jmh.infra.Blackhole
 import java.util.concurrent.TimeUnit
 import scala.util.Try
 
-private class DatasetComparerBenchmark extends DatasetComparer {
+private class DatasetComparerBenchmark extends DatasetComparerV2 {
   def getSparkSession: SparkSession = {
     val session = SparkSession
       .builder()
@@ -30,7 +30,7 @@ private class DatasetComparerBenchmark extends DatasetComparer {
     val ds1   = spark.range(0, 1000000, 1, 8)
     val ds3   = ds1
 
-    val result = Try(assertLargeDatasetEqualityV2(ds1, ds3))
+    val result = Try(assertLargeDatasetEquality(ds1, ds3))
 
     blackHole.consume(result)
     result.isSuccess
@@ -47,7 +47,7 @@ private class DatasetComparerBenchmark extends DatasetComparer {
     val ds1   = spark.range(0, 1000000, 1, 8)
     val ds3   = ds1
 
-    val result = Try(assertLargeDatasetEqualityV2(ds1, ds3, primaryKeys = Seq("id")))
+    val result = Try(assertLargeDatasetEquality(ds1, ds3, primaryKeys = Seq("id")))
 
     blackHole.consume(result)
     result.isSuccess
@@ -80,7 +80,7 @@ private class DatasetComparerBenchmark extends DatasetComparer {
     val spark  = getSparkSession
     val ds1    = spark.range(0, 1000000, 1, 8).withColumn("id2", col("id") + 1)
     val ds3    = ds1
-    val result = Try(assertLargeDatasetEqualityV2(ds1, ds3, primaryKeys = Seq("id", "id2")))
+    val result = Try(assertLargeDatasetEquality(ds1, ds3, primaryKeys = Seq("id", "id2")))
 
     blackHole.consume(result)
     result.isSuccess
@@ -96,7 +96,7 @@ private class DatasetComparerBenchmark extends DatasetComparer {
     val spark  = getSparkSession
     val ds1    = spark.range(0, 1000000, 1, 8).withColumn("id2", col("id") + 1).withColumn("id3", col("id2") + 1)
     val ds3    = ds1
-    val result = Try(assertLargeDatasetEqualityV2(ds1, ds3, primaryKeys = Seq("id", "id2", "id3")))
+    val result = Try(assertLargeDatasetEquality(ds1, ds3, primaryKeys = Seq("id", "id2", "id3")))
 
     blackHole.consume(result)
     result.isSuccess

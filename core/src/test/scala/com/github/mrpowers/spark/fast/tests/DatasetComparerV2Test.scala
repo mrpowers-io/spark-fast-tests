@@ -8,7 +8,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.col
 import org.scalatest.freespec.AnyFreeSpec
 
-class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
+class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparerV2 {
   lazy val spark: SparkSession = {
     val session = SparkSession
       .builder()
@@ -40,7 +40,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
         List(("number", IntegerType, true), ("text", StringType, true))
       )
 
-      assertLargeDatasetEqualityV2(sourceDF, expectedDF)
+      assertLargeDatasetEquality(sourceDF, expectedDF)
     }
 
     "can compare Dataset[Array[_]]" in {
@@ -56,7 +56,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
         Array("red", "green", "blue")
       ).toDS
 
-      assertLargeDatasetEqualityV2(sourceDS, expectedDS, equals = Left((a1: Array[String], a2: Array[String]) => a1.mkString == a2.mkString))
+      assertLargeDatasetEquality(sourceDS, expectedDS, equals = (a1: Array[String], a2: Array[String]) => a1.mkString == a2.mkString, Seq.empty)
     }
 
     "can compare Dataset[Map[_]]" in {
@@ -70,10 +70,10 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
         Map("apple" -> "banana", "apple1" -> "banana1")
       ).toDS
 
-      assertLargeDatasetEqualityV2(
+      assertLargeDatasetEquality(
         sourceDS,
         expectedDS,
-        equals = Left((a1: Map[String, String], a2: Map[String, String]) => a1.mkString == a2.mkString)
+        equals = (a1: Map[String, String], a2: Map[String, String]) => a1.mkString == a2.mkString
       )
     }
 
@@ -92,7 +92,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
         )
       )
 
-      assertLargeDatasetEqualityV2(sourceDS, expectedDS)
+      assertLargeDatasetEquality(sourceDS, expectedDS)
     }
 
     "works with DataFrames that have ArrayType columns" in {
@@ -118,7 +118,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
         )
       )
 
-      assertLargeDatasetEqualityV2(sourceDF, expectedDF)
+      assertLargeDatasetEquality(sourceDF, expectedDF)
     }
 
     "throws an error if the DataFrames have different schemas" in {
@@ -176,7 +176,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
       )
 
       intercept[DatasetSchemaMismatch] {
-        assertLargeDatasetEqualityV2(sourceDF, expectedDF)
+        assertLargeDatasetEquality(sourceDF, expectedDF)
       }
     }
 
@@ -190,7 +190,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
       ).toDF("number")
 
       intercept[DatasetContentMismatch] {
-        assertLargeDatasetEqualityV2(sourceDF, expectedDF)
+        assertLargeDatasetEquality(sourceDF, expectedDF)
       }
     }
 
@@ -210,7 +210,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
       )
 
       intercept[DatasetContentMismatch] {
-        assertLargeDatasetEqualityV2(sourceDS, expectedDS)
+        assertLargeDatasetEquality(sourceDS, expectedDS)
       }
     }
 
@@ -227,7 +227,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
           Person("Alice", 5)
         )
       )
-      assertLargeDatasetEqualityV2(sourceDS, expectedDS, equals = Left((p1: Person, p2: Person) => Person.caseInsensitivePersonEquals(p1, p2)))
+      assertLargeDatasetEquality(sourceDS, expectedDS, equals = (p1: Person, p2: Person) => Person.caseInsensitivePersonEquals(p1, p2))
     }
 
     "fails if custom comparator for returns false" in {
@@ -245,7 +245,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
       )
 
       intercept[DatasetContentMismatch] {
-        assertLargeDatasetEqualityV2(sourceDS, expectedDS, equals = Left((p1: Person, p2: Person) => Person.caseInsensitivePersonEquals(p1, p2)))
+        assertLargeDatasetEquality(sourceDS, expectedDS, equals = (p1: Person, p2: Person) => Person.caseInsensitivePersonEquals(p1, p2))
       }
     }
 
@@ -271,7 +271,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
         List(("number", IntegerType, true))
       )
 
-      assertLargeDatasetEqualityV2(sourceDF, expectedDF, ignoreNullable = true)
+      assertLargeDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
     }
 
     "should not ignore nullable if ignoreNullable is false" in {
@@ -293,7 +293,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
       )
 
       intercept[DatasetSchemaMismatch] {
-        assertLargeDatasetEqualityV2(sourceDF, expectedDF)
+        assertLargeDatasetEquality(sourceDF, expectedDF)
       }
     }
 
@@ -315,7 +315,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
       )
 
       intercept[DatasetCountMismatch] {
-        assertLargeDatasetEqualityV2(sourceDF, expectedDF)
+        assertLargeDatasetEquality(sourceDF, expectedDF)
       }
     }
 
@@ -340,7 +340,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
           ("number", IntegerType, true)
         )
       )
-      assertLargeDatasetEqualityV2(sourceDF, expectedDF, ignoreColumnOrder = true)
+      assertLargeDatasetEquality(sourceDF, expectedDF, ignoreColumnOrder = true)
     }
 
     "can performed Dataset comparisons with unordered column" in {
@@ -358,7 +358,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
         Person("alice", 5)
       ).toDS.select("age", "name").as(ds1.encoder)
 
-      assertLargeDatasetEqualityV2(ds2, ds1, ignoreColumnOrder = true)
+      assertLargeDatasetEquality(ds2, ds1, ignoreColumnOrder = true)
     }
 
     "correctly mark unequal schema field" in {
@@ -386,7 +386,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
       )
 
       val e = intercept[DatasetSchemaMismatch] {
-        assertLargeDatasetEqualityV2(sourceDF, expectedDF)
+        assertLargeDatasetEquality(sourceDF, expectedDF)
       }
 
       e.assertColorDiff(Seq("float", "DoubleType", "MISSING"), Seq("word", "StringType", "StructField(long,LongType,true,{})"))
@@ -411,7 +411,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
         .withColumn("name", col("name").as("name", new MetadataBuilder().putString("description", "name of the individual").build()))
         .as[Person]
 
-      assertLargeDatasetEqualityV2(ds2, ds1)
+      assertLargeDatasetEquality(ds2, ds1)
     }
 
     "can performed Dataset comparisons and compare metadata" in {
@@ -434,7 +434,7 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
         .as[Person]
 
       intercept[DatasetSchemaMismatch] {
-        assertLargeDatasetEqualityV2(ds2, ds1, ignoreMetadata = false)
+        assertLargeDatasetEquality(ds2, ds1, ignoreMetadata = false)
       }
     }
 
@@ -454,11 +454,15 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
       )
 
       intercept[DatasetContentMismatch] {
-        assertLargeDatasetEqualityV2(
+        assertLargeDatasetEquality(
           sourceDS,
           expectedDS,
-          ignoreMetadata = false,
-          equals = Left((p1: Person, p2: Person) => p1.age == p2.age && p1.name == p2.name)
+          equals = (p1: Person, p2: Person) => p1.age == p2.age && p1.name == p2.name,
+          ignoreNullable = false,
+          ignoreColumnNames = false,
+          ignoreColumnOrder = false,
+          ignoreMetadata = true,
+          primaryKeys = Seq.empty
         )
       }
 
@@ -469,11 +473,15 @@ class DatasetComparerV2Test extends AnyFreeSpec with DatasetComparer {
       val expectedDS = spark.range(0, 20, 2)
 
       intercept[DatasetContentMismatch] {
-        assertLargeDatasetEqualityV2(
+        assertLargeDatasetEquality(
           sourceDS,
           expectedDS,
-          ignoreMetadata = false,
-          equals = Left((p1: java.lang.Long, p2: java.lang.Long) => p1 == p2)
+          equals = (p1: java.lang.Long, p2: java.lang.Long) => p1 == p2,
+          ignoreNullable = false,
+          ignoreColumnNames = false,
+          ignoreColumnOrder = false,
+          ignoreMetadata = true,
+          primaryKeys = Seq.empty
         )
       }
 

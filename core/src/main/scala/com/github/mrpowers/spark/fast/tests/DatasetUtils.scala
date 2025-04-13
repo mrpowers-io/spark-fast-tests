@@ -14,12 +14,6 @@ private object DatasetUtils {
       .withColumn(indexName, row_number().over(Window.orderBy(monotonically_increasing_id())))
       .select(ds.columns.map(col) :+ col(indexName): _*)
 
-    /**
-     * Check if the primary key is actually unique
-     */
-    def isKeyUnique(primaryKey: Seq[String]): Boolean =
-      ds.select(primaryKey.map(col): _*).distinct.count == ds.count
-
     def joinPair[P: ClassTag](
         other: Dataset[P],
         primaryKeys: Seq[String]
@@ -29,15 +23,19 @@ private object DatasetUtils {
           .as("l")
           .joinWith(other.as("r"), primaryKeys.map(k => col(s"l.$k") === col(s"r.$k")).reduce(_ && _), "full_outer")
           .select(
-            col("_1").alias("actual").as[T](ds.encoder),
-            col("_2").alias("expected").as[P](other.encoder)
+            col("_1").as[T](ds.encoder).name("actual"),
+            col("_2").as[P](other.encoder).name("expected")
           )
       } else {
         val indexName = s"index_${java.util.UUID.randomUUID}"
         val joined = ds
           .zipWithIndex(indexName)
           .alias("l")
-          .joinWith(other.zipWithIndex(indexName).alias("r"), col(s"l.$indexName") === col(s"r.$indexName"), "full_outer")
+          .joinWith(
+            other.zipWithIndex(indexName).alias("r"),
+            col(s"l.$indexName") === col(s"r.$indexName"),
+            "full_outer"
+          )
 
         joined
           .select(
