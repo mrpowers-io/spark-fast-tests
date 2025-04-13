@@ -28,6 +28,10 @@ private object DatasetUtils {
         ds
           .as("l")
           .joinWith(other.as("r"), primaryKeys.map(k => col(s"l.$k") === col(s"r.$k")).reduce(_ && _), "full_outer")
+          .select(
+            col("_1").alias("actual").as[T](ds.encoder),
+            col("_2").alias("expected").as[P](other.encoder)
+          )
       } else {
         val indexName = s"index_${java.util.UUID.randomUUID}"
         val joined = ds
@@ -37,8 +41,8 @@ private object DatasetUtils {
 
         joined
           .select(
-            encoderToCol("_1", ds.schema, ds.encoder, Seq(indexName)),
-            encoderToCol("_2", other.schema, other.encoder, Seq(indexName))
+            encoderToCol("_1", ds.schema, ds.encoder, Seq(indexName)).name("actual"),
+            encoderToCol("_2", other.schema, other.encoder, Seq(indexName)).name("expected")
           )
       }
     }

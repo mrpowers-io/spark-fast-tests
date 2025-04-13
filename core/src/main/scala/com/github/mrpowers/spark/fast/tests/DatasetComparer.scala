@@ -220,7 +220,8 @@ Expected DataFrame Row Count: '$expectedCount'
           )
 
         case Right(equalExprOption) =>
-          joinedDf.filter(equalExprOption.getOrElse(col("_1") =!= col("_2")))
+          joinedDf
+            .filter(equalExprOption.getOrElse(col("actual") =!= col("expected")))
       }
 
       if (!unequalDS.isEmpty) {

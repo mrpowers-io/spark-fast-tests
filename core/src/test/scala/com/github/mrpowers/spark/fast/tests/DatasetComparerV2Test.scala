@@ -4,7 +4,7 @@ import org.apache.spark.sql.types._
 import SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
 import com.github.mrpowers.spark.fast.tests.TestUtilsExt.ExceptionOps
-import org.apache.spark.sql.{Row, SparkSession}
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.col
 import org.scalatest.freespec.AnyFreeSpec
 
