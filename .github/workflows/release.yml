@@ -21,5 +21,5 @@ jobs:
           PGP_PASSPHRASE: ${{secrets.PGP_PASSPHRASE}}
           PGP_SECRET: ${{secrets.PGP_LONG_ID}}
           SONATYPE_PASSWORD: ${{secrets.SONATYPE_PASSWORD}}
-          SONATYPE_USERNAME: ${{secrets.SONATYPE_USERNAME
+          SONATYPE_USERNAME: ${{secrets.SONATYPE_USERNAME}}
         }}
