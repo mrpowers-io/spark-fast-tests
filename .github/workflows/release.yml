@@ -12,10 +12,10 @@ jobs:
       - uses: coursier/setup-action@v1
         with:
           jvm: zulu:11
-      - name: Setup sbt launcher
-        uses: sbt/setup-sbt@v1
+      - uses: coursier/setup-action@v1.3.9
         with:
-          sbt-version: 1.10.1
+          jvm: adopt:8
+          apps: sbt scala scalafmt  # https://github.com/coursier/apps
       - run: sbt -Dsun.net.client.defaultReadTimeout=60000 -Dsun.net.client.defaultConnectTimeout=60000 -Dspark.version=3.5.3 -v ci-release
         env:
           PGP_PASSPHRASE: ${{secrets.PGP_PASSPHRASE}}
