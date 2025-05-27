@@ -72,7 +72,7 @@ Expected DataFrame Row Count: '$expectedCount'
     val e = expectedDS.collect().toSeq
     if (!a.approximateSameElements(e, equals)) {
       val arr = ("Actual Content", "Expected Content")
-      val msg = "Diffs\n" ++ ProductUtil.showProductDiff(arr, a, e, truncate)
+      val msg = "Diffs\n" ++ ProductUtil.showProductDiff(arr, Left(a -> e), truncate)
       throw DatasetContentMismatch(msg)
     }
   }
@@ -92,6 +92,7 @@ Expected DataFrame Row Count: '$expectedCount'
   /**
    * Raises an error unless `actualDS` and `expectedDS` are equal
    */
+  @deprecated("Use assertLargeDatasetEquality from DatasetComparerV2 instead", "3.1.0")
   def assertLargeDatasetEquality[T: ClassTag](
       actualDS: Dataset[T],
       expectedDS: Dataset[T],
