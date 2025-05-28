@@ -4,7 +4,7 @@ import java.sql.Date
 import java.time.format.DateTimeFormatter
 import org.apache.commons.lang3.StringUtils
 
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Row}
 
 object DataFramePrettyPrint {
 
@@ -43,6 +43,17 @@ object DataFramePrettyPrint {
             )
           case d: Date =>
             d.toLocalDate.format(DateTimeFormatter.ISO_DATE)
+          case r: Row =>
+            r.schema.fieldNames
+              .zip(r.toSeq)
+              .map { case (k, v) =>
+                s"$k -> $v"
+              }
+              .mkString(
+                "{",
+                ", ",
+                "}"
+              )
           case _ => cell.toString
         }
         if (truncate > 0 && str.length > truncate) {
