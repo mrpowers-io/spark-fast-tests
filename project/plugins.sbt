@@ -6,7 +6,7 @@ resolvers += Resolver.typesafeRepo("releases")
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.2")
 
-addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.9.0")
+addSbtPlugin("com.github.sbt" % "sbt-ci-release" % "1.11.1")
 
 addSbtPlugin("org.typelevel" % "laika-sbt" % "1.2.0")
 
