@@ -21,7 +21,7 @@ jobs:
       - name: Setup sbt launcher
         uses: sbt/setup-sbt@v1
         with:
-          sbt-version: 1.10.1
+          sbt-version: 1.11.0
       - name: ScalaFmt
         id: fmt
         run: sbt scalafmtCheckAll
