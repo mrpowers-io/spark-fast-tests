@@ -9,7 +9,7 @@ val noPublish = Seq(
 
 inThisBuild(
   List(
-    organization := "com.github.mrpowers",
+    organization := "io.github.zeotuan",
     homepage     := Some(url("https://github.com/mrpowers-io/spark-fast-tests")),
     licenses     := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
     developers ++= List(
