@@ -32,7 +32,7 @@ Fetch the JAR file from Maven.
 
 ```scala
 // for Spark 3
-libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "1.3.0" % "test"
+libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "3.0.1" % "test"
 ```
 
 **Important: Future versions of spark-fast-test will no longer support Spark 2.x. We recommend upgrading to Spark 3.x to
