@@ -104,6 +104,11 @@ lazy val docs = (project in file("docs"))
               TextLink.internal(Root / "about" / "README.md", "Spark Fast Tests")
             )
           ),
+          projectLinks = Seq(
+            LinkGroup.create(
+              TextLink.internal(Root / "api" / "com" / "github" / "mrpowers" / "spark" / "fast" / "tests" / "index.html", "API (Scaladoc)")
+            )
+          ),
           teasers = Seq(
             Teaser("Fast", "Handle small dataframes effectively and provide column assertions"),
             Teaser("Flexible", "Works fine with scalatest, uTest, munit")
