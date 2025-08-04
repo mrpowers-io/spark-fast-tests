@@ -9,7 +9,7 @@ val noPublish = Seq(
 
 inThisBuild(
   List(
-    organization := "io.github.zeotuan",
+    organization := "com.github.mrpowers",
     homepage     := Some(url("https://github.com/mrpowers-io/spark-fast-tests")),
     licenses     := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
     developers ++= List(
@@ -62,11 +62,23 @@ lazy val benchmarks = (project in file("benchmarks"))
   .settings(noPublish)
   .enablePlugins(JmhPlugin)
 
+// Automatically copy README.md from the root to docs/README.md before generating the site
+lazy val copyRootReadme = taskKey[Unit]("Copy root README.md to docs/about/README.md")
+
 lazy val docs = (project in file("docs"))
-  .dependsOn(core)
   .enablePlugins(LaikaPlugin)
   .settings(
     name := "docs",
+    copyRootReadme := {
+      import java.nio.file.{Files, StandardCopyOption}
+      val rootReadme = baseDirectory.value.getParentFile.toPath.resolve("README.md")
+      val aboutDir   = baseDirectory.value.toPath.resolve("about")
+      val docsReadme = aboutDir.resolve("README.md")
+
+      Files.createDirectories(aboutDir)
+      Files.copy(rootReadme, docsReadme, StandardCopyOption.REPLACE_EXISTING)
+    },
+    laikaSite := (laikaSite dependsOn copyRootReadme).value,
     laikaTheme := {
       import laika.ast.Path.Root
       import laika.helium.Helium
@@ -90,11 +102,6 @@ lazy val docs = (project in file("docs"))
             LinkPanel(
               "Documentation",
               TextLink.internal(Root / "about" / "README.md", "Spark Fast Tests")
-            )
-          ),
-          projectLinks = Seq(
-            LinkGroup.create(
-              TextLink.internal(Root / "api" / "com" / "github" / "mrpowers" / "spark" / "fast" / "tests" / "index.html", "API (Scaladoc)")
             )
           ),
           teasers = Seq(

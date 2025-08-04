@@ -17,7 +17,7 @@ Spark code!  Good test suites yield higher quality codebases that are easy to re
 - [Why is this library fast?](#why-is-this-library-fast)
 - [Usage](#usage)
   - [Local Testing SparkSession](#local-sparksession-for-test)
-  - [DataFrameComparer](#datasetcomparer--dataframecomparer)
+  - [DataFrameComparer](#datasetcomparer)
     - [Unordered DataFrames comparison](#unordered-dataframe-equality-comparisons)
     - [Approximate DataFrames comparison](#approximate-dataframe-equality)
     - [Ignore Nullable DataFrames comparison](#equality-comparisons-ignoring-the-nullable-flag)
@@ -69,7 +69,7 @@ assertSmallDataFrameEquality(sourceDF, expectedDF)
     <img src="./images/assertSmallDataFrameEquality_DatasetContentMissmatch_message.png" alt="assertSmallDataFrameEquality_DatasetContentMissmatch_message" width="500", height="200"/>
 </p>
 
-The `assertSmallDatasetEquality` method can be used to compare two Datasets or DataFrames(Dataset[Row]).
+The `assertSmallDatasetEquality` method can be used to compare two Datasets or DataFrames(Dataset).
 Nicely formatted error messages are displayed when the Datasets are not equal. Here is an example of content mismatch:
 
 ```scala
@@ -192,7 +192,7 @@ big DataFrames in your test suite.
 Make sure to only use the `SparkSessionTestWrapper` trait in your test suite. You don't want to use test specific
 configuration (like one shuffle partition) when running production code.
 
-### DatasetComparer / DataFrameComparer
+### DatasetComparer
 The `DatasetComparer` trait defines the `assertSmallDatasetEquality` method. Extend your spec file with the
 `SparkSessionTestWrapper` trait to create DataFrames and the `DatasetComparer` trait to make DataFrame comparisons.
 

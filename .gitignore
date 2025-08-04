@@ -2,6 +2,7 @@ target/
 lib_managed/
 src_managed/
 project/boot/
+docs/about/README.md
 
 .DS_Store
 
