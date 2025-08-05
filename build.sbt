@@ -66,6 +66,7 @@ lazy val benchmarks = (project in file("benchmarks"))
 lazy val copyRootReadme = taskKey[Unit]("Copy root README.md to docs/about/README.md")
 
 lazy val docs = (project in file("docs"))
+  .dependsOn(core)
   .enablePlugins(LaikaPlugin)
   .settings(
     name := "docs",
@@ -77,8 +78,33 @@ lazy val docs = (project in file("docs"))
 
       Files.createDirectories(aboutDir)
       Files.copy(rootReadme, docsReadme, StandardCopyOption.REPLACE_EXISTING)
+      println(s"Copied ${rootReadme.toAbsolutePath} to ${docsReadme.toAbsolutePath}")
+
+      // Copy API documentation to the docs directory
+      val apiDocs      = (core / Compile / doc).value.toPath
+      val targetApiDir = baseDirectory.value.toPath.resolve("api")
+
+      if (Files.exists(targetApiDir)) {
+        println(s"Removing existing API documentation directory: ${targetApiDir.toAbsolutePath}")
+        Files.walk(targetApiDir).sorted(java.util.Comparator.reverseOrder()).forEach(f => Files.delete(f))
+      }
+
+      Files.createDirectories(targetApiDir)
+
+      println("Copying API documentation to " + targetApiDir.toAbsolutePath)
+      Files
+        .walk(apiDocs)
+        .forEach { source =>
+          val target = targetApiDir.resolve(apiDocs.relativize(source))
+          if (Files.isDirectory(source)) {
+            Files.createDirectories(target)
+          } else {
+            Files.createDirectories(target.getParent)
+            Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING)
+          }
+        }
     },
-    laikaSite := (laikaSite dependsOn copyRootReadme).value,
+    laikaSite := (laikaSite dependsOn copyRootReadme dependsOn (core / Compile / doc)).value,
     laikaTheme := {
       import laika.ast.Path.Root
       import laika.helium.Helium
