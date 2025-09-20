@@ -14,33 +14,72 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
   "prints a descriptive error message if it bugs out" in {
     val sourceDF = spark.createDF(
       List(
-        ("bob", 1, "uk"),
-        ("camila", 5, "peru")
+        ("bob", 1, "uk","bob", 1, "uk","bob", 1, "uk","bob", 1, "uk","bob", 1, "uk","bob", 1, "uk"),
+        ("camila", 5, "peru","camila", 5, "peru","camila", 5, "peru","camila", 5, "peru","camila", 5, "peru","camila", 5, "peru")
       ),
       List(
-        ("name", StringType, true),
-        ("age", IntegerType, true),
-        ("country", StringType, true)
+        ("name1", StringType, true),
+        ("age1", IntegerType, true),
+        ("country1", StringType, true),
+
+        ("name2", StringType, true),
+        ("age2", IntegerType, true),
+        ("country2", StringType, true),
+
+
+        ("name3", StringType, true),
+        ("age3", IntegerType, true),
+        ("country3", StringType, true),
+
+
+        ("name4", StringType, true),
+        ("age4", IntegerType, true),
+        ("country4", StringType, true),
+
+
+        ("name5", StringType, true),
+        ("age5", IntegerType, true),
+        ("country5", StringType, true),
       )
     )
 
     val expectedDF = spark.createDF(
       List(
-        ("bob", 1, "france"),
-        ("camila", 5, "peru")
+        ("bob", 1, "usa","bob", 1, "uk","bob", 1, "uk","bob", 1, "uk","bob", 1, "uk","bob", 1, "uk"),
+        ("camila", 5, "peru","camila", 5, "peru","camila", 5, "peru","camila", 5, "peru","camila", 5, "peru","camila", 6, "india")
       ),
       List(
-        ("name", StringType, true),
-        ("age", IntegerType, true),
-        ("country", StringType, true)
+        ("name1", StringType, true),
+        ("age1", IntegerType, true),
+        ("country1", StringType, true),
+
+        ("name2", StringType, true),
+        ("age2", IntegerType, true),
+        ("country2", StringType, true),
+
+
+        ("name3", StringType, true),
+        ("age3", IntegerType, true),
+        ("country3", StringType, true),
+
+
+        ("name4", StringType, true),
+        ("age4", IntegerType, true),
+        ("country4", StringType, true),
+
+
+        ("name5", StringType, true),
+        ("age5", IntegerType, true),
+        ("country5", StringType, true),
       )
     )
 
-    val e = intercept[DatasetContentMismatch] {
+
+    //    val e = intercept[DatasetContentMismatch] {
       assertSmallDataFrameEquality(sourceDF, expectedDF)
-    }
-    assert(e.getMessage.indexOf("bob") >= 0)
-    assert(e.getMessage.indexOf("camila") >= 0)
+//    }
+//    assert(e.getMessage.indexOf("bob") >= 0)
+//    assert(e.getMessage.indexOf("camila") >= 0)
   }
 
   "Correctly mark unequal elements" in {
