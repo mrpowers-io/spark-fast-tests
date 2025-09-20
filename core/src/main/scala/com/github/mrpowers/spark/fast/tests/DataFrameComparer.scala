@@ -1,6 +1,8 @@
 package com.github.mrpowers.spark.fast.tests
 
+import com.github.mrpowers.spark.fast.tests.SeqLikesExtensions.SeqExtensions
 import org.apache.spark.sql.{DataFrame, Row}
+
 trait DataFrameComparer extends DatasetComparer {
 
   /**
@@ -16,16 +18,36 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreMetadata: Boolean = true,
       truncate: Int = 500
   ): Unit = {
-    assertSmallDatasetEquality(
-      actualDF,
-      expectedDF,
+    SchemaComparer.assertSchemaEqual(
+      actualDF.schema,
+      expectedDF.schema,
       ignoreNullable,
       ignoreColumnNames,
-      orderedComparison,
       ignoreColumnOrder,
       ignoreMetadata,
-      truncate
     )
+    val actual = if (ignoreColumnOrder) orderColumns(actualDF, expectedDF) else actualDF
+    if (orderedComparison)
+      assertSmallDataFrameEquality(actual, expectedDF, truncate)
+    else
+      assertSmallDataFrameEquality(
+        defaultSortDataset(actual),
+        defaultSortDataset(expectedDF),
+        truncate
+      )
+  }
+
+  def assertSmallDataFrameEquality(
+      actualDF: DataFrame,
+      expectedDF: DataFrame,
+      truncate: Int
+  ): Unit = {
+    val a = actualDF.collect()
+    val e = expectedDF.collect()
+    if (!a.toSeq.approximateSameElements(e, (o1: Row, o2: Row) => o1.equals(o2))) {
+      val msg = "Difference\n" ++ DataframeUtil.showDataframeDiff(a, e, truncate)
+      throw DatasetContentMismatch(msg)
+    }
   }
 
   /**

@@ -1,11 +1,14 @@
 package com.github.mrpowers.spark.fast.tests
 
-import org.apache.spark.sql.types.{DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType}
-import SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
-import org.apache.spark.sql.functions.col
+import com.github.mrpowers.spark.fast.tests.SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.TestUtilsExt.ExceptionOps
+import com.github.mrpowers.spark.fast.tests.ufansi.Color.{DarkGray, Green, Red, Reset}
+import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.types._
 import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers.equal
+import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 import java.time.Instant
 
@@ -73,8 +76,20 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     val e = intercept[DatasetContentMismatch] {
       assertSmallDataFrameEquality(expectedDF, sourceDF)
     }
+    e.getMessage
+      .replace(DarkGray.escape, "<gray>")
+      .replace(Red.escape, "<red>")
+      .replace(Green.escape, "<green>")
+      .replace(Reset.escape, "</reset>") should equal("""Difference
+    |  +------+---+-------+
+    |  |  name|age|country|
+    |1:|<gray>   bob|  1|<red> france</reset>|:1
+    |1:|<gray>   bob|  1|<green>     uk</reset>|:1
+    |2:|<gray>camila|  5|   peru</reset>|:2
+    |3:|<red>  mark| 11|    usa</reset>|:3
+    |  +------+---+-------+
+    |""".stripMargin)
 
-    e.assertColorDiff(Seq("france", "[mark,11,usa]"), Seq("uk", "[steve,10,aus]"))
   }
 
   "Can handle unequal Dataframe containing null" in {
@@ -107,8 +122,19 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     val e = intercept[DatasetContentMismatch] {
       assertSmallDataFrameEquality(expectedDF, sourceDF)
     }
-
-    e.assertColorDiff(Seq("null"), Seq("steve"))
+    e.getMessage
+      .replace(DarkGray.escape, "<gray>")
+      .replace(Red.escape, "<red>")
+      .replace(Green.escape, "<green>")
+      .replace(Reset.escape, "</reset>") should equal ("""Difference
+   |  +-----+---+-------+
+   |  | name|age|country|
+   |1:|<gray>  bob|  1|     uk</reset>|:1
+   |2:|<gray> null|  5|   peru</reset>|:2
+   |3:|<red> null<gray>| 10|    aus</reset>|:3
+   |3:|<green>steve<gray>| 10|    aus</reset>|:3
+   |  +-----+---+-------+
+   |""".stripMargin)
   }
 
   "works well for wide DataFrames" in {
