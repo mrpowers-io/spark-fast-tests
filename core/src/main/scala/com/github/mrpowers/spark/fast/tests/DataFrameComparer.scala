@@ -24,7 +24,7 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreNullable,
       ignoreColumnNames,
       ignoreColumnOrder,
-      ignoreMetadata,
+      ignoreMetadata
     )
     val actual = if (ignoreColumnOrder) orderColumns(actualDF, expectedDF) else actualDF
     if (orderedComparison)

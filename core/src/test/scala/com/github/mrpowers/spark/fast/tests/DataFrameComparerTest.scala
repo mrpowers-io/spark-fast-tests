@@ -126,7 +126,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       .replace(DarkGray.escape, "<gray>")
       .replace(Red.escape, "<red>")
       .replace(Green.escape, "<green>")
-      .replace(Reset.escape, "</reset>") should equal ("""Difference
+      .replace(Reset.escape, "</reset>") should equal("""Difference
    |  +-----+---+-------+
    |  | name|age|country|
    |1:|<gray>  bob|  1|     uk</reset>|:1

@@ -9,31 +9,31 @@ import org.apache.spark.sql.Row
 object DataframeUtil {
 
   private[mrpowers] def showDataframeDiff(
-    actual: Array[Row],
-    expected: Array[Row],
-    truncate: Int = 20,
-    minColWidth: Int = 3,
+      actual: Array[Row],
+      expected: Array[Row],
+      truncate: Int = 20,
+      minColWidth: Int = 3
   ): String = {
 
-    val sb = new StringBuilder
-    val fields = actual.head.schema.fieldNames
-    val fullJoin = actual.zipAll(expected, Row(), Row())
-    val rowWidths = getColWidths(fields, actual.toSeq ++ expected.toSeq)
-    val indexes = actual.indices.map(v => v + 1).map(_.toString + ":")
+    val sb          = new StringBuilder
+    val fields      = actual.head.schema.fieldNames
+    val fullJoin    = actual.zipAll(expected, Row(), Row())
+    val rowWidths   = getColWidths(fields, actual.toSeq ++ expected.toSeq)
+    val indexes     = actual.indices.map(v => v + 1).map(_.toString + ":")
     val indColWidth = indexes.map(_.length).max + 1
 
     val diff = fullJoin.map { case (actualRow, expectedRow) =>
-      val paddedActualRow = pad(actualRow, truncate, rowWidths)
+      val paddedActualRow   = pad(actualRow, truncate, rowWidths)
       val paddedExpectedRow = pad(expectedRow, truncate, rowWidths)
       if (actualRow.equals(expectedRow)) {
         List(DarkGray(paddedActualRow.mkString("|")), DarkGray(paddedActualRow.mkString("|")))
       } else {
-        val actualSeq = actualRow.toSeq
+        val actualSeq   = actualRow.toSeq
         val expectedSeq = expectedRow.toSeq
         if (actualSeq.isEmpty)
           List(
             Red(" " * rowWidths.sum),
-            Green(paddedExpectedRow.mkString("", "|", "")),
+            Green(paddedExpectedRow.mkString("", "|", ""))
           )
         else if (expectedSeq.isEmpty)
           List(Red(paddedActualRow.mkString("", "|", "")), Green("" * rowWidths.sum))
@@ -47,7 +47,7 @@ object DataframeUtil {
           if (allFieldsAreNotEqual) {
             List(
               Red(paddedActualRow.mkString("", "|", "")),
-              Green(paddedExpectedRow.mkString("", "|", "")),
+              Green(paddedExpectedRow.mkString("", "|", ""))
             )
           } else {
 
@@ -55,27 +55,27 @@ object DataframeUtil {
               .map {
                 case ((actualRowField, expectedRowField, true), i) =>
                   val paddedActualRow = padAny(actualRowField, truncate, rowWidths(i))
-                  val paddedExpected = padAny(expectedRowField, truncate, rowWidths(i))
+                  val paddedExpected  = padAny(expectedRowField, truncate, rowWidths(i))
                   (DarkGray(paddedActualRow), DarkGray(paddedExpected))
                 case ((actualRowField, expectedRowField, false), i) =>
                   val paddedActualRow = padAny(actualRowField, truncate, rowWidths(i))
-                  val paddedExpected = padAny(expectedRowField, truncate, rowWidths(i))
+                  val paddedExpected  = padAny(expectedRowField, truncate, rowWidths(i))
                   (Red(paddedActualRow), Green(paddedExpected))
               }
             val start = DarkGray("")
-            val sep = DarkGray("|")
-            val end = DarkGray("")
+            val sep   = DarkGray("|")
+            val end   = DarkGray("")
             List(
               coloredDiff.map(_._1).mkStr(start, sep, end),
-              coloredDiff.map(_._2).mkStr(start, sep, end),
+              coloredDiff.map(_._2).mkStr(start, sep, end)
             )
           }
         }
       }
     }
 
-    val leftPaddedFields = pad(fields, truncate, rowWidths)
-    val fieldsHeader = List(leftPaddedFields.mkString("|"))
+    val leftPaddedFields      = pad(fields, truncate, rowWidths)
+    val fieldsHeader          = List(leftPaddedFields.mkString("|"))
     val colWidths: Array[Int] = getColWidths(minColWidth, diff)
 
     // Create SeparateLine
@@ -100,12 +100,10 @@ object DataframeUtil {
       sb.append(indexString)
       sb.append(v.head)
       sb.append(s"|:${i + 1}\n")
-      val actualColors = v.head.getColors.distinct
+      val actualColors   = v.head.getColors.distinct
       val expectedColors = v.head.getColors.distinct
       // rows are not equal
-      if (
-        actualColors.length != 1 || expectedColors.length != 1 || actualColors.head != expectedColors.head
-      ) {
+      if (actualColors.length != 1 || expectedColors.length != 1 || actualColors.head != expectedColors.head) {
         sb.append(indexString)
         sb.append(v.tail.head)
         sb.append(s"|:${i + 1}\n")
@@ -120,20 +118,20 @@ object DataframeUtil {
         Option(v).map(_.toString).getOrElse("null")
       },
       truncate,
-      colWidths,
+      colWidths
     )
 
   private def pad(
-    rows: Array[List[Str]],
-    truncate: Int,
-    colWidths: Array[Int],
-    spacesColor: EscapeAttr = DarkGray,
+      rows: Array[List[Str]],
+      truncate: Int,
+      colWidths: Array[Int],
+      spacesColor: EscapeAttr = DarkGray
   ) =
     rows.map { row =>
       row.zipWithIndex
         .map { case (cell, i) =>
           val padsLen = colWidths(i) - cell.length
-          val pads = if (padsLen > 0) spacesColor(" " * padsLen) else spacesColor("")
+          val pads    = if (padsLen > 0) spacesColor(" " * padsLen) else spacesColor("")
           if (truncate > 0) {
             pads ++ cell
           } else {
