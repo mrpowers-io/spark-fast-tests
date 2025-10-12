@@ -15,7 +15,6 @@ case class FieldComparison(
 )
 
 object FieldComparison {
-  val FIELD   = "field"
   val ELEMENT = "element"
   val KEY     = "key"
   val VALUE   = "value"
@@ -45,7 +44,10 @@ object FieldComparison {
       )
     }
 
-    (leftFields.keySet ++ rightFields.keySet).toSeq.distinct.map { name =>
+    // Maintain order: left fields first, then right-only fields
+    val leftKeys      = leftFields.keys.toSeq
+    val rightOnlyKeys = rightFields.keys.filterNot(leftKeys.contains).toSeq
+    (leftKeys ++ rightOnlyKeys).map { name =>
       FieldComparison(name, leftFields.get(name), rightFields.get(name), matchFieldByName)
     }
   }
@@ -67,35 +69,47 @@ object FieldComparison {
 
       // Array types
       case (Some(l: ArrayType), Some(r: ArrayType)) =>
-        Seq(
-          FieldComparison(
-            ELEMENT,
-            Some(FieldInfo(l)),
-            Some(FieldInfo(r)),
-            buildChildComparisons(Some(l.elementType), Some(r.elementType), isTopLevel = false, matchFieldByName)
+        if (isTopLevel) {
+          buildChildComparisons(Some(l.elementType), Some(r.elementType), isTopLevel = false, matchFieldByName)
+        } else {
+          Seq(
+            FieldComparison(
+              ELEMENT,
+              Some(FieldInfo(l)),
+              Some(FieldInfo(r)),
+              buildChildComparisons(Some(l.elementType), Some(r.elementType), isTopLevel = false, matchFieldByName)
+            )
           )
-        )
+        }
 
       case (Some(l: ArrayType), None) =>
-        val leftInfo = Some(FieldInfo(l))
-        Seq(
-          FieldComparison(
-            ELEMENT,
-            leftInfo,
-            None,
-            buildChildComparisons(Some(l.elementType), None, isTopLevel = false, matchFieldByName)
+        if (isTopLevel) {
+          buildChildComparisons(Some(l.elementType), None, isTopLevel = false, matchFieldByName)
+        } else {
+          val leftInfo = Some(FieldInfo(l))
+          Seq(
+            FieldComparison(
+              ELEMENT,
+              leftInfo,
+              None,
+              buildChildComparisons(Some(l.elementType), None, isTopLevel = false, matchFieldByName)
+            )
           )
-        )
+        }
 
       case (None, Some(r: ArrayType)) =>
-        Seq(
-          FieldComparison(
-            ELEMENT,
-            None,
-            Some(FieldInfo(r)),
-            buildChildComparisons(None, Some(r.elementType), isTopLevel = false, matchFieldByName)
+        if (isTopLevel) {
+          buildChildComparisons(None, Some(r.elementType), isTopLevel = false, matchFieldByName)
+        } else {
+          Seq(
+            FieldComparison(
+              ELEMENT,
+              Some(FieldInfo(r)),
+              None,
+              buildChildComparisons(None, Some(r.elementType), isTopLevel = false, matchFieldByName)
+            )
           )
-        )
+        }
 
       // Map types
       case (Some(l: MapType), Some(r: MapType)) =>
@@ -152,7 +166,7 @@ object FieldComparison {
         else {
           val leftInfo  = leftType.map(t => FieldInfo(t))
           val rightInfo = rightType.map(t => FieldInfo(t))
-          Seq(FieldComparison(FIELD, leftInfo, rightInfo, Seq.empty))
+          Seq(FieldComparison(ELEMENT, leftInfo, rightInfo, Seq.empty))
         }
     }
   }

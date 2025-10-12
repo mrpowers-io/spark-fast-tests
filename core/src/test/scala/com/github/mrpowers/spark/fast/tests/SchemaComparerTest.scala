@@ -243,10 +243,10 @@ class SchemaComparerTest extends AnyFreeSpec {
       assert(SchemaComparer.equals(s1, s2))
     }
 
-    "display schema diff as tree with different depth" in {
+    "display schema diff as tree with different depth with ignoreColumnOrder = false" in {
       val s1 = StructType(
         Seq(
-          StructField("array", ArrayType(StringType, containsNull = true), true),
+          StructField("array", ArrayType(ArrayType(StringType, containsNull = true)), true),
           StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
           StructField("something", StringType, true),
           StructField(
@@ -275,7 +275,7 @@ class SchemaComparerTest extends AnyFreeSpec {
       )
       val s2 = StructType(
         Seq(
-          StructField("array", ArrayType(StringType, containsNull = true), true),
+          StructField("array", ArrayType(ArrayType(StringType, containsNull = true)), true),
           StructField("something", StringType, true),
           StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
           StructField(
