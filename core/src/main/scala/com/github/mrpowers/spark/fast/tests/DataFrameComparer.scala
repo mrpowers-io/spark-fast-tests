@@ -2,6 +2,7 @@ package com.github.mrpowers.spark.fast.tests
 
 import com.github.mrpowers.spark.fast.tests.SeqLikesExtensions.SeqExtensions
 import org.apache.spark.sql.{DataFrame, Row}
+import com.github.mrpowers.spark.fast.tests.DataframeDiffOutputFormat.DataframeDiffOutputFormat
 
 trait DataFrameComparer extends DatasetComparer {
 
@@ -9,32 +10,48 @@ trait DataFrameComparer extends DatasetComparer {
    * Raises an error unless `actualDF` and `expectedDF` are equal
    */
   def assertSmallDataFrameEquality(
-      actualDF: DataFrame,
-      expectedDF: DataFrame,
-      ignoreNullable: Boolean = false,
-      ignoreColumnNames: Boolean = false,
-      orderedComparison: Boolean = true,
-      ignoreColumnOrder: Boolean = false,
-      ignoreMetadata: Boolean = true,
-      truncate: Int = 500
+                                    actualDF: DataFrame,
+                                    expectedDF: DataFrame,
+                                    ignoreNullable: Boolean = false,
+                                    ignoreColumnNames: Boolean = false,
+                                    orderedComparison: Boolean = true,
+                                    ignoreColumnOrder: Boolean = false,
+                                    ignoreMetadata: Boolean = true,
+                                    truncate: Int = 500,
+                                    outputFormat: DataframeDiffOutputFormat = DataframeDiffOutputFormat.SideBySide
   ): Unit = {
-    SchemaComparer.assertSchemaEqual(
-      actualDF.schema,
-      expectedDF.schema,
-      ignoreNullable,
-      ignoreColumnNames,
-      ignoreColumnOrder,
-      ignoreMetadata
-    )
-    val actual = if (ignoreColumnOrder) orderColumns(actualDF, expectedDF) else actualDF
-    if (orderedComparison)
-      assertSmallDataFrameEquality(actual, expectedDF, truncate)
-    else
-      assertSmallDataFrameEquality(
-        defaultSortDataset(actual),
-        defaultSortDataset(expectedDF),
-        truncate
-      )
+    outputFormat match {
+      case DataframeDiffOutputFormat.SideBySide =>
+        assertSmallDatasetEquality(
+          actualDF,
+          expectedDF,
+          ignoreNullable,
+          ignoreColumnNames,
+          orderedComparison,
+          ignoreColumnOrder,
+          ignoreMetadata,
+          truncate
+        )
+      case DataframeDiffOutputFormat.SeparateLines =>
+        SchemaComparer.assertSchemaEqual(
+          actualDF.schema,
+          expectedDF.schema,
+          ignoreNullable,
+          ignoreColumnNames,
+          ignoreColumnOrder,
+          ignoreMetadata
+        )
+        val actual = if (ignoreColumnOrder) orderColumns(actualDF, expectedDF) else actualDF
+        if (orderedComparison)
+          assertSmallDataFrameEquality(actual, expectedDF, truncate)
+        else
+          assertSmallDataFrameEquality(
+            defaultSortDataset(actual),
+            defaultSortDataset(expectedDF),
+            truncate
+          )
+    }
+
   }
 
   def assertSmallDataFrameEquality(
