@@ -157,7 +157,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
 
   }
 
-  "Can handle unequal Dataframe containing null" in {
+  "Can handle unequal Dataframe containing null separate lines view" in {
     val sourceDF = spark.createDF(
       List(
         ("bob", 1, "uk"),
