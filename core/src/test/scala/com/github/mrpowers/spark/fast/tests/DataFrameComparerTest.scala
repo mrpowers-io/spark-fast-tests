@@ -1,10 +1,10 @@
 package com.github.mrpowers.spark.fast.tests
 
+import org.apache.spark.sql.types.{DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType}
+import SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
-import com.github.mrpowers.spark.fast.tests.SparkSessionExt._
-import com.github.mrpowers.spark.fast.tests.TestUtilsExt.ExceptionOps
 import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.types._
+import com.github.mrpowers.spark.fast.tests.TestUtilsExt.ExceptionOps
 import org.scalatest.freespec.AnyFreeSpec
 
 import java.time.Instant
@@ -26,8 +26,6 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
 
     val expectedDF = spark.createDF(
       List(
-        ("bob", 1, "france"),
-        ("bob", 1, "france"),
         ("bob", 1, "france"),
         ("camila", 5, "peru")
       ),
