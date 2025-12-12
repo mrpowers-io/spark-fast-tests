@@ -7,7 +7,6 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.Row
 
 object DataframeUtil {
-
   private[mrpowers] def showDataframeDiff(
       actual: Array[Row],
       expected: Array[Row],
@@ -17,15 +16,17 @@ object DataframeUtil {
 
     val sb          = new StringBuilder
     val fields      = actual.head.schema.fieldNames
-    val fullJoin    = actual.zipAll(expected, Row(), Row())
     val rowWidths   = getColWidths(fields, actual.toSeq ++ expected.toSeq)
     val indexes     = actual.indices.map(v => v + 1).map(_.toString + ":")
     val indColWidth = indexes.map(_.length).max + 1
 
-    val diff = fullJoin.map { case (actualRow, expectedRow) =>
+    val fullJoinWithEquals = actual
+      .zipAll(expected, Row(), Row())
+      .map { case (actualRow, expectedRow) => (actualRow, expectedRow, actualRow.equals(expectedRow)) }
+    val diff = fullJoinWithEquals.map { case (actualRow, expectedRow, rowsAreEqual) =>
       val paddedActualRow   = pad(actualRow, truncate, rowWidths)
       val paddedExpectedRow = pad(expectedRow, truncate, rowWidths)
-      if (actualRow.equals(expectedRow)) {
+      if (rowsAreEqual) {
         List(DarkGray(paddedActualRow.mkString("|")), DarkGray(paddedActualRow.mkString("|")))
       } else {
         val actualSeq   = actualRow.toSeq
@@ -50,7 +51,6 @@ object DataframeUtil {
               Green(paddedExpectedRow.mkString("", "|", ""))
             )
           } else {
-
             val coloredDiff = withEquals.zipWithIndex
               .map {
                 case ((actualRowField, expectedRowField, true), i) =>
@@ -95,16 +95,19 @@ object DataframeUtil {
         }
       }
       .addString(sb, StringUtils.leftPad("|", indColWidth), "|", "|\n")
-    pad(diff, truncate, colWidths).zipWithIndex.map { case (rowDiff @ (actual :: expected :: Nil), i) =>
+    pad(diff, truncate, colWidths).zipWithIndex.map { case (actual :: expected :: Nil, i) =>
       val indexString = StringUtils.leftPad(s"${i + 1}:|", indColWidth)
       sb.append(indexString)
       sb.append(actual)
       sb.append(s"|:${i + 1}\n")
-      val rowsAreDifferent = rowDiff.flatMap(_.getColors).distinct.head != DarkGray.applyMask
+      val rowsAreDifferent = !fullJoinWithEquals(i)._3
       if (rowsAreDifferent) {
         sb.append(indexString)
         sb.append(expected)
         sb.append(s"|:${i + 1}\n")
+        sb.append("\n")
+      } else if (i < diff.length - 1 && !fullJoinWithEquals(i + 1)._3) {
+        //if current rows are equal and next ones are not
         sb.append("\n")
       }
     }

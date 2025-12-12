@@ -54,7 +54,7 @@ trait DataFrameComparer extends DatasetComparer {
 
   }
 
-  def assertSmallDataFrameEquality(
+  private def assertSmallDataFrameEquality(
       actualDF: DataFrame,
       expectedDF: DataFrame,
       truncate: Int

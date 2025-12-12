@@ -74,21 +74,23 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     )
 
     val e = intercept[DatasetContentMismatch] {
-      assertSmallDataFrameEquality(expectedDF, sourceDF)
+      assertSmallDataFrameEquality(expectedDF, sourceDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
     }
-    e.getMessage
-      .replace(DarkGray.escape, "<gray>")
-      .replace(Red.escape, "<red>")
-      .replace(Green.escape, "<green>")
-      .replace(Reset.escape, "</reset>") should equal("""Difference
-    |  +------+---+-------+
-    |  |  name|age|country|
-    |1:|<gray>   bob|  1|<red> france</reset>|:1
-    |1:|<gray>   bob|  1|<green>     uk</reset>|:1
-    |2:|<gray>camila|  5|   peru</reset>|:2
-    |3:|<red>  mark| 11|    usa</reset>|:3
-    |  +------+---+-------+
-    |""".stripMargin)
+    val expected =
+      """|Difference
+        |  +------+---+-------+
+        |  |  name|age|country|
+        |1:|[90m   bob|  1|[31m france[39m|:1
+        |1:|[90m   bob|  1|[32m     uk[39m|:1
+        |
+        |2:|[90mcamila|  5|   peru[39m|:2
+        |
+        |3:|[31m  mark| 11|    usa[39m|:3
+        |3:|[32m steve| 10|    aus[39m|:3
+        |
+        |  +------+---+-------+
+        |""".stripMargin
+    assert(e.getMessage == expected)
 
   }
 
@@ -120,21 +122,20 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     )
 
     val e = intercept[DatasetContentMismatch] {
-      assertSmallDataFrameEquality(expectedDF, sourceDF)
+      assertSmallDataFrameEquality(expectedDF, sourceDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
     }
-    e.getMessage
-      .replace(DarkGray.escape, "<gray>")
-      .replace(Red.escape, "<red>")
-      .replace(Green.escape, "<green>")
-      .replace(Reset.escape, "</reset>") should equal("""Difference
-   |  +-----+---+-------+
-   |  | name|age|country|
-   |1:|<gray>  bob|  1|     uk</reset>|:1
-   |2:|<gray> null|  5|   peru</reset>|:2
-   |3:|<red> null<gray>| 10|    aus</reset>|:3
-   |3:|<green>steve<gray>| 10|    aus</reset>|:3
-   |  +-----+---+-------+
-   |""".stripMargin)
+    val expected = """Difference
+                     |  +-----+---+-------+
+                     |  | name|age|country|
+                     |1:|[90m  bob|  1|     uk[39m|:1
+                     |2:|[90m null|  5|   peru[39m|:2
+                     |
+                     |3:|[31m null[90m| 10|    aus[39m|:3
+                     |3:|[32msteve[90m| 10|    aus[39m|:3
+                     |
+                     |  +-----+---+-------+
+                     |""".stripMargin
+    assert(e.getMessage == expected)
   }
 
   "works well for wide DataFrames" in {
