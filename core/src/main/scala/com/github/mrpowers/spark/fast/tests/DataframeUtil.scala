@@ -95,14 +95,13 @@ object DataframeUtil {
         }
       }
       .addString(sb, StringUtils.leftPad("|", indColWidth), "|", "|\n")
-    pad(diff, truncate, colWidths).zipWithIndex.map { case (diff @ (actual :: expected :: Nil), i) =>
+    pad(diff, truncate, colWidths).zipWithIndex.map { case (rowDiff @ (actual :: expected :: Nil), i) =>
       val indexString = StringUtils.leftPad(s"${i + 1}:|", indColWidth)
       sb.append(indexString)
       sb.append(actual)
       sb.append(s"|:${i + 1}\n")
-      val colors    = diff.flatMap(_.getColors).distinct.head
-      val rowsEqual = colors == DarkGray.applyMask
-      if (!rowsEqual) {
+      val rowsAreDifferent = rowDiff.flatMap(_.getColors).distinct.head != DarkGray.applyMask
+      if (rowsAreDifferent) {
         sb.append(indexString)
         sb.append(expected)
         sb.append(s"|:${i + 1}\n")
