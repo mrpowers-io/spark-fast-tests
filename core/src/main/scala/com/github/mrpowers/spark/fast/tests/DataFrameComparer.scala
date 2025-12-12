@@ -10,15 +10,15 @@ trait DataFrameComparer extends DatasetComparer {
    * Raises an error unless `actualDF` and `expectedDF` are equal
    */
   def assertSmallDataFrameEquality(
-                                    actualDF: DataFrame,
-                                    expectedDF: DataFrame,
-                                    ignoreNullable: Boolean = false,
-                                    ignoreColumnNames: Boolean = false,
-                                    orderedComparison: Boolean = true,
-                                    ignoreColumnOrder: Boolean = false,
-                                    ignoreMetadata: Boolean = true,
-                                    truncate: Int = 500,
-                                    outputFormat: DataframeDiffOutputFormat = DataframeDiffOutputFormat.SideBySide
+      actualDF: DataFrame,
+      expectedDF: DataFrame,
+      ignoreNullable: Boolean = false,
+      ignoreColumnNames: Boolean = false,
+      orderedComparison: Boolean = true,
+      ignoreColumnOrder: Boolean = false,
+      ignoreMetadata: Boolean = true,
+      truncate: Int = 500,
+      outputFormat: DataframeDiffOutputFormat = DataframeDiffOutputFormat.SideBySide
   ): Unit = {
     outputFormat match {
       case DataframeDiffOutputFormat.SideBySide =>
