@@ -3,12 +3,9 @@ package com.github.mrpowers.spark.fast.tests
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
 import com.github.mrpowers.spark.fast.tests.SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.TestUtilsExt.ExceptionOps
-import com.github.mrpowers.spark.fast.tests.ufansi.Color.{DarkGray, Green, Red, Reset}
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.types._
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.must.Matchers.equal
-import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 import java.time.Instant
 
@@ -45,8 +42,75 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     assert(e.getMessage.indexOf("bob") >= 0)
     assert(e.getMessage.indexOf("camila") >= 0)
   }
+  "Correctly mark unequal elements side by side view" in {
+    val sourceDF = spark.createDF(
+      List(
+        ("bob", 1, "uk"),
+        ("camila", 5, "peru"),
+        ("steve", 10, "aus")
+      ),
+      List(
+        ("name", StringType, true),
+        ("age", IntegerType, true),
+        ("country", StringType, true)
+      )
+    )
 
-  "Correctly mark unequal elements" in {
+    val expectedDF = spark.createDF(
+      List(
+        ("bob", 1, "france"),
+        ("camila", 5, "peru"),
+        ("mark", 11, "usa")
+      ),
+      List(
+        ("name", StringType, true),
+        ("age", IntegerType, true),
+        ("country", StringType, true)
+      )
+    )
+
+    val e = intercept[DatasetContentMismatch] {
+      assertSmallDataFrameEquality(expectedDF, sourceDF)
+    }
+
+    e.assertColorDiff(Seq("france", "[mark,11,usa]"), Seq("uk", "[steve,10,aus]"))
+  }
+
+  "Can handle unequal Dataframe containing null side by side view" in {
+    val sourceDF = spark.createDF(
+      List(
+        ("bob", 1, "uk"),
+        (null, 5, "peru"),
+        ("steve", 10, "aus")
+      ),
+      List(
+        ("name", StringType, true),
+        ("age", IntegerType, true),
+        ("country", StringType, true)
+      )
+    )
+
+    val expectedDF = spark.createDF(
+      List(
+        ("bob", 1, "uk"),
+        (null, 5, "peru"),
+        (null, 10, "aus")
+      ),
+      List(
+        ("name", StringType, true),
+        ("age", IntegerType, true),
+        ("country", StringType, true)
+      )
+    )
+
+    val e = intercept[DatasetContentMismatch] {
+      assertSmallDataFrameEquality(expectedDF, sourceDF)
+    }
+
+    e.assertColorDiff(Seq("null"), Seq("steve"))
+  }
+
+  "Correctly mark unequal elements separate lines view separate lines view" in {
     val sourceDF = spark.createDF(
       List(
         ("bob", 1, "uk"),
@@ -78,18 +142,17 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     }
     val expected =
       """|Difference
-        |  +------+---+-------+
-        |  |  name|age|country|
-        |1:|[90m   bob|  1|[31m france[39m|:1
-        |1:|[90m   bob|  1|[32m     uk[39m|:1
-        |
-        |2:|[90mcamila|  5|   peru[39m|:2
-        |
-        |3:|[31m  mark| 11|    usa[39m|:3
-        |3:|[32m steve| 10|    aus[39m|:3
-        |
-        |  +------+---+-------+
-        |""".stripMargin
+         |  +------+---+-------+
+         |  |  name|age|country|
+         |1:|[90m   bob|  1|[31m france[39m|:1
+         |1:|[90m   bob|  1|[32m     uk[39m|:1
+         |
+         |2:|[90mcamila|  5|   peru[39m|:2
+         |
+         |3:|[31m  mark| 11|    usa[39m|:3
+         |3:|[32m steve| 10|    aus[39m|:3
+         |  +------+---+-------+
+         |""".stripMargin
     assert(e.getMessage == expected)
 
   }
@@ -132,7 +195,6 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
                      |
                      |3:|[31m null[90m| 10|    aus[39m|:3
                      |3:|[32msteve[90m| 10|    aus[39m|:3
-                     |
                      |  +-----+---+-------+
                      |""".stripMargin
     assert(e.getMessage == expected)

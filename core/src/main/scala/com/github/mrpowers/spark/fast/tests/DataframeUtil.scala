@@ -105,9 +105,10 @@ object DataframeUtil {
         sb.append(indexString)
         sb.append(expected)
         sb.append(s"|:${i + 1}\n")
-        sb.append("\n")
+        if (i < diff.length - 1)
+          sb.append("\n")
       } else if (i < diff.length - 1 && !fullJoinWithEquals(i + 1)._3) {
-        //if current rows are equal and next ones are not
+        // if current rows are equal and next ones are not
         sb.append("\n")
       }
     }
