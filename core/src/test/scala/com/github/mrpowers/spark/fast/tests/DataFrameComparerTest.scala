@@ -27,6 +27,8 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     val expectedDF = spark.createDF(
       List(
         ("bob", 1, "france"),
+        ("bob", 1, "france"),
+        ("bob", 1, "france"),
         ("camila", 5, "peru")
       ),
       List(
@@ -42,7 +44,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     assert(e.getMessage.indexOf("bob") >= 0)
     assert(e.getMessage.indexOf("camila") >= 0)
   }
-  "Correctly mark unequal elements side by side view" in {
+  "Correctly mark unequal elements - side by side view" in {
     val sourceDF = spark.createDF(
       List(
         ("bob", 1, "uk"),
@@ -70,13 +72,13 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     )
 
     val e = intercept[DatasetContentMismatch] {
-      assertSmallDataFrameEquality(expectedDF, sourceDF)
+      assertSmallDataFrameEquality(sourceDF, expectedDF)
     }
 
-    e.assertColorDiff(Seq("france", "[mark,11,usa]"), Seq("uk", "[steve,10,aus]"))
+    e.assertColorDiff(Seq("uk", "[steve,10,aus]"), Seq("france", "[mark,11,usa]"))
   }
 
-  "Can handle unequal Dataframe containing null side by side view" in {
+  "Can handle unequal Dataframe containing null - side by side view" in {
     val sourceDF = spark.createDF(
       List(
         ("bob", 1, "uk"),
@@ -104,13 +106,13 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     )
 
     val e = intercept[DatasetContentMismatch] {
-      assertSmallDataFrameEquality(expectedDF, sourceDF)
+      assertSmallDataFrameEquality(sourceDF, expectedDF)
     }
 
-    e.assertColorDiff(Seq("null"), Seq("steve"))
+    e.assertColorDiff(Seq("steve"), Seq("null"))
   }
 
-  "Correctly mark unequal elements separate lines view separate lines view" in {
+  "Correctly mark unequal elements separate lines view - separate lines view" in {
     val sourceDF = spark.createDF(
       List(
         ("bob", 1, "uk"),
@@ -138,26 +140,26 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     )
 
     val e = intercept[DatasetContentMismatch] {
-      assertSmallDataFrameEquality(expectedDF, sourceDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
     }
     val expected =
       """|Difference
-         |  +------+---+-------+
-         |  |  name|age|country|
-         |1:|[90m   bob|  1|[31m france[39m|:1
-         |1:|[90m   bob|  1|[32m     uk[39m|:1
-         |
-         |2:|[90mcamila|  5|   peru[39m|:2
-         |
-         |3:|[31m  mark| 11|    usa[39m|:3
-         |3:|[32m steve| 10|    aus[39m|:3
-         |  +------+---+-------+
-         |""".stripMargin
+        |  +------+---+-------+
+        |  |  name|age|country|
+        |1:|[90m   bob|  1|[31m     uk[39m|:1
+        |1:|[90m   bob|  1|[32m france[39m|:1
+        |
+        |2:|[90mcamila|  5|   peru[39m|:2
+        |
+        |3:|[31m steve| 10|    aus[39m|:3
+        |3:|[32m  mark| 11|    usa[39m|:3
+        |  +------+---+-------+
+        |""".stripMargin
     assert(e.getMessage == expected)
 
   }
 
-  "Can handle unequal Dataframe containing null separate lines view" in {
+  "Can handle unequal Dataframe containing null - separate lines view" in {
     val sourceDF = spark.createDF(
       List(
         ("bob", 1, "uk"),
@@ -185,7 +187,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     )
 
     val e = intercept[DatasetContentMismatch] {
-      assertSmallDataFrameEquality(expectedDF, sourceDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
     }
     val expected = """Difference
                      |  +-----+---+-------+
@@ -193,8 +195,8 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
                      |1:|[90m  bob|  1|     uk[39m|:1
                      |2:|[90m null|  5|   peru[39m|:2
                      |
-                     |3:|[31m null[90m| 10|    aus[39m|:3
-                     |3:|[32msteve[90m| 10|    aus[39m|:3
+                     |3:|[31msteve[90m| 10|    aus[39m|:3
+                     |3:|[32m null[90m| 10|    aus[39m|:3
                      |  +-----+---+-------+
                      |""".stripMargin
     assert(e.getMessage == expected)
