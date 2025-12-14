@@ -247,6 +247,7 @@ class SchemaComparerTest extends AnyFreeSpec {
       val s1 = StructType(
         Seq(
           StructField("array", ArrayType(ArrayType(StringType, containsNull = true)), true),
+          StructField("field2", ArrayType(ArrayType(StringType, containsNull = true)), true),
           StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
           StructField("something", StringType, true),
           StructField(
@@ -276,6 +277,7 @@ class SchemaComparerTest extends AnyFreeSpec {
       val s2 = StructType(
         Seq(
           StructField("array", ArrayType(ArrayType(StringType, containsNull = true)), true),
+          StructField("field2", StringType, true),
           StructField("something", StringType, true),
           StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
           StructField(
@@ -308,23 +310,24 @@ class SchemaComparerTest extends AnyFreeSpec {
       }
       val expectedMessage = """Diffs
       |
-      |Actual Schema                                                  Expected Schema
-      |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                             \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mtrue\u001b[39m)                 \u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|--\u001b[39m \u001b[31mmap\u001b[39m : \u001b[31mmap\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                                 \u001b[90m|--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[31mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                        \u001b[90m|--\u001b[39m \u001b[32mmap\u001b[39m : \u001b[32mmap\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[31mstruct\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                           \u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[32mstruct\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|    |--\u001b[39m \u001b[31mmood\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[31mtrue\u001b[39m)                         \u001b[90m|    |--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[32mfalse\u001b[39m)
-      |\u001b[31m|    |    |--\u001b[39m \u001b[31melement\u001b[39m : \u001b[31mstring\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)           \u001b[32m|    |--\u001b[39m \u001b[32mmood\u001b[39m : \u001b[32marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[31m|    |--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[31mfalse\u001b[39m)                  \u001b[32m|    |    |--\u001b[39m \u001b[32melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)
-      |\u001b[90m|    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)                 \u001b[90m|    |--\u001b[39m \u001b[32msomething3\u001b[39m : \u001b[32mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
-      |\u001b[90m|    |    |--\u001b[39m \u001b[31mmood2\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                   \u001b[90m|    |    |--\u001b[39m \u001b[32mmood3\u001b[39m : \u001b[32marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[31mdouble\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)      \u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[32mstring\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)
-      |\u001b[31m|    |    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)            \u001b[32m|--\u001b[39m \u001b[32mnorma2\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
-      |""".stripMargin
-
-      println(e.getMessage)
-      println(expectedMessage)
+      |Actual Schema                                                   Expected Schema
+      |\u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = true)\u001b[39m                           \u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|    |--\u001b[39m \u001b[31mmood\u001b[39m : \u001b[31marray\u001b[39m \u001b[31m(nullable = true)\u001b[39m                         \u001b[90m|    |--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m \u001b[32m(nullable = false)\u001b[39m
+      |\u001b[90m|    |--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[31mstring\u001b[39m \u001b[31m(nullable = false)\u001b[39m                  \u001b[90m|    |--\u001b[39m \u001b[32mmood\u001b[39m : \u001b[32marray\u001b[39m \u001b[32m(nullable = true)\u001b[39m
+      |\u001b[90m|    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = false)\u001b[39m                 \u001b[90m|    |--\u001b[39m \u001b[32msomething3\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = false)\u001b[39m
+      |\u001b[90m|    |    |--\u001b[39m \u001b[31mmood2\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m                   \u001b[90m|    |    |--\u001b[39m \u001b[32mmood3\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = false)\u001b[39m       \u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = false)\u001b[39m
+      |\u001b[90m|    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[31mdouble\u001b[39m \u001b[90m(nullable = true)\u001b[39m      \u001b[90m|    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[32mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[31m|    |    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstring\u001b[39m \u001b[31m(nullable = false)\u001b[39m
+      |\u001b[90m|--\u001b[39m \u001b[90mfield2\u001b[39m : \u001b[31marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m                            \u001b[90m|--\u001b[39m \u001b[90mfield2\u001b[39m : \u001b[32mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m                             \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = true)\u001b[39m                  \u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = true)\u001b[39m
+      |\u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = true)\u001b[39m             \u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = true)\u001b[39m
+      |\u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m           \u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|--\u001b[39m \u001b[31mmap\u001b[39m : \u001b[31mmap\u001b[39m \u001b[90m(nullable = true)\u001b[39m                                 \u001b[90m|--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[31mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m                        \u001b[90m|--\u001b[39m \u001b[32mmap\u001b[39m : \u001b[32mmap\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |                                                                \u001b[32m|--\u001b[39m \u001b[32mnorma2\u001b[39m : \u001b[32mstring\u001b[39m \u001b[32m(nullable = false)\u001b[39m
+      |""".stripMargin.replaceAll("\r\n", "\n")
 
       assert(e.getMessage == expectedMessage)
     }
@@ -394,23 +397,30 @@ class SchemaComparerTest extends AnyFreeSpec {
       }
       val expectedMessage = """Diffs
                               |
-                              |Actual Schema                                                  Expected Schema
-                              |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                             \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-                              |\u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mtrue\u001b[39m)                 \u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mtrue\u001b[39m)
-                              |\u001b[90m|--\u001b[39m \u001b[31mmap\u001b[39m : \u001b[31mmap\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                                 \u001b[90m|--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-                              |\u001b[90m|--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[31mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                        \u001b[90m|--\u001b[39m \u001b[32mmap\u001b[39m : \u001b[32mmap\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-                              |\u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[31mstruct\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                           \u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[32mstruct\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-                              |\u001b[90m|    |--\u001b[39m \u001b[31mmood\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[31mtrue\u001b[39m)                         \u001b[90m|    |--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[32mfalse\u001b[39m)
-                              |\u001b[31m|    |    |--\u001b[39m \u001b[31melement\u001b[39m : \u001b[31mstring\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)           \u001b[32m|    |--\u001b[39m \u001b[32mmood\u001b[39m : \u001b[32marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-                              |\u001b[31m|    |--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[31mfalse\u001b[39m)                  \u001b[32m|    |    |--\u001b[39m \u001b[32melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)
-                              |\u001b[90m|    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)                 \u001b[90m|    |--\u001b[39m \u001b[32msomething3\u001b[39m : \u001b[32mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
-                              |\u001b[90m|    |    |--\u001b[39m \u001b[31mmood2\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                   \u001b[90m|    |    |--\u001b[39m \u001b[32mmood3\u001b[39m : \u001b[32marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-                              |\u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[31mdouble\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)      \u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[32mstring\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)
-                              |\u001b[31m|    |    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)            \u001b[32m|--\u001b[39m \u001b[32mnorma2\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
-                              |""".stripMargin
-
-      println(e.getMessage)
-      println(expectedMessage)
+                              |Actual Schema                                              Expected Schema
+                              |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m                        \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+                              |\u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = true)\u001b[39m             \u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = true)\u001b[39m
+                              |\u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m           \u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+                              |\u001b[90m|--\u001b[39m \u001b[90mmap\u001b[39m : \u001b[90mmap\u001b[39m \u001b[90m(nullable = true)\u001b[39m                            \u001b[90m|--\u001b[39m \u001b[90mmap\u001b[39m : \u001b[90mmap\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+                              |\u001b[90m|    |--\u001b[39m \u001b[90mkey\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m                    \u001b[90m|    |--\u001b[39m \u001b[90mkey\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+                              |\u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m           \u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+                              |\u001b[90m|    |--\u001b[39m \u001b[90mvalue\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m                  \u001b[90m|    |--\u001b[39m \u001b[90mvalue\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+                              |\u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m           \u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+                              |\u001b[90m|--\u001b[39m \u001b[90msomething\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m                   \u001b[90m|--\u001b[39m \u001b[90msomething\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+                              |\u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = true)\u001b[39m                      \u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+                              |\u001b[90m|    |--\u001b[39m \u001b[90mmood\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m                    \u001b[90m|    |--\u001b[39m \u001b[90mmood\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+                              |\u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = false)\u001b[39m       \u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = false)\u001b[39m
+                              |\u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m      \u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+                              |\u001b[90m|    |--\u001b[39m \u001b[90msomething\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = false)\u001b[39m             \u001b[90m|    |--\u001b[39m \u001b[90msomething\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = false)\u001b[39m
+                              |\u001b[31m|    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstruct\u001b[39m \u001b[31m(nullable = false)\u001b[39m
+                              |\u001b[31m|    |    |--\u001b[39m \u001b[31mmood2\u001b[39m : \u001b[31marray\u001b[39m \u001b[31m(nullable = true)\u001b[39m
+                              |\u001b[31m|    |    |    |--\u001b[39m \u001b[31melement\u001b[39m : \u001b[31mdouble\u001b[39m \u001b[31m(nullable = true)\u001b[39m
+                              |\u001b[31m|    |    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstring\u001b[39m \u001b[31m(nullable = false)\u001b[39m
+                              |                                                           \u001b[32m|    |--\u001b[39m \u001b[32msomething3\u001b[39m : \u001b[32mstruct\u001b[39m \u001b[32m(nullable = false)\u001b[39m
+                              |                                                           \u001b[32m|    |    |--\u001b[39m \u001b[32mmood3\u001b[39m : \u001b[32marray\u001b[39m \u001b[32m(nullable = true)\u001b[39m
+                              |                                                           \u001b[32m|    |    |    |--\u001b[39m \u001b[32melement\u001b[39m : \u001b[32mstring\u001b[39m \u001b[32m(nullable = true)\u001b[39m
+                              |                                                           \u001b[32m|--\u001b[39m \u001b[32mnorma2\u001b[39m : \u001b[32mstring\u001b[39m \u001b[32m(nullable = false)\u001b[39m
+                              |""".stripMargin.replaceAll("\r\n", "\n")
 
       assert(e.getMessage == expectedMessage)
     }
@@ -426,7 +436,6 @@ class SchemaComparerTest extends AnyFreeSpec {
           StructField("array", ArrayType(StructType(Seq(StructField("arrayChild2", IntegerType))), containsNull = false), true)
         )
       )
-      s1.printTreeString()
 
       val e = intercept[DatasetSchemaMismatch] {
         SchemaComparer.assertSchemaEqual(s1, s2, ignoreColumnOrder = false, outputFormat = SchemaDiffOutputFormat.Tree)
@@ -434,11 +443,11 @@ class SchemaComparerTest extends AnyFreeSpec {
 
       val expectedMessage = """Diffs
       |
-      |Actual Schema                                            Expected Schema
-      |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                       \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[32marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[31mstruct\u001b[39m (containsNull = \u001b[31mtrue\u001b[39m)           \u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[32mstruct\u001b[39m (containsNull = \u001b[32mfalse\u001b[39m)
-      |\u001b[90m|    |    |--\u001b[39m \u001b[31marrayChild1\u001b[39m : \u001b[31mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)      \u001b[90m|    |    |--\u001b[39m \u001b[32marrayChild2\u001b[39m : \u001b[32minteger\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |""".stripMargin
+      |Actual Schema                                             Expected Schema
+      |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m                       \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[31m(containsNull = true)\u001b[39m            \u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[32m(containsNull = false)\u001b[39m
+      |\u001b[90m|    |    |--\u001b[39m \u001b[31marrayChild1\u001b[39m : \u001b[31mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m      \u001b[90m|    |    |--\u001b[39m \u001b[32marrayChild2\u001b[39m : \u001b[32minteger\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |""".stripMargin.replaceAll("\r\n", "\n")
 
       assert(e.getMessage == expectedMessage)
     }
@@ -454,7 +463,6 @@ class SchemaComparerTest extends AnyFreeSpec {
           StructField("array", ArrayType(ArrayType(StructType(Seq(StructField("arrayChild2", IntegerType))), containsNull = false)))
         )
       )
-      s1.printTreeString()
 
       val e = intercept[DatasetSchemaMismatch] {
         SchemaComparer.assertSchemaEqual(s1, s2, ignoreColumnOrder = false, outputFormat = SchemaDiffOutputFormat.Tree)
@@ -462,12 +470,12 @@ class SchemaComparerTest extends AnyFreeSpec {
 
       val expectedMessage = """Diffs
       |
-      |Actual Schema                                                 Expected Schema
-      |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                            \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[32marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[31marray\u001b[39m (containsNull = \u001b[90mtrue\u001b[39m)                 \u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[32marray\u001b[39m (containsNull = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[31mstruct\u001b[39m (containsNull = \u001b[31mtrue\u001b[39m)           \u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[32mstruct\u001b[39m (containsNull = \u001b[32mfalse\u001b[39m)
-      |\u001b[90m|    |    |    |--\u001b[39m \u001b[31marrayChild1\u001b[39m : \u001b[31mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)      \u001b[90m|    |    |    |--\u001b[39m \u001b[32marrayChild2\u001b[39m : \u001b[32minteger\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |""".stripMargin
+      |Actual Schema                                                  Expected Schema
+      |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m                            \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = true)\u001b[39m                 \u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = true)\u001b[39m
+      |\u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[31m(containsNull = true)\u001b[39m            \u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[32m(containsNull = false)\u001b[39m
+      |\u001b[90m|    |    |    |--\u001b[39m \u001b[31marrayChild1\u001b[39m : \u001b[31mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m      \u001b[90m|    |    |    |--\u001b[39m \u001b[32marrayChild2\u001b[39m : \u001b[32minteger\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |""".stripMargin.replaceAll("\r\n", "\n")
 
       assert(e.getMessage == expectedMessage)
     }
@@ -483,7 +491,6 @@ class SchemaComparerTest extends AnyFreeSpec {
           StructField("array", ArrayType(IntegerType, containsNull = true), true)
         )
       )
-      s1.printTreeString()
 
       val e = intercept[DatasetSchemaMismatch] {
         SchemaComparer.assertSchemaEqual(s1, s2, ignoreColumnOrder = false, outputFormat = SchemaDiffOutputFormat.Tree)
@@ -491,10 +498,11 @@ class SchemaComparerTest extends AnyFreeSpec {
 
       val expectedMessage = """Diffs
       |
-      |Actual Schema                                        Expected Schema
-      |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                  \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[32marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[31mstring\u001b[39m (containsNull = \u001b[90mtrue\u001b[39m)      \u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[32minteger\u001b[39m (containsNull = \u001b[90mtrue\u001b[39m)
-      |""".stripMargin
+      |Actual Schema                                         Expected Schema
+      |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m                   \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = true)\u001b[39m        \u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = true)\u001b[39m
+      |\u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[31mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m      \u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[32minteger\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |""".stripMargin.replaceAll("\r\n", "\n")
 
       assert(e.getMessage == expectedMessage)
     }

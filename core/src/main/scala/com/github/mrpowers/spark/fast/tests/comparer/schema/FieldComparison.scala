@@ -69,18 +69,18 @@ object FieldComparison {
 
       // Array types
       case (Some(l: ArrayType), Some(r: ArrayType)) =>
-        if (isTopLevel) {
-          buildChildComparisons(Some(l.elementType), Some(r.elementType), isTopLevel = false, matchFieldByName)
-        } else {
-          Seq(
-            FieldComparison(
-              ELEMENT,
-              Some(FieldInfo(l)),
-              Some(FieldInfo(r)),
-              buildChildComparisons(Some(l.elementType), Some(r.elementType), isTopLevel = false, matchFieldByName)
-            )
+//        if (isTopLevel) {
+//          buildChildComparisons(Some(l.elementType), Some(r.elementType), isTopLevel = false, matchFieldByName)
+//        } else {
+        Seq(
+          FieldComparison(
+            ELEMENT,
+            Some(FieldInfo(l)),
+            Some(FieldInfo(r)),
+            buildChildComparisons(Some(l.elementType), Some(r.elementType), isTopLevel = false, matchFieldByName)
           )
-        }
+        )
+//        }
 
       case (Some(l: ArrayType), None) =>
         if (isTopLevel) {
@@ -205,7 +205,13 @@ object FieldComparison {
       ignoreNullable: Boolean = false,
       ignoreMetadata: Boolean = true
   ): String = {
-    def getColoredFieldInfo(fieldInfo: Option[FieldInfo], fallbackName: String, indent: Int, color: EscapeAttr): String = {
+    def getColoredFieldInfo(
+        fieldInfo: Option[FieldInfo],
+        otherInfo: Option[FieldInfo],
+        fallbackName: String,
+        indent: Int,
+        isLeftSide: Boolean
+    ): String = {
       fieldInfo match {
         case None => ""
         case Some(info) =>
@@ -216,12 +222,34 @@ object FieldComparison {
           val containsNull = info.containsNull.map(cn => s"(containsNull = $cn)").getOrElse("")
           val description  = if (containsNull.nonEmpty) containsNull else nullable
 
-          val formattedPrefix = color(prefix).toString
-          val formattedName   = color(fieldName).toString
-          val formattedType   = color(typeName).toString
-          val formattedDesc   = if (description.nonEmpty) color(description).toString else ""
+          otherInfo match {
+            case None =>
+              val color           = if (isLeftSide) Red else Green
+              val formattedPrefix = color(prefix).toString
+              val formattedName   = color(fieldName).toString
+              val formattedType   = color(typeName).toString
+              val formattedDesc   = if (description.nonEmpty) color(description).toString else ""
+              s"$formattedPrefix $formattedName : $formattedType $formattedDesc"
 
-          s"$formattedPrefix $formattedName : $formattedType $formattedDesc"
+            case Some(other) =>
+              val prefixColor     = DarkGray
+              val formattedPrefix = prefixColor(prefix).toString
+
+              val nameColor     = if (info.name == other.name) DarkGray else (if (isLeftSide) Red else Green)
+              val formattedName = nameColor(fieldName).toString
+
+              val typeColor     = if (info.typeName == other.typeName) DarkGray else (if (isLeftSide) Red else Green)
+              val formattedType = typeColor(typeName).toString
+
+              val formattedDesc = if (description.nonEmpty) {
+                val descMatches = (info.nullable == other.nullable || ignoreNullable) &&
+                  info.containsNull == other.containsNull
+                val descColor = if (descMatches) DarkGray else (if (isLeftSide) Red else Green)
+                descColor(description).toString
+              } else ""
+
+              s"$formattedPrefix $formattedName : $formattedType $formattedDesc"
+          }
       }
     }
 
@@ -242,7 +270,7 @@ object FieldComparison {
         if (comps.isEmpty) 0
         else {
           val widths = comps.map { fc =>
-            val leftStr       = getColoredFieldInfo(fc.leftInfo, fc.name, currentIndent, DarkGray)
+            val leftStr       = getColoredFieldInfo(fc.leftInfo, fc.rightInfo, fc.name, currentIndent, isLeftSide = true)
             val plainLeftStr  = leftStr.replaceAll("\u001b\\[[0-9;]*m", "")
             val currentWidth  = plainLeftStr.length
             val childrenWidth = if (fc.children.nonEmpty) calculateMaxWidth(fc.children, currentIndent + 1) else 0
@@ -256,25 +284,8 @@ object FieldComparison {
 
       def buildOutput(comps: Seq[FieldComparison], currentIndent: Int, sb: StringBuilder): StringBuilder = {
         comps.foreach { fc =>
-          val areEqual = areFieldInfoEqual(fc.leftInfo, fc.rightInfo)
-
-          val leftStr = if (areEqual) {
-            getColoredFieldInfo(fc.leftInfo, fc.name, currentIndent, DarkGray)
-          } else {
-            fc.leftInfo match {
-              case Some(_) => getColoredFieldInfo(fc.leftInfo, fc.name, currentIndent, Red)
-              case None    => ""
-            }
-          }
-
-          val rightStr = if (areEqual) {
-            getColoredFieldInfo(fc.rightInfo, fc.name, currentIndent, DarkGray)
-          } else {
-            fc.rightInfo match {
-              case Some(_) => getColoredFieldInfo(fc.rightInfo, fc.name, currentIndent, Green)
-              case None    => ""
-            }
-          }
+          val leftStr  = getColoredFieldInfo(fc.leftInfo, fc.rightInfo, fc.name, currentIndent, isLeftSide = true)
+          val rightStr = getColoredFieldInfo(fc.rightInfo, fc.leftInfo, fc.name, currentIndent, isLeftSide = false)
 
           // Calculate padding based on max width
           val schemaGap = maxWidth + TREE_GAP
