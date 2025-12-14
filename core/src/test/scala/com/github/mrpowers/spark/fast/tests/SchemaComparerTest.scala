@@ -611,33 +611,36 @@ class SchemaComparerTest extends AnyFreeSpec {
       }
       val expectedMessage = """Diffs
       |
-      |Actual Schema                                                            Expected Schema
-      |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                                       \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mtrue\u001b[39m)                           \u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|--\u001b[39m \u001b[31mmap\u001b[39m : \u001b[31mmap\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                                           \u001b[90m|--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[31mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                                  \u001b[90m|--\u001b[39m \u001b[32mmap\u001b[39m : \u001b[32mmap\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[31mstruct\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                                     \u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[32mstruct\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|    |--\u001b[39m \u001b[31mmood\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[31mtrue\u001b[39m)                                   \u001b[90m|    |--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[32mfalse\u001b[39m)
-      |\u001b[31m|    |    |--\u001b[39m \u001b[31melement\u001b[39m : \u001b[31mstring\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)                     \u001b[32m|    |--\u001b[39m \u001b[32mmood\u001b[39m : \u001b[32marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[31m|    |--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[31mfalse\u001b[39m)                            \u001b[32m|    |    |--\u001b[39m \u001b[32melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)
-      |\u001b[90m|    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[90mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)                           \u001b[90m|    |--\u001b[39m \u001b[32msomething3\u001b[39m : \u001b[90mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
-      |\u001b[90m|    |    |--\u001b[39m \u001b[90mmood2\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                             \u001b[90m|    |    |--\u001b[39m \u001b[90mmood2\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mdouble\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)                \u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mdouble\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)
-      |\u001b[90m|    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)                      \u001b[90m|    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
-      |\u001b[90m|    |    |    |--\u001b[39m \u001b[90mmood\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                         \u001b[90m|    |    |    |--\u001b[39m \u001b[90mmood\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)           \u001b[90m|    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)
-      |\u001b[90m|    |    |    |--\u001b[39m \u001b[90msomething\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)                  \u001b[90m|    |    |    |--\u001b[39m \u001b[90msomething\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
-      |\u001b[90m|    |    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)                 \u001b[90m|    |    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
-      |\u001b[90m|    |    |    |    |--\u001b[39m \u001b[90mmood2\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                   \u001b[90m|    |    |    |    |--\u001b[39m \u001b[90mmood2\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-      |\u001b[90m|    |    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mdouble\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)      \u001b[90m|    |    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mdouble\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)
-      |\u001b[90m|    |    |    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)            \u001b[90m|    |    |    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
-      |                                                                          \u001b[90m|--\u001b[39m \u001b[32mnorma2\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[32mfalse\u001b[39m)
-      |""".stripMargin
+      |Actual Schema                                                             Expected Schema
+      |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m                                       \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = true)\u001b[39m                            \u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = true)\u001b[39m
+      |\u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m                          \u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|--\u001b[39m \u001b[31mmap\u001b[39m : \u001b[31mmap\u001b[39m \u001b[90m(nullable = true)\u001b[39m                                           \u001b[90m|--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[31mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m                                  \u001b[90m|--\u001b[39m \u001b[32mmap\u001b[39m : \u001b[32mmap\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = true)\u001b[39m                                     \u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|    |--\u001b[39m \u001b[31mmood\u001b[39m : \u001b[31marray\u001b[39m \u001b[31m(nullable = true)\u001b[39m                                   \u001b[90m|    |--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m \u001b[32m(nullable = false)\u001b[39m
+      |\u001b[90m|    |--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[31mstring\u001b[39m \u001b[31m(nullable = false)\u001b[39m                            \u001b[90m|    |--\u001b[39m \u001b[32mmood\u001b[39m : \u001b[32marray\u001b[39m \u001b[32m(nullable = true)\u001b[39m
+      |\u001b[90m|    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = false)\u001b[39m                           \u001b[90m|    |--\u001b[39m \u001b[32msomething3\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = false)\u001b[39m
+      |\u001b[90m|    |    |--\u001b[39m \u001b[90mmood2\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m                             \u001b[90m|    |    |--\u001b[39m \u001b[90mmood2\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = false)\u001b[39m                 \u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = false)\u001b[39m
+      |\u001b[90m|    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mdouble\u001b[39m \u001b[90m(nullable = true)\u001b[39m                \u001b[90m|    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mdouble\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = false)\u001b[39m                      \u001b[90m|    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = false)\u001b[39m
+      |\u001b[90m|    |    |    |--\u001b[39m \u001b[90mmood\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m                         \u001b[90m|    |    |    |--\u001b[39m \u001b[90mmood\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = false)\u001b[39m            \u001b[90m|    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = false)\u001b[39m
+      |\u001b[90m|    |    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m           \u001b[90m|    |    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|    |    |    |--\u001b[39m \u001b[90msomething\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = false)\u001b[39m                  \u001b[90m|    |    |    |--\u001b[39m \u001b[90msomething\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = false)\u001b[39m
+      |\u001b[90m|    |    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = false)\u001b[39m                 \u001b[90m|    |    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = false)\u001b[39m
+      |\u001b[90m|    |    |    |    |--\u001b[39m \u001b[90mmood2\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m                   \u001b[90m|    |    |    |    |--\u001b[39m \u001b[90mmood2\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|    |    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = false)\u001b[39m       \u001b[90m|    |    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = false)\u001b[39m
+      |\u001b[90m|    |    |    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mdouble\u001b[39m \u001b[90m(nullable = true)\u001b[39m      \u001b[90m|    |    |    |    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mdouble\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+      |\u001b[90m|    |    |    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = false)\u001b[39m            \u001b[90m|    |    |    |    |--\u001b[39m \u001b[90msomething2\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = false)\u001b[39m
+      |                                                                          \u001b[32m|--\u001b[39m \u001b[32mnorma2\u001b[39m : \u001b[32mstring\u001b[39m \u001b[32m(nullable = false)\u001b[39m
+      |""".stripMargin.replaceAll("\r\n", "\n")
 
       assert(e.getMessage == expectedMessage)
     }
 
-    "display schema diff as tree with more actual Column 2" in {
+    "display schema diff for wide tree with ignoreColumnOrder" in {
       val s1 = StructType(
         Seq(
           StructField("array", ArrayType(StringType, containsNull = true), true),
@@ -714,31 +717,40 @@ class SchemaComparerTest extends AnyFreeSpec {
       )
 
       val e = intercept[DatasetSchemaMismatch] {
-        SchemaComparer.assertSchemaEqual(s1, s2, ignoreColumnOrder = false, outputFormat = SchemaDiffOutputFormat.Tree)
+        SchemaComparer.assertSchemaEqual(s1, s2, ignoreColumnOrder = true, outputFormat = SchemaDiffOutputFormat.Tree)
       }
 
       val expectedMessage = """Diffs
           |
-          |Actual Schema                                                            Expected Schema
-          |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                                       \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-          |\u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mtrue\u001b[39m)                           \u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mtrue\u001b[39m)
-          |\u001b[90m|--\u001b[39m \u001b[31mmap\u001b[39m : \u001b[31mmap\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                                           \u001b[90m|--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-          |\u001b[90m|--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[31mstring\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                                  \u001b[90m|--\u001b[39m \u001b[32mstruct\u001b[39m : \u001b[32mstruct\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-          |\u001b[31m|--\u001b[39m \u001b[31mstruct\u001b[39m : \u001b[31mstruct\u001b[39m (nullable = \u001b[31mtrue\u001b[39m)                                     \u001b[32m|    |--\u001b[39m \u001b[32msomething\u001b[39m : \u001b[32mstring\u001b[39m (nullable = \u001b[32mfalse\u001b[39m)
-          |\u001b[90m|    |--\u001b[39m \u001b[90mmood\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                                   \u001b[90m|    |--\u001b[39m \u001b[90mmood\u001b[39m : \u001b[90marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)
-          |\u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)                     \u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)
-          |\u001b[90m|    |--\u001b[39m \u001b[31msomething\u001b[39m : \u001b[31mstring\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)                            \u001b[90m|    |--\u001b[39m \u001b[32msomething3\u001b[39m : \u001b[32mstruct\u001b[39m (nullable = \u001b[90mfalse\u001b[39m)
-          |\u001b[31m|    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstruct\u001b[39m (nullable = \u001b[31mfalse\u001b[39m)                           \u001b[32m|    |    |--\u001b[39m \u001b[32mmood3\u001b[39m : \u001b[32marray\u001b[39m (nullable = \u001b[32mtrue\u001b[39m)
-          |\u001b[31m|    |    |--\u001b[39m \u001b[31mmood2\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[90mtrue\u001b[39m)                             \u001b[32m|    |    |    |--\u001b[39m \u001b[32melement\u001b[39m : \u001b[32mstring\u001b[39m (containsNull = \u001b[90mfalse\u001b[39m)
-          |\u001b[31m|    |    |    |--\u001b[39m \u001b[31melement\u001b[39m : \u001b[31mdouble\u001b[39m (containsNull = \u001b[31mfalse\u001b[39m)
-          |\u001b[31m|    |    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstruct\u001b[39m (nullable = \u001b[31mfalse\u001b[39m)
-          |\u001b[31m|    |    |    |--\u001b[39m \u001b[31mmood2\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[31mtrue\u001b[39m)
-          |\u001b[31m|    |    |    |    |--\u001b[39m \u001b[31melement\u001b[39m : \u001b[31mdouble\u001b[39m (containsNull = \u001b[31mfalse\u001b[39m)
-          |\u001b[31m|    |    |    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstruct\u001b[39m (nullable = \u001b[31mfalse\u001b[39m)
-          |\u001b[31m|    |    |    |    |--\u001b[39m \u001b[31mmood2\u001b[39m : \u001b[31marray\u001b[39m (nullable = \u001b[31mtrue\u001b[39m)
-          |\u001b[31m|    |    |    |    |    |--\u001b[39m \u001b[31melement\u001b[39m : \u001b[31mdouble\u001b[39m (containsNull = \u001b[31mfalse\u001b[39m)
-          |\u001b[31m|    |    |    |    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstring\u001b[39m (nullable = \u001b[31mfalse\u001b[39m)
-          |""".stripMargin
+          |Actual Schema                                                        Expected Schema
+          |\u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m                                  \u001b[90m|--\u001b[39m \u001b[90marray\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+          |\u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = true)\u001b[39m                       \u001b[90m|    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = true)\u001b[39m
+          |\u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m                     \u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+          |\u001b[31m|--\u001b[39m \u001b[31mmap\u001b[39m : \u001b[31mmap\u001b[39m \u001b[31m(nullable = true)\u001b[39m
+          |\u001b[31m|    |--\u001b[39m \u001b[31mkey\u001b[39m : \u001b[31mstring\u001b[39m \u001b[31m(nullable = true)\u001b[39m
+          |\u001b[31m|    |    |--\u001b[39m \u001b[31melement\u001b[39m : \u001b[31mstring\u001b[39m \u001b[31m(nullable = true)\u001b[39m
+          |\u001b[31m|    |--\u001b[39m \u001b[31mvalue\u001b[39m : \u001b[31mstring\u001b[39m \u001b[31m(nullable = true)\u001b[39m
+          |\u001b[31m|    |    |--\u001b[39m \u001b[31melement\u001b[39m : \u001b[31mstring\u001b[39m \u001b[31m(nullable = true)\u001b[39m
+          |\u001b[90m|--\u001b[39m \u001b[90msomething\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m                             \u001b[90m|--\u001b[39m \u001b[90msomething\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+          |\u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = true)\u001b[39m                                \u001b[90m|--\u001b[39m \u001b[90mstruct\u001b[39m : \u001b[90mstruct\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+          |\u001b[90m|    |--\u001b[39m \u001b[90mmood\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m                              \u001b[90m|    |--\u001b[39m \u001b[90mmood\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+          |\u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = false)\u001b[39m                 \u001b[90m|    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90marray\u001b[39m \u001b[90m(containsNull = false)\u001b[39m
+          |\u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m                \u001b[90m|    |    |    |--\u001b[39m \u001b[90melement\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = true)\u001b[39m
+          |\u001b[90m|    |--\u001b[39m \u001b[90msomething\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = false)\u001b[39m                       \u001b[90m|    |--\u001b[39m \u001b[90msomething\u001b[39m : \u001b[90mstring\u001b[39m \u001b[90m(nullable = false)\u001b[39m
+          |\u001b[31m|    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstruct\u001b[39m \u001b[31m(nullable = false)\u001b[39m
+          |\u001b[31m|    |    |--\u001b[39m \u001b[31mmood2\u001b[39m : \u001b[31marray\u001b[39m \u001b[31m(nullable = true)\u001b[39m
+          |\u001b[31m|    |    |    |--\u001b[39m \u001b[31melement\u001b[39m : \u001b[31mdouble\u001b[39m \u001b[31m(nullable = true)\u001b[39m
+          |\u001b[31m|    |    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstruct\u001b[39m \u001b[31m(nullable = false)\u001b[39m
+          |\u001b[31m|    |    |    |--\u001b[39m \u001b[31mmood2\u001b[39m : \u001b[31marray\u001b[39m \u001b[31m(nullable = true)\u001b[39m
+          |\u001b[31m|    |    |    |    |--\u001b[39m \u001b[31melement\u001b[39m : \u001b[31mdouble\u001b[39m \u001b[31m(nullable = true)\u001b[39m
+          |\u001b[31m|    |    |    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstruct\u001b[39m \u001b[31m(nullable = false)\u001b[39m
+          |\u001b[31m|    |    |    |    |--\u001b[39m \u001b[31mmood2\u001b[39m : \u001b[31marray\u001b[39m \u001b[31m(nullable = true)\u001b[39m
+          |\u001b[31m|    |    |    |    |    |--\u001b[39m \u001b[31melement\u001b[39m : \u001b[31mdouble\u001b[39m \u001b[31m(nullable = true)\u001b[39m
+          |\u001b[31m|    |    |    |    |--\u001b[39m \u001b[31msomething2\u001b[39m : \u001b[31mstring\u001b[39m \u001b[31m(nullable = false)\u001b[39m
+          |                                                                     \u001b[32m|    |--\u001b[39m \u001b[32msomething3\u001b[39m : \u001b[32mstruct\u001b[39m \u001b[32m(nullable = false)\u001b[39m
+          |                                                                     \u001b[32m|    |    |--\u001b[39m \u001b[32mmood3\u001b[39m : \u001b[32marray\u001b[39m \u001b[32m(nullable = true)\u001b[39m
+          |                                                                     \u001b[32m|    |    |    |--\u001b[39m \u001b[32melement\u001b[39m : \u001b[32mstring\u001b[39m \u001b[32m(nullable = true)\u001b[39m
+          |""".stripMargin.replaceAll("\r\n", "\n")
 
       assert(e.getMessage == expectedMessage)
     }
