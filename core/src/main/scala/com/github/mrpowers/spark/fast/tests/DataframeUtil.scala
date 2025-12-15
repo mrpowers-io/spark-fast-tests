@@ -2,26 +2,33 @@ package com.github.mrpowers.spark.fast.tests
 
 import com.github.mrpowers.spark.fast.tests.ufansi.Color.{DarkGray, Green, Red}
 import com.github.mrpowers.spark.fast.tests.ufansi.FansiExtensions.StrOps
-import com.github.mrpowers.spark.fast.tests.ufansi.{EscapeAttr, Str}
+import com.github.mrpowers.spark.fast.tests.ufansi.Str
 import org.apache.commons.lang3.StringUtils
 import org.apache.spark.sql.Row
 
 object DataframeUtil {
+  private val EmptyStr = Str("")
   private[mrpowers] def showDataframeDiff(
       actual: Array[Row],
       expected: Array[Row],
+      fieldNames: Array[String],
       truncate: Int = 20,
       minColWidth: Int = 3
   ): String = {
-
-    val sb          = new StringBuilder
-    val fields      = actual.head.schema.fieldNames
-    val rowWidths   = getColWidths(fields, actual.toSeq ++ expected.toSeq)
-    val indexes     = actual.indices.map(v => v + 1).map(_.toString + ":")
-    val indColWidth = indexes.map(_.length).max + 1
+    val sb        = new StringBuilder
+    val rowWidths = getColWidths(fieldNames, actual.toSeq ++ expected.toSeq)
+    // needed to calculate padding for other elements
+    val largestIndexOffset = {
+      if (actual.isEmpty && expected.isEmpty) 0
+      else {
+        val maxIndex     = Math.max(actual.length, expected.length) - 1
+        val largestIndex = maxIndex.toString + ":" // Largest index that is visible on the side. Like `100:`
+        largestIndex.length + 1
+      }
+    }
 
     val fullJoinWithEquals = actual
-      .zipAll(expected, Row(), Row())
+      .zipAll(expected, Row.empty, Row.empty)
       .map { case (actualRow, expectedRow) => (actualRow, expectedRow, actualRow.equals(expectedRow)) }
     val diff = fullJoinWithEquals.map { case (actualRow, expectedRow, rowsAreEqual) =>
       val paddedActualRow   = pad(actualRow, truncate, rowWidths)
@@ -33,11 +40,11 @@ object DataframeUtil {
         val expectedSeq = expectedRow.toSeq
         if (actualSeq.isEmpty)
           List(
-            Red(" " * rowWidths.sum),
+            EmptyStr,
             Green(paddedExpectedRow.mkString("", "|", ""))
           )
         else if (expectedSeq.isEmpty)
-          List(Red(paddedActualRow.mkString("", "|", "")), Green("" * rowWidths.sum))
+          List(Red(paddedActualRow.mkString("", "|", "")), EmptyStr)
         else {
           val withEquals = actualSeq
             .zip(expectedSeq)
@@ -74,19 +81,18 @@ object DataframeUtil {
       }
     }
 
-    val leftPaddedFields      = pad(fields, truncate, rowWidths)
-    val fieldsHeader          = List(leftPaddedFields.mkString("|"))
+    val headerWithLeftPadding = pad(fieldNames, truncate, rowWidths)
+    val headerFields          = List(headerWithLeftPadding.mkString("|"))
     val colWidths: Array[Int] = getColWidths(minColWidth, diff)
 
-    // Create SeparateLine
-    val sep: String =
+    val separatorLine: String =
       rowWidths
         .map("-" * _)
-        .mkString(StringUtils.leftPad("+", indColWidth), "+", "+\n")
+        .mkString(StringUtils.leftPad("+", largestIndexOffset), "+", "+\n")
 
-    sb.append(sep)
+    sb.append(separatorLine)
 
-    fieldsHeader.zipWithIndex
+    headerFields.zipWithIndex
       .map { case (cell, i) =>
         if (truncate > 0) {
           StringUtils.leftPad(cell, colWidths(i))
@@ -94,17 +100,21 @@ object DataframeUtil {
           StringUtils.rightPad(cell, colWidths(i))
         }
       }
-      .addString(sb, StringUtils.leftPad("|", indColWidth), "|", "|\n")
-    pad(diff, truncate, colWidths).zipWithIndex.map { case (actual :: expected :: Nil, i) =>
-      val indexString = StringUtils.leftPad(s"${i + 1}:|", indColWidth)
-      sb.append(indexString)
-      sb.append(actual)
-      sb.append(s"|:${i + 1}\n")
+      .addString(sb, StringUtils.leftPad("|", largestIndexOffset), "|", "|\n")
+    diff.zipWithIndex.map { case (actual :: expected :: Nil, i) =>
+      def appendRow(row: Str, i: Int) = {
+        if (row.length == 0) sb
+        else {
+          val indexString = StringUtils.leftPad(s"${i + 1}:|", largestIndexOffset)
+          sb.append(indexString)
+          sb.append(row)
+          sb.append(s"|:${i + 1}\n")
+        }
+      }
+      appendRow(actual, i)
       val rowsAreDifferent = !fullJoinWithEquals(i)._3
       if (rowsAreDifferent) {
-        sb.append(indexString)
-        sb.append(expected)
-        sb.append(s"|:${i + 1}\n")
+        appendRow(expected, i)
         if (i < diff.length - 1)
           sb.append("\n")
       } else if (i < diff.length - 1 && !fullJoinWithEquals(i + 1)._3) {
@@ -112,7 +122,7 @@ object DataframeUtil {
         sb.append("\n")
       }
     }
-    sb.append(sep).toString()
+    sb.append(separatorLine).toString()
   }
 
   private def pad(row: Row, truncate: Int, colWidths: Array[Int]): Seq[String] =
@@ -123,26 +133,6 @@ object DataframeUtil {
       truncate,
       colWidths
     )
-
-  private def pad(
-      rows: Array[List[Str]],
-      truncate: Int,
-      colWidths: Array[Int],
-      spacesColor: EscapeAttr = DarkGray
-  ) =
-    rows.map { row =>
-      row.zipWithIndex
-        .map { case (cell, i) =>
-          val padsLen = colWidths(i) - cell.length
-          val pads    = if (padsLen > 0) spacesColor(" " * padsLen) else spacesColor("")
-          if (truncate > 0) {
-            pads ++ cell
-          } else {
-            cell ++ pads
-          }
-
-        }
-    }
 
   private def padAny(s: Any, truncate: Int, width: Int) = {
     val cell = Option(s).map(_.toString).getOrElse("null")
@@ -175,7 +165,7 @@ object DataframeUtil {
   }
 
   private def getColWidths(fields: Array[String], rows: Seq[Row]) = {
-    val numCols = rows.map(_.size).max
+    val numCols = if (rows.isEmpty) 0 else rows.map(_.size).max
     // Initialise the width of each column to a minimum value
     val colWidths = Array.fill(numCols)(0)
     for ((cell, i) <- fields.zipWithIndex)

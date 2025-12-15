@@ -5,9 +5,11 @@ import SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
 import org.apache.spark.sql.functions.col
 import com.github.mrpowers.spark.fast.tests.TestUtilsExt.ExceptionOps
+import org.scalatest.Tag
 import org.scalatest.freespec.AnyFreeSpec
 
 import java.time.Instant
+object SeparateLinesOutputFormat extends Tag("SeparateLinesOutputFormat")
 
 class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with SparkSessionTestWrapper {
 
@@ -42,7 +44,8 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     assert(e.getMessage.indexOf("bob") >= 0)
     assert(e.getMessage.indexOf("camila") >= 0)
   }
-  "Correctly mark unequal elements - side by side view" in {
+
+  "Correctly mark unequal elements" in {
     val sourceDF = spark.createDF(
       List(
         ("bob", 1, "uk"),
@@ -70,13 +73,13 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     )
 
     val e = intercept[DatasetContentMismatch] {
-      assertSmallDataFrameEquality(sourceDF, expectedDF)
+      assertSmallDataFrameEquality(expectedDF, sourceDF)
     }
 
-    e.assertColorDiff(Seq("uk", "[steve,10,aus]"), Seq("france", "[mark,11,usa]"))
+    e.assertColorDiff(Seq("france", "[mark,11,usa]"), Seq("uk", "[steve,10,aus]"))
   }
 
-  "Can handle unequal Dataframe containing null - side by side view" in {
+  "Can handle unequal Dataframe containing null" in {
     val sourceDF = spark.createDF(
       List(
         ("bob", 1, "uk"),
@@ -108,96 +111,6 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     }
 
     e.assertColorDiff(Seq("steve"), Seq("null"))
-  }
-
-  "Correctly mark unequal elements separate lines view - separate lines view" in {
-    val sourceDF = spark.createDF(
-      List(
-        ("bob", 1, "uk"),
-        ("camila", 5, "peru"),
-        ("steve", 10, "aus")
-      ),
-      List(
-        ("name", StringType, true),
-        ("age", IntegerType, true),
-        ("country", StringType, true)
-      )
-    )
-
-    val expectedDF = spark.createDF(
-      List(
-        ("bob", 1, "france"),
-        ("camila", 5, "peru"),
-        ("mark", 11, "usa")
-      ),
-      List(
-        ("name", StringType, true),
-        ("age", IntegerType, true),
-        ("country", StringType, true)
-      )
-    )
-
-    val e = intercept[DatasetContentMismatch] {
-      assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
-    }
-    val expected =
-      """|Difference
-        |  +------+---+-------+
-        |  |  name|age|country|
-        |1:|[90m   bob|  1|[31m     uk[39m|:1
-        |1:|[90m   bob|  1|[32m france[39m|:1
-        |
-        |2:|[90mcamila|  5|   peru[39m|:2
-        |
-        |3:|[31m steve| 10|    aus[39m|:3
-        |3:|[32m  mark| 11|    usa[39m|:3
-        |  +------+---+-------+
-        |""".stripMargin
-    assert(e.getMessage == expected)
-
-  }
-
-  "Can handle unequal Dataframe containing null - separate lines view" in {
-    val sourceDF = spark.createDF(
-      List(
-        ("bob", 1, "uk"),
-        (null, 5, "peru"),
-        ("steve", 10, "aus")
-      ),
-      List(
-        ("name", StringType, true),
-        ("age", IntegerType, true),
-        ("country", StringType, true)
-      )
-    )
-
-    val expectedDF = spark.createDF(
-      List(
-        ("bob", 1, "uk"),
-        (null, 5, "peru"),
-        (null, 10, "aus")
-      ),
-      List(
-        ("name", StringType, true),
-        ("age", IntegerType, true),
-        ("country", StringType, true)
-      )
-    )
-
-    val e = intercept[DatasetContentMismatch] {
-      assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
-    }
-    val expected = """Difference
-                     |  +-----+---+-------+
-                     |  | name|age|country|
-                     |1:|[90m  bob|  1|     uk[39m|:1
-                     |2:|[90m null|  5|   peru[39m|:2
-                     |
-                     |3:|[31msteve[90m| 10|    aus[39m|:3
-                     |3:|[32m null[90m| 10|    aus[39m|:3
-                     |  +-----+---+-------+
-                     |""".stripMargin
-    assert(e.getMessage == expected)
   }
 
   "works well for wide DataFrames" in {
@@ -537,6 +450,331 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         assertLargeDataFrameEquality(sourceDF, expectedDF, ignoreMetadata = false)
       }
     }
+
+    "does nothing if both DataFrames are empty with the same schema" taggedAs (SeparateLinesOutputFormat) in {
+      val sourceDF = spark.createDF(
+        List.empty,
+        List(("name", StringType, true), ("age", IntegerType, true))
+      )
+
+      val expectedDF = spark.createDF(
+        List.empty,
+        List(("name", StringType, true), ("age", IntegerType, true))
+      )
+
+      assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+    }
+
+    "works well for very wide DataFrames with many columns - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
+      val sourceDF = spark.createDF(
+        List(
+          ("alice", 25, "engineer", "new york", "single", "bachelor", "reading", "travel", "cooking", "yoga"),
+          ("bob", 30, "doctor", "los angeles", "married", "master", "running", "music", "painting", "meditation")
+        ),
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("profession", StringType, true),
+          ("city", StringType, true),
+          ("marital_status", StringType, true),
+          ("education", StringType, true),
+          ("hobby1", StringType, true),
+          ("hobby2", StringType, true),
+          ("hobby3", StringType, true),
+          ("hobby4", StringType, true)
+        )
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          ("alice", 25, "engineer", "new york", "single", "bachelor", "reading", "travel", "cooking", "yoga"),
+          ("bob", 30, "doctor", "los angeles", "married", "master", "running", "music", "painting", "gardening")
+        ),
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("profession", StringType, true),
+          ("city", StringType, true),
+          ("marital_status", StringType, true),
+          ("education", StringType, true),
+          ("hobby1", StringType, true),
+          ("hobby2", StringType, true),
+          ("hobby3", StringType, true),
+          ("hobby4", StringType, true)
+        )
+      )
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+
+      assert(e.getMessage == """Difference
+                               |  +-----+---+----------+-----------+--------------+---------+-------+------+--------+----------+
+                               |  | name|age|profession|       city|marital_status|education| hobby1|hobby2|  hobby3|    hobby4|
+                               |1:|[90malice| 25|  engineer|   new york|        single| bachelor|reading|travel| cooking|      yoga[39m|:1
+                               |
+                               |2:|[90m  bob| 30|    doctor|los angeles|       married|   master|running| music|painting|[31mmeditation[39m|:2
+                               |2:|[90m  bob| 30|    doctor|los angeles|       married|   master|running| music|painting|[32m gardening[39m|:2
+                               |  +-----+---+----------+-----------+--------------+---------+-------+------+--------+----------+
+                               |""".stripMargin)
+    }
+
+    "Correctly mark unequal elements - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
+      val sourceDF = spark.createDF(
+        List(
+          ("bob", 1, "uk"),
+          ("camila", 5, "peru"),
+          ("steve", 10, "aus")
+        ),
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("country", StringType, true)
+        )
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          ("bob", 1, "france"),
+          ("camila", 5, "peru"),
+          ("mark", 11, "usa")
+        ),
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("country", StringType, true)
+        )
+      )
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+      assert(
+        e.getMessage ==
+          """Difference
+            |  +------+---+-------+
+            |  |  name|age|country|
+            |1:|[90m   bob|  1|[31m     uk[39m|:1
+            |1:|[90m   bob|  1|[32m france[39m|:1
+            |
+            |2:|[90mcamila|  5|   peru[39m|:2
+            |
+            |3:|[31m steve| 10|    aus[39m|:3
+            |3:|[32m  mark| 11|    usa[39m|:3
+            |  +------+---+-------+
+            |""".stripMargin
+      )
+    }
+
+    "Correctly mark unequal elements separate lines view" taggedAs (SeparateLinesOutputFormat) in {
+      val sourceDF = spark.createDF(
+        List(
+          ("bob", 1, "uk"),
+          ("camila", 5, "peru"),
+          ("steve", 10, "aus")
+        ),
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("country", StringType, true)
+        )
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          ("bob", 1, "france"),
+          ("camila", 5, "peru"),
+          ("mark", 11, "usa")
+        ),
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("country", StringType, true)
+        )
+      )
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+      val expected =
+        """|Difference
+           |  +------+---+-------+
+           |  |  name|age|country|
+           |1:|[90m   bob|  1|[31m     uk[39m|:1
+           |1:|[90m   bob|  1|[32m france[39m|:1
+           |
+           |2:|[90mcamila|  5|   peru[39m|:2
+           |
+           |3:|[31m steve| 10|    aus[39m|:3
+           |3:|[32m  mark| 11|    usa[39m|:3
+           |  +------+---+-------+
+           |""".stripMargin
+      assert(e.getMessage == expected)
+
+    }
+
+    "Can handle unequal Dataframe containing null - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
+      val sourceDF = spark.createDF(
+        List(
+          ("bob", 1, "uk"),
+          (null, 5, "peru"),
+          ("steve", 10, "aus")
+        ),
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("country", StringType, true)
+        )
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          ("bob", 1, "uk"),
+          (null, 5, "peru"),
+          (null, 10, "aus")
+        ),
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("country", StringType, true)
+        )
+      )
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+
+      assert(e.getMessage == """Difference
+                               |  +-----+---+-------+
+                               |  | name|age|country|
+                               |1:|[90m  bob|  1|     uk[39m|:1
+                               |2:|[90m null|  5|   peru[39m|:2
+                               |
+                               |3:|[31msteve[90m| 10|    aus[39m|:3
+                               |3:|[32m null[90m| 10|    aus[39m|:3
+                               |  +-----+---+-------+
+                               |""".stripMargin)
+    }
+
+    "Handle dataframes with different row counts" taggedAs (SeparateLinesOutputFormat) in {
+      val sourceDF = spark.createDF(
+        List(
+          ("bob", 1, "uk"),
+          ("camila", 5, "peru")
+        ),
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("country", StringType, true)
+        )
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          ("bob", 1, "uk"),
+          ("camila", 5, "peru"),
+          ("steve", 10, "aus")
+        ),
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("country", StringType, true)
+        )
+      )
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+
+      assert(e.getMessage == """Difference
+                               |  +------+---+-------+
+                               |  |  name|age|country|
+                               |1:|[90m   bob|  1|     uk[39m|:1
+                               |2:|[90mcamila|  5|   peru[39m|:2
+                               |
+                               |3:|[32m steve| 10|    aus[39m|:3
+                               |  +------+---+-------+
+                               |""".stripMargin)
+    }
+
+    "Handle empty dataframes - actual empty - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
+      val actualDF = spark.createDF(
+        List.empty,
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("country", StringType, true)
+        )
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          ("bob", 1, "uk"),
+          ("camila", 5, "peru"),
+          ("steve", 10, "aus")
+        ),
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("country", StringType, true)
+        )
+      )
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDataFrameEquality(actualDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+
+      assert(e.getMessage == """Difference
+                               |  +------+---+-------+
+                               |  |  name|age|country|
+                               |1:|[32m   bob|  1|     uk[39m|:1
+                               |
+                               |2:|[32mcamila|  5|   peru[39m|:2
+                               |
+                               |3:|[32m steve| 10|    aus[39m|:3
+                               |  +------+---+-------+
+                               |""".stripMargin)
+    }
+
+    "Handle empty dataframes - expected empty - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
+      val actualDF = spark.createDF(
+        List(
+          ("bob", 1, "uk"),
+          ("camila", 5, "peru"),
+          ("steve", 10, "aus")
+        ),
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("country", StringType, true)
+        )
+      )
+
+      val expectedDF = spark.createDF(
+        List.empty,
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true),
+          ("country", StringType, true)
+        )
+      )
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDataFrameEquality(actualDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+
+      assert(
+        e.getMessage == """Difference
+                          |  +------+---+-------+
+                          |  |  name|age|country|
+                          |1:|[31m   bob|  1|     uk[39m|:1
+                          |
+                          |2:|[31mcamila|  5|   peru[39m|:2
+                          |
+                          |3:|[31m steve| 10|    aus[39m|:3
+                          |  +------+---+-------+
+                          |""".stripMargin
+      )
+    }
+
   }
 
   "assertApproximateDataFrameEquality" - {
