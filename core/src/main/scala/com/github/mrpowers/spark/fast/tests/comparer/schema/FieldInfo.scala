@@ -23,4 +23,14 @@ object FieldInfo {
     case _: DataType =>
       FieldInfo(dataType.typeName, nullable = true, Metadata.empty)
   }
+
+  // Special apply for array elements - shows the element type with containsNull as nullable
+  def applyForArrayElement(arrayType: ArrayType): FieldInfo = arrayType.elementType match {
+    case innerArray: ArrayType =>
+      FieldInfo(innerArray.typeName, nullable = true, Metadata.empty, Some(innerArray.containsNull))
+    case mapType: MapType =>
+      FieldInfo(mapType.typeName, nullable = true, Metadata.empty, Some(mapType.valueContainsNull))
+    case elementType =>
+      FieldInfo(elementType.typeName, arrayType.containsNull, Metadata.empty)
+  }
 }
