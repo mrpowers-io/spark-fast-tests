@@ -116,10 +116,10 @@ object DataframeUtil {
       if (rowsAreDifferent) {
         appendRow(expected, i)
         if (i < diff.length - 1)
-          sb.append("\n")
+          sb.append(separatorLine)
       } else if (i < diff.length - 1 && !fullJoinWithEquals(i + 1)._3) {
         // if current rows are equal and next ones are not
-        sb.append("\n")
+        sb.append(separatorLine)
       }
     }
     sb.append(separatorLine).toString()

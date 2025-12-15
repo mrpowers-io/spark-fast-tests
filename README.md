@@ -68,6 +68,13 @@ assertSmallDataFrameEquality(sourceDF, expectedDF)
 <p>
     <img src="./images/assertSmallDataFrameEquality_DatasetContentMissmatch_message.png" alt="assertSmallDataFrameEquality_DatasetContentMissmatch_message" width="500", height="200"/>
 </p>
+Or if you prefer wide dataframes
+```scala
+assertSmallDataFrameEquality(..., outputFormat = DataframeDiffOutputFormat.SeparateLines)
+```
+<p>
+    <img src="./images/assertSmallWideDataframe.png" alt="assertSmallWideDataframe"/>
+</p>
 
 The `assertSmallDatasetEquality` method can be used to compare two Datasets or DataFrames(Dataset).
 Nicely formatted error messages are displayed when the Datasets are not equal. Here is an example of content mismatch:
