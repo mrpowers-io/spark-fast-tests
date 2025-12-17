@@ -12,7 +12,6 @@ object DataframeUtil {
       actual: Array[Row],
       expected: Array[Row],
       fieldNames: Array[String],
-      truncate: Int = 20,
       minColWidth: Int = 3
   ): String = {
     val sb        = new StringBuilder
@@ -31,8 +30,8 @@ object DataframeUtil {
       .zipAll(expected, Row.empty, Row.empty)
       .map { case (actualRow, expectedRow) => (actualRow, expectedRow, actualRow.equals(expectedRow)) }
     val diff = fullJoinWithEquals.map { case (actualRow, expectedRow, rowsAreEqual) =>
-      val paddedActualRow   = pad(actualRow, truncate, rowWidths)
-      val paddedExpectedRow = pad(expectedRow, truncate, rowWidths)
+      val paddedActualRow   = pad(actualRow.toSeq, rowWidths)
+      val paddedExpectedRow = pad(expectedRow.toSeq, rowWidths)
       if (rowsAreEqual) {
         List(DarkGray(paddedActualRow.mkString("|")), DarkGray(paddedActualRow.mkString("|")))
       } else {
@@ -61,12 +60,12 @@ object DataframeUtil {
             val coloredDiff = withEquals.zipWithIndex
               .map {
                 case ((actualRowField, expectedRowField, true), i) =>
-                  val paddedActualRow = padAny(actualRowField, truncate, rowWidths(i))
-                  val paddedExpected  = padAny(expectedRowField, truncate, rowWidths(i))
+                  val paddedActualRow = padAny(actualRowField, rowWidths(i))
+                  val paddedExpected  = padAny(expectedRowField, rowWidths(i))
                   (DarkGray(paddedActualRow), DarkGray(paddedExpected))
                 case ((actualRowField, expectedRowField, false), i) =>
-                  val paddedActualRow = padAny(actualRowField, truncate, rowWidths(i))
-                  val paddedExpected  = padAny(expectedRowField, truncate, rowWidths(i))
+                  val paddedActualRow = padAny(actualRowField, rowWidths(i))
+                  val paddedExpected  = padAny(expectedRowField, rowWidths(i))
                   (Red(paddedActualRow), Green(paddedExpected))
               }
             val start = DarkGray("")
@@ -81,7 +80,7 @@ object DataframeUtil {
       }
     }
 
-    val headerWithLeftPadding = pad(fieldNames, truncate, rowWidths)
+    val headerWithLeftPadding = pad(fieldNames, rowWidths)
     val headerFields          = List(headerWithLeftPadding.mkString("|"))
     val colWidths: Array[Int] = getColWidths(minColWidth, diff)
 
@@ -92,13 +91,10 @@ object DataframeUtil {
 
     sb.append(separatorLine)
 
-    headerFields.zipWithIndex
-      .map { case (cell, i) =>
-        if (truncate > 0) {
-          StringUtils.leftPad(cell, colWidths(i))
-        } else {
-          StringUtils.rightPad(cell, colWidths(i))
-        }
+    headerFields
+      .zip(colWidths)
+      .map { case (cell, colWidth) =>
+        StringUtils.leftPad(cell, colWidth)
       }
       .addString(sb, StringUtils.leftPad("|", largestIndexOffset), "|", "|\n")
     diff.zipWithIndex.map { case (actual :: expected :: Nil, i) =>
@@ -125,33 +121,13 @@ object DataframeUtil {
     sb.append(separatorLine).toString()
   }
 
-  private def pad(row: Row, truncate: Int, colWidths: Array[Int]): Seq[String] =
-    pad(
-      row.toSeq.map { v =>
-        Option(v).map(_.toString).getOrElse("null")
-      },
-      truncate,
-      colWidths
-    )
+  private def pad(items: Seq[Any], colWidths: Array[Int]): Seq[String] =
+    items.zip(colWidths).map { case (v, colWidth) => padAny(v, colWidth) }
 
-  private def padAny(s: Any, truncate: Int, width: Int) = {
+  private def padAny(s: Any, width: Int) = {
     val cell = Option(s).map(_.toString).getOrElse("null")
-    if (truncate > 0) {
-      StringUtils.leftPad(cell, width)
-    } else {
-      StringUtils.rightPad(cell, width)
-    }
+    StringUtils.leftPad(cell, width)
   }
-
-  private def pad(header: Seq[String], truncate: Int, colWidths: Array[Int]) =
-    header.zipWithIndex
-      .map { case (cell, i) =>
-        if (truncate > 0) {
-          StringUtils.leftPad(cell, colWidths(i))
-        } else {
-          StringUtils.rightPad(cell, colWidths(i))
-        }
-      }
 
   private def getColWidths(minColWidth: Int, rows: Array[List[Str]]) = {
     val numCols = rows.map(_.length).max

@@ -553,6 +553,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
+      println(e.getMessage)
       assert(
         e.getMessage ==
           """Difference
@@ -600,6 +601,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
+      println(e.getMessage)
       val expected =
         """|Difference
            |  +------+---+-------+
@@ -647,6 +649,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
+      println(e.getMessage)
 
       assert(e.getMessage == """Difference
                                |  +-----+---+-------+
@@ -689,6 +692,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
+      println(e.getMessage)
 
       assert(e.getMessage == """Difference
                                |  +------+---+-------+
@@ -726,6 +730,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(actualDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
+      println(e.getMessage)
 
       assert(e.getMessage == """Difference
                                |  +------+---+-------+
@@ -764,6 +769,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(actualDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
+      println(e.getMessage)
 
       assert(
         e.getMessage == """Difference

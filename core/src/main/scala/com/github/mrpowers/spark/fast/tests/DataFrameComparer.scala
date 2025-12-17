@@ -57,12 +57,11 @@ trait DataFrameComparer extends DatasetComparer {
         )
         val actual = if (ignoreColumnOrder) orderColumns(actualDF, expectedDF) else actualDF
         if (orderedComparison)
-          assertSmallDataFrameEquality(actual, expectedDF, truncate)
+          assertSmallDataFrameEquality(actual, expectedDF)
         else
           assertSmallDataFrameEquality(
             defaultSortDataset(actual),
-            defaultSortDataset(expectedDF),
-            truncate
+            defaultSortDataset(expectedDF)
           )
     }
 
@@ -70,13 +69,12 @@ trait DataFrameComparer extends DatasetComparer {
 
   private def assertSmallDataFrameEquality(
       actualDF: DataFrame,
-      expectedDF: DataFrame,
-      truncate: Int
+      expectedDF: DataFrame
   ): Unit = {
     val a = actualDF.collect()
     val e = expectedDF.collect()
     if (!a.toSeq.approximateSameElements(e, (o1: Row, o2: Row) => o1.equals(o2))) {
-      val msg = "Difference\n" ++ DataframeUtil.showDataframeDiff(a, e, actualDF.schema.fieldNames, truncate)
+      val msg = "Difference\n" ++ DataframeUtil.showDataframeDiff(a, e, actualDF.schema.fieldNames)
       throw DatasetContentMismatch(msg)
     }
   }
