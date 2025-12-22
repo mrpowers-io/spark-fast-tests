@@ -21,7 +21,7 @@ trait DataFrameComparer extends DatasetComparer {
    * @param ignoreMetadata
    *   \- don't compare column metadata when matching schemas
    * @param truncate
-   *   \- TODO: describe
+   *   \- truncate column if length more than specified number
    */
   def assertSmallDataFrameEquality(
       actualDF: DataFrame,
@@ -57,11 +57,12 @@ trait DataFrameComparer extends DatasetComparer {
         )
         val actual = if (ignoreColumnOrder) orderColumns(actualDF, expectedDF) else actualDF
         if (orderedComparison)
-          assertSmallDataFrameEquality(actual, expectedDF)
+          assertSmallDataFrameEquality(actual, expectedDF, truncate)
         else
           assertSmallDataFrameEquality(
             defaultSortDataset(actual),
-            defaultSortDataset(expectedDF)
+            defaultSortDataset(expectedDF),
+            truncate
           )
     }
 
@@ -69,12 +70,13 @@ trait DataFrameComparer extends DatasetComparer {
 
   private def assertSmallDataFrameEquality(
       actualDF: DataFrame,
-      expectedDF: DataFrame
+      expectedDF: DataFrame,
+      truncate: Int
   ): Unit = {
     val a = actualDF.collect()
     val e = expectedDF.collect()
     if (!a.toSeq.approximateSameElements(e, (o1: Row, o2: Row) => o1.equals(o2))) {
-      val msg = "Difference\n" ++ DataframeUtil.showDataframeDiff(a, e, actualDF.schema.fieldNames)
+      val msg = "Difference\n" ++ DataframeUtil.showDataframeDiff(a, e, actualDF.schema.fieldNames, truncate)
       throw DatasetContentMismatch(msg)
     }
   }

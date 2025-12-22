@@ -465,6 +465,75 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
     }
 
+    "truncates column values when they exceed the truncate length" taggedAs (SeparateLinesOutputFormat) in {
+      val longString1 = "thisisaverylongstringthatshouldbetruncated"
+      val longString2 = "anotherverylongstringthatshouldalsobetruncated"
+      val sourceDF = spark.createDF(
+        List(
+          (longString1, 1)
+        ),
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true)
+        )
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          (longString2, 1)
+        ),
+        List(
+          ("name", StringType, true),
+          ("age", IntegerType, true)
+        )
+      )
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDataFrameEquality(sourceDF, expectedDF, truncate = 10, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+      print(e.getMessage)
+      assert(e.getMessage == """Difference
+                               |  +----------+---+
+                               |  |      name|age|
+                               |1:|[31mthisisa...[90m|  1[39m|:1
+                               |1:|[32manother...[90m|  1[39m|:1
+                               |  +----------+---+
+                               |""".stripMargin)
+    }
+
+    "truncates headers values when they exceed the truncate length" taggedAs (SeparateLinesOutputFormat) in {
+      val longString = "thisisaverylongstringthatshouldbetruncated"
+      val sourceDF = spark.createDF(
+        List(
+          ("a", 1)
+        ),
+        List(
+          (longString, StringType, true)
+        )
+      )
+
+      val expectedDF = spark.createDF(
+        List(
+          ("b", 1)
+        ),
+        List(
+          (longString, StringType, true)
+        )
+      )
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDataFrameEquality(sourceDF, expectedDF, truncate = 10, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+      print(e.getMessage)
+      assert(e.getMessage == """Difference
+                               |  +----------+
+                               |  |thisisa...|
+                               |1:|[31m         a[39m|:1
+                               |1:|[32m         b[39m|:1
+                               |  +----------+
+                               |""".stripMargin)
+    }
+
     "works well for very wide DataFrames with many columns - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
       val sourceDF = spark.createDF(
         List(
