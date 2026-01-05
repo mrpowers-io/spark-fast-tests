@@ -155,6 +155,11 @@
 </span><span class="identifier">assertSmallDataFrameEquality</span><span>(</span><span class="identifier">sourceDF</span><span>, </span><span class="identifier">expectedDF</span><span>)</span></code></pre>
         <p>&lt;p&gt;
             &lt;img src=&quot;./images/assertSmallDataFrameEquality<em>DatasetContentMissmatch</em>message.png&quot; alt=&quot;assertSmallDataFrameEquality<em>DatasetContentMissmatch</em>message&quot; width=&quot;500&quot;, height=&quot;200&quot;/&gt;
+        &lt;/p&gt;
+        Or if you prefer wide dataframes</p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="identifier">assertSmallDataFrameEquality</span><span>(..., </span><span class="identifier">outputFormat</span><span> = </span><span class="type-name">DataframeDiffOutputFormat</span><span>.</span><span class="type-name">SeparateLines</span><span>)</span></code></pre>
+        <p>&lt;p&gt;
+            &lt;img src=&quot;./images/assertSmallWideDataframe.png&quot; alt=&quot;assertSmallWideDataframe&quot;/&gt;
         &lt;/p&gt;</p>
         <p>The <code>assertSmallDatasetEquality</code> method can be used to compare two Datasets or DataFrames(Dataset).
         Nicely formatted error messages are displayed when the Datasets are not equal. Here is an example of content mismatch:</p>
