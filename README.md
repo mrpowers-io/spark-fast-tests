@@ -69,6 +69,7 @@ assertSmallDataFrameEquality(sourceDF, expectedDF)
     <img src="./images/assertSmallDataFrameEquality_DatasetContentMissmatch_message.png" alt="assertSmallDataFrameEquality_DatasetContentMissmatch_message" width="500", height="200"/>
 </p>
 Or if you prefer wide dataframes
+
 ```scala
 assertSmallDataFrameEquality(..., outputFormat = DataframeDiffOutputFormat.SeparateLines)
 ```
@@ -450,6 +451,16 @@ val s2 = StructType(
 The `assertSchemaEqual` support two output format `SchemaDiffOutputFormat.Tree` and `SchemaDiffOutputFormat.Table`. Tree
 output
 format is useful when the schema is large and contains multi level nested fields.
+By default, ColumnOrder is not important and field are match by name. 
+
+```scala
+SchemaComparer.assertSchemaEqual(s1, s2, outputFormat = SchemaDiffOutputFormat.Tree)
+```
+<p>
+    <img src="./images/assertSchemaEquality_tree_message_ignore_column_order.png" alt="assert_column_equality_error_message" width="600", height="200">
+</p>
+
+If Column Order is important, set `ignoreColumnOrder` to false.
 
 ```scala
 SchemaComparer.assertSchemaEqual(s1, s2, ignoreColumnOrder = false, outputFormat = SchemaDiffOutputFormat.Tree)
