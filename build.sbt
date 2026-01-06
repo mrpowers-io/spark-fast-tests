@@ -1,4 +1,5 @@
 val versionRegex = """^(.*)\.(.*)\.(.*)$""".r
+val thisVersionShortRegex = """^([0-9]+\.[0-9]+\.[0-9]+)(.*)$""".r
 val scala2_13    = "2.13.14"
 val scala2_12    = "2.12.20"
 val sparkVersion = System.getProperty("spark.version", "3.5.3")
@@ -108,14 +109,17 @@ lazy val docs = (project in file("docs"))
     laikaTheme := {
       import laika.ast.Path.Root
       import laika.helium.Helium
-      import laika.helium.config.*
+      import laika.helium.config._
 
       Helium.defaults.site
         .landingPage(
           title = Some("Spark Fast Tests"),
           subtitle = Some("Unit testing your Apache Spark application"),
           latestReleases = Seq(
-            ReleaseInfo("Latest Stable Release", "1.0.0")
+            ReleaseInfo("Latest Stable Release", (core / version).value match {
+              case thisVersionShortRegex(v, _) => v
+              case v => v
+            }),
           ),
           license = Some("MIT"),
           titleLinks = Seq(
