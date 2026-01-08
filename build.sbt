@@ -37,13 +37,15 @@ lazy val commonSettings = Seq(
                                                             else Seq.empty)
   },
   libraryDependencies ++= Seq(
-    "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
-    "org.scalatest"    %% "scalatest" % "3.2.18"     % "test"
+    "org.scalatest" %% "scalatest" % "3.2.18" % "test"
   )
 )
 
 lazy val core = (project in file("core"))
   .settings(
+    libraryDependencies ++= Seq(
+      "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
+    ),
     commonSettings,
     moduleName                             := "spark-fast-tests",
     name                                   := moduleName.value,
@@ -56,7 +58,8 @@ lazy val benchmarks = (project in file("benchmarks"))
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
-      "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.37" // required for jmh IDEA plugin. Make sure this version matches sbt-jmh version!
+      "org.apache.spark" %% "spark-sql"                % sparkVersion % "compile",
+      "org.openjdk.jmh"   % "jmh-generator-annprocess" % "1.37" // required for jmh IDEA plugin. Make sure this version matches sbt-jmh version!
     ),
     name := "benchmarks"
   )
@@ -158,6 +161,9 @@ lazy val docs = (project in file("docs"))
 
 lazy val root = (project in file("."))
   .settings(
+    libraryDependencies ++= Seq(
+      "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
+    ),
     name := "spark-fast-tests-root",
     commonSettings,
     noPublish
