@@ -478,7 +478,13 @@
 )</span></code></pre>
         <p>The <code>assertSchemaEqual</code> support two output format <code>SchemaDiffOutputFormat.Tree</code> and <code>SchemaDiffOutputFormat.Table</code>. Tree
         output
-        format is useful when the schema is large and contains multi level nested fields.</p>
+        format is useful when the schema is large and contains multi level nested fields.
+        By default, ColumnOrder is not important and field are match by name. </p>
+        <pre class="keep-together pdf epub"><code class="nohighlight"><span class="type-name">SchemaComparer</span><span>.</span><span class="identifier">assertSchemaEqual</span><span>(</span><span class="identifier">s1</span><span>, </span><span class="identifier">s2</span><span>, </span><span class="identifier">outputFormat</span><span> = </span><span class="type-name">SchemaDiffOutputFormat</span><span>.</span><span class="type-name">Tree</span><span>)</span></code></pre>
+        <p>&lt;p&gt;
+            &lt;img src=&quot;./images/assertSchemaEquality<em>tree</em>message<em>ignore</em>column<em>order.png&quot; alt=&quot;assert</em>column<em>equality</em>error_message&quot; width=&quot;600&quot;, height=&quot;200&quot;&gt;
+        &lt;/p&gt;</p>
+        <p>If Column Order is important, set <code>ignoreColumnOrder</code> to false.</p>
         <pre class="keep-together pdf epub"><code class="nohighlight"><span class="type-name">SchemaComparer</span><span>.</span><span class="identifier">assertSchemaEqual</span><span>(</span><span class="identifier">s1</span><span>, </span><span class="identifier">s2</span><span>, </span><span class="identifier">ignoreColumnOrder</span><span> = </span><span class="boolean-literal">false</span><span>, </span><span class="identifier">outputFormat</span><span> = </span><span class="type-name">SchemaDiffOutputFormat</span><span>.</span><span class="type-name">Tree</span><span>)</span></code></pre>
         <p>&lt;p&gt;
             &lt;img src=&quot;./images/assertSchemaEquality<em>tree</em>message.png&quot; alt=&quot;assert<em>column</em>equality<em>error</em>message&quot; width=&quot;600&quot;, height=&quot;200&quot;&gt;
