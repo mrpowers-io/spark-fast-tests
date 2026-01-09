@@ -15,6 +15,20 @@ object Person {
 }
 case class Person(name: String, age: Int)
 case class PrecisePerson(name: String, age: Double)
+case class PersonWithCountry(name: String, age: Int, country: String)
+case class TestClassWithLongString1(thisisaverylongstringthatshouldbetruncated: String)
+case class WideProfile(
+    name: String,
+    age: Int,
+    profession: String,
+    city: String,
+    marital_status: String,
+    education: String,
+    hobby1: String,
+    hobby2: String,
+    hobby3: String,
+    hobby4: String
+)
 
 class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSessionTestWrapper {
 
@@ -922,6 +936,271 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         assertSmallDatasetEquality(ds2, ds1, ignoreMetadata = false)
       }
     }
+
+    "does nothing if both Dataset are empty with the same schema" taggedAs (SeparateLinesOutputFormat) in {
+      val sourceDF   = Seq(Person("juan", 5)).toDS
+      val expectedDF = Seq(Person("juan", 5)).toDS
+      assertSmallDatasetEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+    }
+
+    "truncates column values when they exceed the truncate length" taggedAs (SeparateLinesOutputFormat) in {
+      val longString1 = "thisisaverylongstringthatshouldbetruncated"
+      val longString2 = "anotherverylongstringthatshouldalsobetruncated"
+      val sourceDF = Seq(
+        Person(longString1, 1)
+      ).toDS()
+
+      val expectedDF = Seq(
+        Person(longString2, 1)
+      ).toDS()
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(sourceDF, expectedDF, truncate = 10, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+      assert(e.getMessage == """Diffs
+                               |  +----------+---+
+                               |  |      name|age|
+                               |1:|[31mthisisa...[90m|  1[39m|:1
+                               |1:|[32manother...[90m|  1[39m|:1
+                               |  +----------+---+
+                               |""".stripMargin.replaceAll("\r\n", "\n"))
+    }
+
+    "truncates headers values when they exceed the truncate length" taggedAs (SeparateLinesOutputFormat) in {
+      val sourceDF = Seq(
+        TestClassWithLongString1("a")
+      ).toDS()
+
+      val expectedDF = Seq(
+        TestClassWithLongString1("b")
+      ).toDS()
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(sourceDF, expectedDF, truncate = 10, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+
+      assert(e.getMessage == """Diffs
+                               |  +----------+
+                               |  |thisisa...|
+                               |1:|[31m         a[39m|:1
+                               |1:|[32m         b[39m|:1
+                               |  +----------+
+                               |""".stripMargin.replaceAll("\r\n", "\n"))
+    }
+
+    "works well for very wide DataFrames with many columns - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
+      val sourceDF = spark.createDataset(
+        List(
+          WideProfile("alice", 25, "engineer", "new york", "single", "bachelor", "reading", "travel", "cooking", "yoga"),
+          WideProfile("bob", 30, "doctor", "los angeles", "married", "master", "running", "music", "painting", "meditation")
+        )
+      )
+
+      val expectedDF = spark.createDataset(
+        List(
+          WideProfile("alice", 25, "engineer", "new york", "single", "bachelor", "reading", "travel", "cooking", "yoga"),
+          WideProfile("charlie", 28, "teacher", "chicago", "single", "master", "swimming", "dancing", "photography", "hiking"),
+          WideProfile("bob", 30, "doctor", "los angeles", "married", "master", "running", "music", "painting", "gardening")
+        )
+      )
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+
+      assert(e.getMessage == """Diffs
+                               |  +-------+---+----------+-----------+--------------+---------+--------+-------+-----------+----------+
+                               |  |   name|age|profession|       city|marital_status|education|  hobby1| hobby2|     hobby3|    hobby4|
+                               |1:|[90m  alice| 25|  engineer|   new york|        single| bachelor| reading| travel|    cooking|      yoga[39m|:1
+                               |  +-------+---+----------+-----------+--------------+---------+--------+-------+-----------+----------+
+                               |2:|[31m    bob[90m|[31m 30[90m|[31m    doctor[90m|[31mlos angeles[90m|[31m       married[90m|   master|[31m running[90m|[31m  music[90m|[31m   painting[90m|[31mmeditation[39m|:2
+                               |2:|[32mcharlie[90m|[32m 28[90m|[32m   teacher[90m|[32m    chicago[90m|[32m        single[90m|   master|[32mswimming[90m|[32mdancing[90m|[32mphotography[90m|[32m    hiking[39m|:2
+                               |  +-------+---+----------+-----------+--------------+---------+--------+-------+-----------+----------+
+                               |3:|[32m    bob| 30|    doctor|los angeles|       married|   master| running|  music|   painting| gardening[39m|:3
+                               |  +-------+---+----------+-----------+--------------+---------+--------+-------+-----------+----------+
+                               |""".stripMargin.replaceAll("\r\n", "\n"))
+    }
+
+    "Correctly mark unequal elements - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
+      val sourceDF = Seq(
+        PersonWithCountry("bob", 1, "uk"),
+        PersonWithCountry("camila", 5, "peru"),
+        PersonWithCountry("steve", 10, "aus")
+      ).toDS()
+
+      val expectedDF = Seq(
+        PersonWithCountry("bob", 1, "france"),
+        PersonWithCountry("camila", 5, "peru"),
+        PersonWithCountry("mark", 11, "usa")
+      ).toDS()
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+      assert(
+        e.getMessage ==
+          """Diffs
+            |  +------+---+-------+
+            |  |  name|age|country|
+            |1:|[90m   bob|  1|[31m     uk[39m|:1
+            |1:|[90m   bob|  1|[32m france[39m|:1
+            |  +------+---+-------+
+            |2:|[90mcamila|  5|   peru[39m|:2
+            |  +------+---+-------+
+            |3:|[31m steve| 10|    aus[39m|:3
+            |3:|[32m  mark| 11|    usa[39m|:3
+            |  +------+---+-------+
+            |""".stripMargin.replaceAll("\r\n", "\n")
+      )
+    }
+
+    "Correctly mark unequal elements separate lines view" taggedAs (SeparateLinesOutputFormat) in {
+      val sourceDF = Seq(
+        PersonWithCountry("bob", 1, "uk"),
+        PersonWithCountry("camila", 5, "peru"),
+        PersonWithCountry("steve", 10, "aus")
+      ).toDS()
+
+      val expectedDF =
+        Seq(
+          PersonWithCountry("bob", 1, "france"),
+          PersonWithCountry("camila", 5, "peru"),
+          PersonWithCountry("mark", 11, "usa")
+        ).toDS()
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+
+      val expected =
+        """|Diffs
+           |  +------+---+-------+
+           |  |  name|age|country|
+           |1:|[90m   bob|  1|[31m     uk[39m|:1
+           |1:|[90m   bob|  1|[32m france[39m|:1
+           |  +------+---+-------+
+           |2:|[90mcamila|  5|   peru[39m|:2
+           |  +------+---+-------+
+           |3:|[31m steve| 10|    aus[39m|:3
+           |3:|[32m  mark| 11|    usa[39m|:3
+           |  +------+---+-------+
+           |""".stripMargin.replaceAll("\r\n", "\n")
+      assert(e.getMessage == expected)
+
+    }
+
+    "Can handle unequal Dataframe containing null - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
+      val sourceDF =
+        Seq(
+          PersonWithCountry("bob", 1, "uk"),
+          PersonWithCountry(null, 5, "peru"),
+          PersonWithCountry("steve", 10, "aus")
+        ).toDS()
+
+      val expectedDF =
+        List(
+          PersonWithCountry("bob", 1, "uk"),
+          PersonWithCountry(null, 5, "peru"),
+          PersonWithCountry(null, 10, "aus")
+        ).toDS()
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+
+      assert(e.getMessage == """Diffs
+                               |  +-----+---+-------+
+                               |  | name|age|country|
+                               |1:|[90m  bob|  1|     uk[39m|:1
+                               |2:|[90m null|  5|   peru[39m|:2
+                               |  +-----+---+-------+
+                               |3:|[31msteve[90m| 10|    aus[39m|:3
+                               |3:|[32m null[90m| 10|    aus[39m|:3
+                               |  +-----+---+-------+
+                               |""".stripMargin.replaceAll("\r\n", "\n"))
+    }
+
+    "Handle dataframes with different row counts" taggedAs (SeparateLinesOutputFormat) in {
+      val sourceDF =
+        Seq(
+          PersonWithCountry("bob", 1, "uk"),
+          PersonWithCountry("camila", 5, "peru")
+        ).toDS()
+
+      val expectedDF =
+        Seq(
+          PersonWithCountry("bob", 1, "uk"),
+          PersonWithCountry("camila", 5, "peru"),
+          PersonWithCountry("steve", 10, "aus")
+        ).toDS()
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+
+      assert(e.getMessage == """Diffs
+                               |  +------+---+-------+
+                               |  |  name|age|country|
+                               |1:|[90m   bob|  1|     uk[39m|:1
+                               |2:|[90mcamila|  5|   peru[39m|:2
+                               |  +------+---+-------+
+                               |3:|[32m steve| 10|    aus[39m|:3
+                               |  +------+---+-------+
+                               |""".stripMargin.replaceAll("\r\n", "\n"))
+    }
+
+    "Handle empty dataframes - actual empty - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
+      val actualDF = Seq.empty[PersonWithCountry].toDS()
+      val expectedDF =
+        Seq(
+          PersonWithCountry("bob", 1, "uk"),
+          PersonWithCountry("camila", 5, "peru"),
+          PersonWithCountry("steve", 10, "aus")
+        ).toDS()
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(actualDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+
+      assert(e.getMessage == """Diffs
+                               |  +------+---+-------+
+                               |  |  name|age|country|
+                               |1:|[32m   bob|  1|     uk[39m|:1
+                               |  +------+---+-------+
+                               |2:|[32mcamila|  5|   peru[39m|:2
+                               |  +------+---+-------+
+                               |3:|[32m steve| 10|    aus[39m|:3
+                               |  +------+---+-------+
+                               |""".stripMargin.replaceAll("\r\n", "\n"))
+    }
+
+    "Handle empty dataframes - expected empty - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
+      val actualDF =
+        Seq(
+          PersonWithCountry("bob", 1, "uk"),
+          PersonWithCountry("camila", 5, "peru"),
+          PersonWithCountry("steve", 10, "aus")
+        ).toDS()
+
+      val expectedDF = Seq.empty[PersonWithCountry].toDS()
+
+      val e = intercept[DatasetContentMismatch] {
+        assertSmallDatasetEquality(actualDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
+      }
+
+      assert(
+        e.getMessage == """Diffs
+                          |  +------+---+-------+
+                          |  |  name|age|country|
+                          |1:|[31m   bob|  1|     uk[39m|:1
+                          |  +------+---+-------+
+                          |2:|[31mcamila|  5|   peru[39m|:2
+                          |  +------+---+-------+
+                          |3:|[31m steve| 10|    aus[39m|:3
+                          |  +------+---+-------+
+                          |""".stripMargin.replaceAll("\r\n", "\n")
+      )
+    }
   }
 
   "defaultSortDataset" - {
@@ -1101,35 +1380,4 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
     }
   }
-
-//      "works with FloatType columns" - {
-//        val sourceDF = spark.createDF(
-//          List(
-//            (1.2),
-//            (5.1),
-//            (null)
-//          ),
-//          List(
-//            ("number", FloatType, true)
-//          )
-//        )
-//
-//        val expectedDF = spark.createDF(
-//          List(
-//            (1.2),
-//            (5.1),
-//            (null)
-//          ),
-//          List(
-//            ("number", FloatType, true)
-//          )
-//        )
-//
-//        assertApproximateDataFrameEquality(
-//          sourceDF,
-//          expectedDF,
-//          0.01
-//        )
-//      }
-
 }

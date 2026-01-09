@@ -491,14 +491,14 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF, truncate = 10, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
-      print(e.getMessage)
-      assert(e.getMessage == """Difference
+
+      assert(e.getMessage == """Diffs
                                |  +----------+---+
                                |  |      name|age|
                                |1:|[31mthisisa...[90m|  1[39m|:1
                                |1:|[32manother...[90m|  1[39m|:1
                                |  +----------+---+
-                               |""".stripMargin)
+                               |""".stripMargin.replaceAll("\r\n", "\n"))
     }
 
     "truncates headers values when they exceed the truncate length" taggedAs (SeparateLinesOutputFormat) in {
@@ -524,14 +524,13 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF, truncate = 10, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
-      print(e.getMessage)
-      assert(e.getMessage == """Difference
+      assert(e.getMessage == """Diffs
                                |  +----------+
                                |  |thisisa...|
                                |1:|[31m         a[39m|:1
                                |1:|[32m         b[39m|:1
                                |  +----------+
-                               |""".stripMargin)
+                               |""".stripMargin.replaceAll("\r\n", "\n"))
     }
 
     "works well for very wide DataFrames with many columns - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
@@ -577,9 +576,8 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
-      println(e.getMessage)
 
-      assert(e.getMessage == """Difference
+      assert(e.getMessage == """Diffs
                                |  +-------+---+----------+-----------+--------------+---------+--------+-------+-----------+----------+
                                |  |   name|age|profession|       city|marital_status|education|  hobby1| hobby2|     hobby3|    hobby4|
                                |1:|[90m  alice| 25|  engineer|   new york|        single| bachelor| reading| travel|    cooking|      yoga[39m|:1
@@ -589,7 +587,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
                                |  +-------+---+----------+-----------+--------------+---------+--------+-------+-----------+----------+
                                |3:|[32m    bob| 30|    doctor|los angeles|       married|   master| running|  music|   painting| gardening[39m|:3
                                |  +-------+---+----------+-----------+--------------+---------+--------+-------+-----------+----------+
-                               |""".stripMargin)
+                               |""".stripMargin.replaceAll("\r\n", "\n"))
     }
 
     "Correctly mark unequal elements - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
@@ -622,10 +620,9 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
-      println(e.getMessage)
       assert(
         e.getMessage ==
-          """Difference
+          """Diffs
             |  +------+---+-------+
             |  |  name|age|country|
             |1:|[90m   bob|  1|[31m     uk[39m|:1
@@ -636,7 +633,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
             |3:|[31m steve| 10|    aus[39m|:3
             |3:|[32m  mark| 11|    usa[39m|:3
             |  +------+---+-------+
-            |""".stripMargin
+            |""".stripMargin.replaceAll("\r\n", "\n")
       )
     }
 
@@ -670,9 +667,8 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
-      println(e.getMessage)
       val expected =
-        """|Difference
+        """|Diffs
            |  +------+---+-------+
            |  |  name|age|country|
            |1:|[90m   bob|  1|[31m     uk[39m|:1
@@ -683,7 +679,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
            |3:|[31m steve| 10|    aus[39m|:3
            |3:|[32m  mark| 11|    usa[39m|:3
            |  +------+---+-------+
-           |""".stripMargin
+           |""".stripMargin.replaceAll("\r\n", "\n")
       assert(e.getMessage == expected)
 
     }
@@ -718,9 +714,8 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
-      println(e.getMessage)
 
-      assert(e.getMessage == """Difference
+      assert(e.getMessage == """Diffs
                                |  +-----+---+-------+
                                |  | name|age|country|
                                |1:|[90m  bob|  1|     uk[39m|:1
@@ -729,7 +724,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
                                |3:|[31msteve[90m| 10|    aus[39m|:3
                                |3:|[32m null[90m| 10|    aus[39m|:3
                                |  +-----+---+-------+
-                               |""".stripMargin)
+                               |""".stripMargin.replaceAll("\r\n", "\n"))
     }
 
     "Handle dataframes with different row counts" taggedAs (SeparateLinesOutputFormat) in {
@@ -761,9 +756,8 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
-      println(e.getMessage)
 
-      assert(e.getMessage == """Difference
+      assert(e.getMessage == """Diffs
                                |  +------+---+-------+
                                |  |  name|age|country|
                                |1:|[90m   bob|  1|     uk[39m|:1
@@ -771,7 +765,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
                                |  +------+---+-------+
                                |3:|[32m steve| 10|    aus[39m|:3
                                |  +------+---+-------+
-                               |""".stripMargin)
+                               |""".stripMargin.replaceAll("\r\n", "\n"))
     }
 
     "Handle empty dataframes - actual empty - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
@@ -799,9 +793,8 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(actualDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
-      println(e.getMessage)
 
-      assert(e.getMessage == """Difference
+      assert(e.getMessage == """Diffs
                                |  +------+---+-------+
                                |  |  name|age|country|
                                |1:|[32m   bob|  1|     uk[39m|:1
@@ -810,7 +803,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
                                |  +------+---+-------+
                                |3:|[32m steve| 10|    aus[39m|:3
                                |  +------+---+-------+
-                               |""".stripMargin)
+                               |""".stripMargin.replaceAll("\r\n", "\n"))
     }
 
     "Handle empty dataframes - expected empty - separate lines view" taggedAs (SeparateLinesOutputFormat) in {
@@ -838,10 +831,9 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       val e = intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(actualDF, expectedDF, outputFormat = DataframeDiffOutputFormat.SeparateLines)
       }
-      println(e.getMessage)
 
       assert(
-        e.getMessage == """Difference
+        e.getMessage == """Diffs
                           |  +------+---+-------+
                           |  |  name|age|country|
                           |1:|[31m   bob|  1|     uk[39m|:1
@@ -850,7 +842,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
                           |  +------+---+-------+
                           |3:|[31m steve| 10|    aus[39m|:3
                           |  +------+---+-------+
-                          |""".stripMargin
+                          |""".stripMargin.replaceAll("\r\n", "\n")
       )
     }
 

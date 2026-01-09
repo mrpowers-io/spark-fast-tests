@@ -22,6 +22,8 @@ trait DataFrameComparer extends DatasetComparer {
    *   \- don't compare column metadata when matching schemas
    * @param truncate
    *   \- truncate column if length more than specified number
+   * @param outputFormat
+   *   \- format of the dataframe diff output either SideBySide or SeparateLines
    */
   def assertSmallDataFrameEquality(
       actualDF: DataFrame,
@@ -34,51 +36,17 @@ trait DataFrameComparer extends DatasetComparer {
       truncate: Int = 500,
       outputFormat: DataframeDiffOutputFormat = DataframeDiffOutputFormat.SideBySide
   ): Unit = {
-    outputFormat match {
-      case DataframeDiffOutputFormat.SideBySide =>
-        assertSmallDatasetEquality(
-          actualDF,
-          expectedDF,
-          ignoreNullable,
-          ignoreColumnNames,
-          orderedComparison,
-          ignoreColumnOrder,
-          ignoreMetadata,
-          truncate
-        )
-      case DataframeDiffOutputFormat.SeparateLines =>
-        SchemaComparer.assertSchemaEqual(
-          actualDF.schema,
-          expectedDF.schema,
-          ignoreNullable,
-          ignoreColumnNames,
-          ignoreColumnOrder,
-          ignoreMetadata
-        )
-        val actual = if (ignoreColumnOrder) orderColumns(actualDF, expectedDF) else actualDF
-        if (orderedComparison)
-          assertSmallDataFrameEquality(actual, expectedDF, truncate)
-        else
-          assertSmallDataFrameEquality(
-            defaultSortDataset(actual),
-            defaultSortDataset(expectedDF),
-            truncate
-          )
-    }
-
-  }
-
-  private def assertSmallDataFrameEquality(
-      actualDF: DataFrame,
-      expectedDF: DataFrame,
-      truncate: Int
-  ): Unit = {
-    val a = actualDF.collect()
-    val e = expectedDF.collect()
-    if (!a.toSeq.approximateSameElements(e, (o1: Row, o2: Row) => o1.equals(o2))) {
-      val msg = "Difference\n" ++ DataframeUtil.showDataframeDiff(a, e, actualDF.schema.fieldNames, truncate)
-      throw DatasetContentMismatch(msg)
-    }
+    assertSmallDatasetEquality(
+      actualDF,
+      expectedDF,
+      ignoreNullable,
+      ignoreColumnNames,
+      orderedComparison,
+      ignoreColumnOrder,
+      ignoreMetadata,
+      truncate,
+      outputFormat = outputFormat
+    )
   }
 
   /**

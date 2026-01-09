@@ -1,5 +1,6 @@
 package com.github.mrpowers.spark.fast.tests
 
+import com.github.mrpowers.spark.fast.tests.DataframeDiffOutputFormat.DataframeDiffOutputFormat
 import com.github.mrpowers.spark.fast.tests.DatasetComparer.maxUnequalRowsToShow
 import com.github.mrpowers.spark.fast.tests.SeqLikesExtensions.SeqExtensions
 import org.apache.spark.rdd.RDD
@@ -47,11 +48,12 @@ Expected DataFrame Row Count: '$expectedCount'
       ignoreColumnOrder: Boolean = false,
       ignoreMetadata: Boolean = true,
       truncate: Int = 500,
-      equals: (T, T) => Boolean = (o1: T, o2: T) => o1.equals(o2)
+      equals: (T, T) => Boolean = (o1: T, o2: T) => o1.equals(o2),
+      outputFormat: DataframeDiffOutputFormat = DataframeDiffOutputFormat.SideBySide
   ): Unit = {
     SchemaComparer.assertDatasetSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)
     val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
-    assertSmallDatasetContentEquality(actual, expectedDS, orderedComparison, truncate, equals)
+    assertSmallDatasetContentEquality(actual, expectedDS, orderedComparison, truncate, equals, outputFormat)
   }
 
   def assertSmallDatasetContentEquality[T: ClassTag](
@@ -59,20 +61,26 @@ Expected DataFrame Row Count: '$expectedCount'
       expectedDS: Dataset[T],
       orderedComparison: Boolean,
       truncate: Int,
-      equals: (T, T) => Boolean
+      equals: (T, T) => Boolean,
+      outputFormat: DataframeDiffOutputFormat
   ): Unit = {
     if (orderedComparison)
-      assertSmallDatasetContentEquality(actualDS, expectedDS, truncate, equals)
+      assertSmallDatasetContentEquality(actualDS, expectedDS, truncate, equals, outputFormat)
     else
-      assertSmallDatasetContentEquality(defaultSortDataset(actualDS), defaultSortDataset(expectedDS), truncate, equals)
+      assertSmallDatasetContentEquality(defaultSortDataset(actualDS), defaultSortDataset(expectedDS), truncate, equals, outputFormat)
   }
 
-  def assertSmallDatasetContentEquality[T: ClassTag](actualDS: Dataset[T], expectedDS: Dataset[T], truncate: Int, equals: (T, T) => Boolean): Unit = {
+  def assertSmallDatasetContentEquality[T: ClassTag](
+      actualDS: Dataset[T],
+      expectedDS: Dataset[T],
+      truncate: Int,
+      equals: (T, T) => Boolean,
+      outputFormat: DataframeDiffOutputFormat
+  ): Unit = {
     val a = actualDS.collect().toSeq
     val e = expectedDS.collect().toSeq
     if (!a.approximateSameElements(e, equals)) {
-      val arr = ("Actual Content", "Expected Content")
-      val msg = "Diffs\n" ++ ProductUtil.showProductDiff(arr, a, e, truncate)
+      val msg = "Diffs\n" ++ ProductUtil.showProductDiff(expectedDS.columns, a, e, truncate, outputFormat = outputFormat)
       throw DatasetContentMismatch(msg)
     }
   }
