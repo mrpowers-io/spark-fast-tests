@@ -10,7 +10,7 @@ object SchemaComparer {
   case class DatasetSchemaMismatch(smth: String) extends Exception(smth)
   private def betterSchemaMismatchMessage(actualSchema: StructType, expectedSchema: StructType): String = {
     showProductDiff(
-      ("Actual Schema", "Expected Schema"),
+      Array("Actual Schema", "Expected Schema"),
       actualSchema.fields,
       expectedSchema.fields,
       truncate = 200
