@@ -2,7 +2,7 @@ package com.github.mrpowers.spark.fast.tests.comparer.schema
 
 import com.github.mrpowers.spark.fast.tests.ufansi.Color.{DarkGray, Green, Red}
 import com.github.mrpowers.spark.fast.tests.ufansi.EscapeAttr
-import org.apache.spark.sql.types.{ArrayType, DataType, MapType, StructField, StructType}
+import com.github.mrpowers.spark.fast.tests.api._
 
 import scala.annotation.tailrec
 
@@ -21,8 +21,8 @@ object FieldComparison {
 
   def apply(
       name: String,
-      leftField: Option[StructField],
-      rightField: Option[StructField],
+      leftField: Option[FieldLike],
+      rightField: Option[FieldLike],
       matchFieldByName: Boolean
   ): FieldComparison = {
     val leftInfo  = leftField.map(f => FieldInfo(f))
@@ -31,7 +31,7 @@ object FieldComparison {
     FieldComparison(name, leftInfo, rightInfo, children)
   }
 
-  def buildComparison(s1: StructType, s2: StructType, matchFieldByName: Boolean): Seq[FieldComparison] = {
+  def buildComparison(s1: SchemaLike, s2: SchemaLike, matchFieldByName: Boolean): Seq[FieldComparison] = {
     val (leftFields, rightFields) = if (matchFieldByName) {
       (
         s1.fields.map(f => f.name -> f).toMap,
@@ -53,13 +53,13 @@ object FieldComparison {
   }
 
   private def buildChildComparisons(
-      leftType: Option[DataType],
-      rightType: Option[DataType],
+      leftType: Option[DataTypeLike],
+      rightType: Option[DataTypeLike],
       matchFieldByName: Boolean
   ): Seq[FieldComparison] = {
     (leftType, rightType) match {
       // Array types - must be checked BEFORE struct types
-      case (Some(l @ ArrayType(_, _)), Some(r @ ArrayType(_, _))) =>
+      case (Some(l: ArrayTypeLike), Some(r: ArrayTypeLike)) =>
         Seq(
           FieldComparison(
             ELEMENT,
@@ -69,7 +69,7 @@ object FieldComparison {
           )
         )
 
-      case (Some(l: ArrayType), None) =>
+      case (Some(l: ArrayTypeLike), None) =>
         Seq(
           FieldComparison(
             ELEMENT,
@@ -79,7 +79,7 @@ object FieldComparison {
           )
         )
 
-      case (None, Some(r: ArrayType)) =>
+      case (None, Some(r: ArrayTypeLike)) =>
         Seq(
           FieldComparison(
             ELEMENT,
@@ -90,15 +90,15 @@ object FieldComparison {
         )
 
       // Both are structs
-      case (Some(st1: StructType), Some(st2: StructType)) =>
+      case (Some(st1: StructTypeLike), Some(st2: StructTypeLike)) =>
         buildComparison(st1, st2, matchFieldByName)
-      case (Some(st: StructType), None) =>
-        buildComparison(st, new StructType(), matchFieldByName)
-      case (None, Some(st: StructType)) =>
-        buildComparison(new StructType(), st, matchFieldByName)
+      case (Some(st: StructTypeLike), None) =>
+        buildComparison(st, GenericSchemaLike(Seq.empty), matchFieldByName)
+      case (None, Some(st: StructTypeLike)) =>
+        buildComparison(GenericSchemaLike(Seq.empty), st, matchFieldByName)
 
       // Map types
-      case (Some(l: MapType), Some(r: MapType)) =>
+      case (Some(l: MapTypeLike), Some(r: MapTypeLike)) =>
         Seq(
           FieldComparison(
             KEY,
@@ -113,7 +113,7 @@ object FieldComparison {
             buildChildComparisons(Some(l.valueType), Some(r.valueType), matchFieldByName)
           )
         )
-      case (Some(l: MapType), None) =>
+      case (Some(l: MapTypeLike), None) =>
         Seq(
           FieldComparison(
             KEY,
@@ -129,7 +129,7 @@ object FieldComparison {
           )
         )
 
-      case (None, Some(r: MapType)) =>
+      case (None, Some(r: MapTypeLike)) =>
         Seq(
           FieldComparison(
             KEY,

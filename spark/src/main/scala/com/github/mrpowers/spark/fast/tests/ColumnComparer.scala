@@ -7,6 +7,9 @@ import org.apache.spark.sql.types.StructField
 
 case class ColumnMismatch(smth: String) extends Exception(smth)
 
+/**
+ * Provides assertion utilities for comparing columns within a DataFrame.
+ */
 trait ColumnComparer {
 
   def assertColumnEquality(df: DataFrame, colName1: String, colName2: String): Unit = {

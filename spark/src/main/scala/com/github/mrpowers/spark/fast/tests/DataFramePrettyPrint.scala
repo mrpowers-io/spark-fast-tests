@@ -1,8 +1,7 @@
 package com.github.mrpowers.spark.fast.tests
 
-import java.sql.Date
-import java.time.format.DateTimeFormatter
 import org.apache.commons.lang3.StringUtils
+import com.github.mrpowers.spark.fast.tests.api.ProductLikeUtil.cellToString
 
 import org.apache.spark.sql.{DataFrame, Row}
 
@@ -14,11 +13,14 @@ object DataFramePrettyPrint {
     val hasMoreData = takeResult.length > numRows
     val data        = takeResult.take(numRows)
 
-    // For array values, replace Seq and Array with square brackets
-    // For cells that are beyond `truncate` characters, replace it with the
-    // first `truncate-3` and "..."
     val rows: Seq[Seq[String]] = df.schema.fieldNames.toSeq +: data.map { row =>
-      row.toSeq.map(cellToString(_, truncate)): Seq[String]
+      row.toSeq.map { v =>
+        val rowVal = v match {
+          case r: Row => SparkRowAdapter(r)
+          case other  => other
+        }
+        cellToString(rowVal, truncate)
+      }
     }
 
     val sb      = new StringBuilder
@@ -78,12 +80,12 @@ object DataFramePrettyPrint {
         .map { case (cell, i) =>
           if (truncate > 0) {
             StringUtils.leftPad(
-              cell.toString,
+              cell,
               colWidths(i)
             )
           } else {
             StringUtils.rightPad(
-              cell.toString,
+              cell,
               colWidths(i)
             )
           }
@@ -105,67 +107,5 @@ object DataFramePrettyPrint {
     }
 
     sb.toString()
-  }
-
-  /**
-   * Convert dataframe cell to string
-   * @param cell
-   *   \- cell value
-   * @param truncate
-   *   \-
-   */
-  private[mrpowers] def cellToString(cell: Any, truncate: Int): String = {
-    val str = cell match {
-      case null => "null"
-      case binary: Array[Byte] =>
-        binary
-          .map("%02X".format(_))
-          .mkString(
-            "[",
-            " ",
-            "]"
-          )
-      case array: Array[_] =>
-        array.mkString(
-          "[",
-          ", ",
-          "]"
-        )
-      case seq: Seq[_] =>
-        seq.mkString(
-          "[",
-          ", ",
-          "]"
-        )
-      case d: Date =>
-        d.toLocalDate.format(DateTimeFormatter.ISO_DATE)
-      case r: Row =>
-        r.schema.fieldNames
-          .zip(r.toSeq)
-          .map { case (k, v) =>
-            s"$k -> $v"
-          }
-          .mkString(
-            "{",
-            ", ",
-            "}"
-          )
-      case _ => cell.toString
-    }
-    if (truncate > 0 && str.length > truncate) {
-      // do not show ellipses for strings shorter than 4 characters.
-      if (truncate < 4)
-        str.substring(
-          0,
-          truncate
-        )
-      else
-        str.substring(
-          0,
-          truncate - 3
-        ) + "..."
-    } else {
-      str
-    }
   }
 }

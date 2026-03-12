@@ -2,7 +2,7 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.types._
 import SparkSessionExt._
-import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
+import com.github.mrpowers.spark.fast.tests.api.{DatasetSchemaMismatch, DatasetContentMismatch, DatasetCountMismatch}
 import com.github.mrpowers.spark.fast.tests.TestUtilsExt.ExceptionOps
 import org.apache.spark.sql.functions.col
 import org.scalatest.freespec.AnyFreeSpec
@@ -1201,37 +1201,6 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
                           |""".stripMargin.replaceAll("\r\n", "\n")
       )
     }
-  }
-
-  "defaultSortDataset" - {
-
-    "sorts a DataFrame by the column names in alphabetical order" in {
-      val sourceDF = spark.createDF(
-        List(
-          (5, "bob"),
-          (1, "phil"),
-          (5, "anne")
-        ),
-        List(
-          ("fun_level", IntegerType, true),
-          ("name", StringType, true)
-        )
-      )
-      val actualDF = defaultSortDataset(sourceDF)
-      val expectedDF = spark.createDF(
-        List(
-          (1, "phil"),
-          (5, "anne"),
-          (5, "bob")
-        ),
-        List(
-          ("fun_level", IntegerType, true),
-          ("name", StringType, true)
-        )
-      )
-      assertSmallDatasetEquality(actualDF, expectedDF)
-    }
-
   }
 
   "assertApproximateDataFrameEquality" - {

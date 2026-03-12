@@ -1,29 +1,17 @@
 package com.github.mrpowers.spark.fast.tests
 
-import com.github.mrpowers.spark.fast.tests.SeqLikesExtensions.SeqExtensions
+import com.github.mrpowers.spark.fast.tests.api._
 import org.apache.spark.sql.{DataFrame, Row}
 import com.github.mrpowers.spark.fast.tests.DataframeDiffOutputFormat.DataframeDiffOutputFormat
+import SparkDataFrameLike.instance
 
+/**
+ * Provides assertion utilities for Spark DataFrames.
+ */
 trait DataFrameComparer extends DatasetComparer {
 
   /**
-   * Raises an error unless `actualDF` and `expectedDF` are equal
-   * @param actualDF
-   *   \- actual dataframe
-   * @param expectedDF
-   *   \- expected dataframe
-   * @param ignoreNullable
-   *   \- ignore nullable parameter when matching schemas
-   * @param ignoreColumnNames
-   *   \- ignore column names
-   * @param orderedComparison
-   *   \- if false sorts actual and expected
-   * @param ignoreMetadata
-   *   \- don't compare column metadata when matching schemas
-   * @param truncate
-   *   \- truncate column if length more than specified number
-   * @param outputFormat
-   *   \- format of the dataframe diff output either SideBySide or SeparateLines
+   * Raises an error unless `actualDF` and `expectedDF` are equal.
    */
   def assertSmallDataFrameEquality(
       actualDF: DataFrame,
@@ -36,7 +24,7 @@ trait DataFrameComparer extends DatasetComparer {
       truncate: Int = 500,
       outputFormat: DataframeDiffOutputFormat = DataframeDiffOutputFormat.SideBySide
   ): Unit = {
-    assertSmallDatasetEquality(
+    assertDataFrameLikeEquality[DataFrame, RowLike](
       actualDF,
       expectedDF,
       ignoreNullable,
@@ -50,7 +38,7 @@ trait DataFrameComparer extends DatasetComparer {
   }
 
   /**
-   * Raises an error unless `actualDF` and `expectedDF` are equal
+   * Raises an error unless `actualDF` and `expectedDF` are equal. Optimized for large DataFrames.
    */
   def assertLargeDataFrameEquality(
       actualDF: DataFrame,
@@ -73,7 +61,7 @@ trait DataFrameComparer extends DatasetComparer {
   }
 
   /**
-   * Raises an error unless `actualDF` and `expectedDF` are equal
+   * Raises an error unless `actualDF` and `expectedDF` are approximately equal within the given precision.
    */
   def assertApproximateSmallDataFrameEquality(
       actualDF: DataFrame,
@@ -83,22 +71,26 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreColumnNames: Boolean = false,
       orderedComparison: Boolean = true,
       ignoreColumnOrder: Boolean = false,
-      ignoreMetadata: Boolean = true
+      ignoreMetadata: Boolean = true,
+      truncate: Int = 500,
+      outputFormat: DataframeDiffOutputFormat = DataframeDiffOutputFormat.SideBySide
   ): Unit = {
-    assertSmallDatasetEquality[Row](
+    assertApproximateDataFrameLikeEquality(
       actualDF,
       expectedDF,
+      precision,
       ignoreNullable,
       ignoreColumnNames,
       orderedComparison,
       ignoreColumnOrder,
       ignoreMetadata,
-      equals = RowComparer.areRowsEqual(_, _, precision)
+      truncate,
+      outputFormat
     )
   }
 
   /**
-   * Raises an error unless `actualDF` and `expectedDF` are equal
+   * Raises an error unless `actualDF` and `expectedDF` are approximately equal within the given precision. Optimized for large DataFrames.
    */
   def assertApproximateLargeDataFrameEquality(
       actualDF: DataFrame,
@@ -110,7 +102,7 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreColumnOrder: Boolean = false,
       ignoreMetadata: Boolean = true
   ): Unit = {
-    assertLargeDatasetEquality[Row](
+    assertLargeDatasetEquality(
       actualDF,
       expectedDF,
       equals = RowComparer.areRowsEqual(_, _, precision),

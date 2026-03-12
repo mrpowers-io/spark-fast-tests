@@ -1,36 +1,36 @@
 package com.github.mrpowers.spark.fast.tests.comparer.schema
 
-import org.apache.spark.sql.types._
+import com.github.mrpowers.spark.fast.tests.api._
 
 case class FieldInfo(
     typeName: String,
     nullable: Boolean,
-    metadata: Metadata,
+    metadata: Map[String, Any],
     containsNull: Option[Boolean] = None, // For array types
     name: Option[String] = None
 )
 
 object FieldInfo {
-  def apply(field: StructField): FieldInfo = {
+  def apply(field: FieldLike): FieldInfo = {
     FieldInfo(field.dataType.typeName, field.nullable, field.metadata, name = Some(field.name))
   }
 
-  def apply(dataType: DataType): FieldInfo = dataType match {
-    case arrayType: ArrayType =>
-      FieldInfo(arrayType.typeName, nullable = true, Metadata.empty, Some(arrayType.containsNull))
-    case mapType: MapType =>
-      FieldInfo(mapType.typeName, nullable = true, Metadata.empty, Some(mapType.valueContainsNull))
-    case _: DataType =>
-      FieldInfo(dataType.typeName, nullable = true, Metadata.empty)
+  def apply(dataType: DataTypeLike): FieldInfo = dataType match {
+    case arrayType: ArrayTypeLike =>
+      FieldInfo(arrayType.typeName, nullable = true, Map.empty, Some(arrayType.containsNull))
+    case mapType: MapTypeLike =>
+      FieldInfo(mapType.typeName, nullable = true, Map.empty, Some(mapType.valueContainsNull))
+    case _: DataTypeLike =>
+      FieldInfo(dataType.typeName, nullable = true, Map.empty)
   }
 
   // Special apply for array elements - shows the element type with containsNull as nullable
-  def applyForArrayElement(arrayType: ArrayType): FieldInfo = arrayType.elementType match {
-    case innerArray: ArrayType =>
-      FieldInfo(innerArray.typeName, nullable = true, Metadata.empty, Some(innerArray.containsNull))
-    case mapType: MapType =>
-      FieldInfo(mapType.typeName, nullable = true, Metadata.empty, Some(mapType.valueContainsNull))
+  def applyForArrayElement(arrayType: ArrayTypeLike): FieldInfo = arrayType.elementType match {
+    case innerArray: ArrayTypeLike =>
+      FieldInfo(innerArray.typeName, nullable = true, Map.empty, Some(innerArray.containsNull))
+    case mapType: MapTypeLike =>
+      FieldInfo(mapType.typeName, nullable = true, Map.empty, Some(mapType.valueContainsNull))
     case elementType =>
-      FieldInfo(elementType.typeName, arrayType.containsNull, Metadata.empty)
+      FieldInfo(elementType.typeName, arrayType.containsNull, Map.empty)
   }
 }
