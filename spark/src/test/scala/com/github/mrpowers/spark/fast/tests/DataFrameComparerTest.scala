@@ -2,7 +2,7 @@ package com.github.mrpowers.spark.fast.tests
 
 import org.apache.spark.sql.types.{DoubleType, IntegerType, LongType, MetadataBuilder, StringType, StructField, StructType}
 import SparkSessionExt._
-import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
+import com.github.mrpowers.spark.fast.tests.api.{DatasetSchemaMismatch, DatasetContentMismatch, DatasetCountMismatch}
 import org.apache.spark.sql.functions.col
 import com.github.mrpowers.spark.fast.tests.TestUtilsExt.ExceptionOps
 import org.scalatest.Tag

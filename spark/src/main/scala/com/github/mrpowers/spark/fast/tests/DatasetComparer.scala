@@ -2,17 +2,18 @@ package com.github.mrpowers.spark.fast.tests
 
 import com.github.mrpowers.spark.fast.tests.DataframeDiffOutputFormat.DataframeDiffOutputFormat
 import com.github.mrpowers.spark.fast.tests.DatasetComparer.maxUnequalRowsToShow
-import com.github.mrpowers.spark.fast.tests.SeqLikesExtensions.SeqExtensions
+import com.github.mrpowers.spark.fast.tests.api._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{DataFrame, Dataset, Row}
+import org.apache.spark.sql.{DataFrame, Dataset, Encoder, Row}
 
 import scala.reflect.ClassTag
 
-case class DatasetContentMismatch(smth: String) extends Exception(smth)
-case class DatasetCountMismatch(smth: String)   extends Exception(smth)
+/**
+ * Provides assertion utilities for Spark Datasets and DataFrames.
+ */
+trait DatasetComparer extends DataFrameLikeComparer {
 
-trait DatasetComparer {
   private def countMismatchMessage(actualCount: Long, expectedCount: Long): String = {
     s"""
 Actual DataFrame Row Count: '$actualCount'
@@ -30,14 +31,21 @@ Expected DataFrame Row Count: '$expectedCount'
   }
 
   /**
-   * order ds1 column according to ds2 column order
+   * Sorts the dataset by columns that are not floating point types (Double, Decimal, Float). Used for unordered comparisons with large datasets to
+   * avoid floating point sorting issues.
    */
-  def orderColumns[T](ds1: Dataset[T], ds2: Dataset[T]): Dataset[T] = {
-    ds1.select(ds2.columns.map(col).toIndexedSeq: _*).as[T](ds2.encoder)
+  def sortPreciseColumns[T](ds: Dataset[T]): Dataset[T] = {
+    val colNames = ds.dtypes
+      .withFilter { dtype =>
+        !Seq("DoubleType", "DecimalType", "FloatType").contains(dtype._2)
+      }
+      .map(_._1)
+    val cols = colNames.map(col)
+    ds.sort(cols: _*)
   }
 
   /**
-   * Raises an error unless `actualDS` and `expectedDS` are equal
+   * Raises an error unless `actualDS` and `expectedDS` are equal.
    */
   def assertSmallDatasetEquality[T: ClassTag](
       actualDS: Dataset[T],
@@ -51,54 +59,23 @@ Expected DataFrame Row Count: '$expectedCount'
       equals: (T, T) => Boolean = (o1: T, o2: T) => o1.equals(o2),
       outputFormat: DataframeDiffOutputFormat = DataframeDiffOutputFormat.SideBySide
   ): Unit = {
-    SchemaComparer.assertDatasetSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)
-    val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
-    assertSmallDatasetContentEquality(actual, expectedDS, orderedComparison, truncate, equals, outputFormat)
-  }
-
-  def assertSmallDatasetContentEquality[T: ClassTag](
-      actualDS: Dataset[T],
-      expectedDS: Dataset[T],
-      orderedComparison: Boolean,
-      truncate: Int,
-      equals: (T, T) => Boolean,
-      outputFormat: DataframeDiffOutputFormat
-  ): Unit = {
-    if (orderedComparison)
-      assertSmallDatasetContentEquality(actualDS, expectedDS, truncate, equals, outputFormat)
-    else
-      assertSmallDatasetContentEquality(defaultSortDataset(actualDS), defaultSortDataset(expectedDS), truncate, equals, outputFormat)
-  }
-
-  def assertSmallDatasetContentEquality[T: ClassTag](
-      actualDS: Dataset[T],
-      expectedDS: Dataset[T],
-      truncate: Int,
-      equals: (T, T) => Boolean,
-      outputFormat: DataframeDiffOutputFormat
-  ): Unit = {
-    val a = actualDS.collect().toSeq
-    val e = expectedDS.collect().toSeq
-    if (!a.approximateSameElements(e, equals)) {
-      val msg = "Diffs\n" ++ ProductUtil.showProductDiff(expectedDS.columns, a, e, truncate, outputFormat = outputFormat)
-      throw DatasetContentMismatch(msg)
-    }
-  }
-
-  def defaultSortDataset[T](ds: Dataset[T]): Dataset[T] = ds.sort(ds.columns.map(col).toIndexedSeq: _*)
-
-  def sortPreciseColumns[T](ds: Dataset[T]): Dataset[T] = {
-    val colNames = ds.dtypes
-      .withFilter { dtype =>
-        !Seq("DoubleType", "DecimalType", "FloatType").contains(dtype._2)
-      }
-      .map(_._1)
-    val cols = colNames.map(col)
-    ds.sort(cols: _*)
+    implicit val datasetLike: DataFrameLike[Dataset[T], T] = SparkDatasetLike.instance[T](expectedDS.encoder)
+    assertDataFrameLikeEquality(
+      actualDS,
+      expectedDS,
+      ignoreNullable,
+      ignoreColumnNames,
+      orderedComparison,
+      ignoreColumnOrder,
+      ignoreMetadata,
+      truncate,
+      equals,
+      outputFormat
+    )
   }
 
   /**
-   * Raises an error unless `actualDS` and `expectedDS` are equal
+   * Raises an error unless `actualDS` and `expectedDS` are equal. Optimized for large datasets.
    */
   def assertLargeDatasetEquality[T: ClassTag](
       actualDS: Dataset[T],
@@ -110,9 +87,17 @@ Expected DataFrame Row Count: '$expectedCount'
       ignoreColumnOrder: Boolean = false,
       ignoreMetadata: Boolean = true
   ): Unit = {
-    // first check if the schemas are equal
-    SchemaComparer.assertDatasetSchemaEqual(actualDS, expectedDS, ignoreNullable, ignoreColumnNames, ignoreColumnOrder, ignoreMetadata)
-    val actual = if (ignoreColumnOrder) orderColumns(actualDS, expectedDS) else actualDS
+    implicit val datasetLike: DataFrameLike[Dataset[T], T] = SparkDatasetLike.instance[T](expectedDS.encoder)
+    SchemaLikeComparer.assertSchemaEqual(
+      datasetLike.schema(actualDS),
+      datasetLike.schema(expectedDS),
+      ignoreNullable,
+      ignoreColumnNames,
+      ignoreColumnOrder,
+      ignoreMetadata
+    )
+
+    val actual = if (ignoreColumnOrder) orderColumnsGeneric(actualDS, expectedDS) else actualDS
     assertLargeDatasetContentEquality(actual, expectedDS, equals, orderedComparison)
   }
 

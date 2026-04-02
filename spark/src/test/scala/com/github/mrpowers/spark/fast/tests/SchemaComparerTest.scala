@@ -1,14 +1,13 @@
 package com.github.mrpowers.spark.fast.tests
 
-import com.github.mrpowers.spark.fast.tests.SchemaComparer.DatasetSchemaMismatch
+import com.github.mrpowers.spark.fast.tests.api.DatasetSchemaMismatch
 import org.apache.spark.sql.types._
 import org.scalatest.freespec.AnyFreeSpec
 
 class SchemaComparerTest extends AnyFreeSpec {
 
-  "equals" - {
-
-    "returns true if the schemas are equal" in {
+  "assertSchemaEqual" - {
+    "does not throw when schemas are equal" in {
       val s1 = StructType(
         Seq(
           StructField("something", StringType, true),
@@ -21,10 +20,10 @@ class SchemaComparerTest extends AnyFreeSpec {
           StructField("mood", StringType, true)
         )
       )
-      assert(SchemaComparer.equals(s1, s2))
+      SchemaComparer.assertSchemaEqual(s1, s2)
     }
 
-    "works for single column schemas" in {
+    "works for single column schemas with ignoreNullable" in {
       val s1 = StructType(
         Seq(
           StructField("something", StringType, true)
@@ -35,10 +34,10 @@ class SchemaComparerTest extends AnyFreeSpec {
           StructField("something", StringType, false)
         )
       )
-      assert(SchemaComparer.equals(s1, s2, true))
+      SchemaComparer.assertSchemaEqual(s1, s2, ignoreNullable = true)
     }
 
-    "returns false if the schemas aren't equal" in {
+    "throws when schemas have different number of fields" in {
       val s1 = StructType(
         Seq(
           StructField("something", StringType, true)
@@ -50,10 +49,12 @@ class SchemaComparerTest extends AnyFreeSpec {
           StructField("mood", StringType, true)
         )
       )
-      assert(!SchemaComparer.equals(s1, s2))
+      intercept[DatasetSchemaMismatch] {
+        SchemaComparer.assertSchemaEqual(s1, s2)
+      }
     }
 
-    "can ignore the nullable flag when determining equality" in {
+    "does not throw when ignoring nullable flag" in {
       val s1 = StructType(
         Seq(
           StructField("something", StringType, true),
@@ -66,10 +67,10 @@ class SchemaComparerTest extends AnyFreeSpec {
           StructField("mood", StringType, true)
         )
       )
-      assert(SchemaComparer.equals(s1, s2, ignoreNullable = true))
+      SchemaComparer.assertSchemaEqual(s1, s2, ignoreNullable = true)
     }
 
-    "do not ignore nullable when determining equality if ignoreNullable is true" in {
+    "throws when nullable differs and ignoreNullable is false" in {
       val s1 = StructType(
         Seq(
           StructField("something", StringType, true),
@@ -82,52 +83,12 @@ class SchemaComparerTest extends AnyFreeSpec {
           StructField("mood", StringType, true)
         )
       )
-      assert(!SchemaComparer.equals(s1, s2))
+      intercept[DatasetSchemaMismatch] {
+        SchemaComparer.assertSchemaEqual(s1, s2, ignoreNullable = false)
+      }
     }
 
-    "can ignore the nullable flag when determining equality on complex data types" in {
-      val s1 = StructType(
-        Seq(
-          StructField("something", StringType, true),
-          StructField("array", ArrayType(StringType, containsNull = true), true),
-          StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
-          StructField(
-            "struct",
-            StructType(
-              StructType(
-                Seq(
-                  StructField("something", StringType, false),
-                  StructField("mood", ArrayType(StringType, containsNull = false), true)
-                )
-              )
-            ),
-            true
-          )
-        )
-      )
-      val s2 = StructType(
-        Seq(
-          StructField("something", StringType, false),
-          StructField("array", ArrayType(StringType, containsNull = false), true),
-          StructField("map", MapType(StringType, StringType, valueContainsNull = true), true),
-          StructField(
-            "struct",
-            StructType(
-              StructType(
-                Seq(
-                  StructField("something", StringType, false),
-                  StructField("mood", ArrayType(StringType, containsNull = true), true)
-                )
-              )
-            ),
-            false
-          )
-        )
-      )
-      assert(SchemaComparer.equals(s1, s2, ignoreNullable = true))
-    }
-
-    "do not ignore nullable when determining equality on complex data types if ignoreNullable is true" in {
+    "does not throw when ignoring nullable flag on complex data types" in {
       val s1 = StructType(
         Seq(
           StructField("something", StringType, true),
@@ -166,10 +127,54 @@ class SchemaComparerTest extends AnyFreeSpec {
           )
         )
       )
-      assert(!SchemaComparer.equals(s1, s2))
+      SchemaComparer.assertSchemaEqual(s1, s2, ignoreNullable = true)
     }
 
-    "can ignore the column names flag when determining equality" in {
+    "throws when nullable differs on complex data types and ignoreNullable is false" in {
+      val s1 = StructType(
+        Seq(
+          StructField("something", StringType, true),
+          StructField("array", ArrayType(StringType, containsNull = true), true),
+          StructField("map", MapType(StringType, StringType, valueContainsNull = false), true),
+          StructField(
+            "struct",
+            StructType(
+              StructType(
+                Seq(
+                  StructField("something", StringType, false),
+                  StructField("mood", ArrayType(StringType, containsNull = false), true)
+                )
+              )
+            ),
+            true
+          )
+        )
+      )
+      val s2 = StructType(
+        Seq(
+          StructField("something", StringType, false),
+          StructField("array", ArrayType(StringType, containsNull = false), true),
+          StructField("map", MapType(StringType, StringType, valueContainsNull = true), true),
+          StructField(
+            "struct",
+            StructType(
+              StructType(
+                Seq(
+                  StructField("something", StringType, false),
+                  StructField("mood", ArrayType(StringType, containsNull = true), true)
+                )
+              )
+            ),
+            false
+          )
+        )
+      )
+      intercept[DatasetSchemaMismatch] {
+        SchemaComparer.assertSchemaEqual(s1, s2, ignoreNullable = false)
+      }
+    }
+
+    "does not throw when ignoring column names" in {
       val s1 = StructType(
         Seq(
           StructField("these", StringType, true),
@@ -182,10 +187,10 @@ class SchemaComparerTest extends AnyFreeSpec {
           StructField("different", StringType, true)
         )
       )
-      assert(SchemaComparer.equals(s1, s2, ignoreColumnNames = true))
+      SchemaComparer.assertSchemaEqual(s1, s2, ignoreColumnNames = true, ignoreColumnOrder = false)
     }
 
-    "can ignore the column order when determining equality" in {
+    "does not throw when ignoring column order" in {
       val s1 = StructType(
         Seq(
           StructField("these", StringType, true),
@@ -198,10 +203,10 @@ class SchemaComparerTest extends AnyFreeSpec {
           StructField("these", StringType, true)
         )
       )
-      assert(SchemaComparer.equals(s1, s2))
+      SchemaComparer.assertSchemaEqual(s1, s2, ignoreColumnOrder = true)
     }
 
-    "can ignore the column order when determining equality of complex type" in {
+    "does not throw when ignoring column order on complex types" in {
       val s1 = StructType(
         Seq(
           StructField("array", ArrayType(StringType, containsNull = true), true),
@@ -240,7 +245,7 @@ class SchemaComparerTest extends AnyFreeSpec {
           )
         )
       )
-      assert(SchemaComparer.equals(s1, s2))
+      SchemaComparer.assertSchemaEqual(s1, s2, ignoreColumnOrder = true)
     }
 
     "display schema diff as tree with different depth with ignoreColumnOrder = false" in {

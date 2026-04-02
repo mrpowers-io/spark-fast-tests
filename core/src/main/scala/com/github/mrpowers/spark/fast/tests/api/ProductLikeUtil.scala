@@ -1,21 +1,27 @@
-package com.github.mrpowers.spark.fast.tests
+package com.github.mrpowers.spark.fast.tests.api
 
 import com.github.mrpowers.spark.fast.tests.DataframeDiffOutputFormat.DataframeDiffOutputFormat
+import com.github.mrpowers.spark.fast.tests.DataframeDiffOutputFormat
 import com.github.mrpowers.spark.fast.tests.ufansi.Color.{DarkGray, Green, Red}
 import com.github.mrpowers.spark.fast.tests.ufansi.FansiExtensions.StrOps
 import com.github.mrpowers.spark.fast.tests.ufansi.Str
-import org.apache.commons.lang3.StringUtils
-import org.apache.spark.sql.Row
 
+import java.sql.Date
+import java.time.format.DateTimeFormatter
 import scala.reflect.ClassTag
 
-object ProductUtil {
-  private[mrpowers] def productOrRowToSeq(product: Any): Seq[Any] = {
+/**
+ * Generic product utilities for displaying differences with colorized output. Supports RowLike abstraction for framework-agnostic DataFrame
+ * comparison.
+ */
+object ProductLikeUtil {
+
+  private[mrpowers] def productOrSeqToSeq(product: Any): Seq[Any] = {
     product match {
       case null           => Seq.empty
-      case a: Array[_]    => a
+      case r: RowLike     => r.toSeq
+      case a: Array[_]    => a.toSeq
       case i: Iterable[_] => i.toSeq
-      case r: Row         => r.toSeq
       case p: Product     => p.productIterator.toSeq
       case s              => Seq(s)
     }
@@ -31,9 +37,21 @@ object ProductUtil {
       minColWidth: Int = 3,
       outputFormat: DataframeDiffOutputFormat = DataframeDiffOutputFormat.SideBySide
   ): String = {
+    showProductDiffWithHeader(Seq("Actual Content", "Expected Content"), columns, actual, expected, truncate, minColWidth, outputFormat)
+  }
+
+  private[mrpowers] def showProductDiffWithHeader[T: ClassTag](
+      header: Seq[String],
+      columns: Array[String],
+      actual: Seq[T],
+      expected: Seq[T],
+      truncate: Int = 20,
+      minColWidth: Int = 3,
+      outputFormat: DataframeDiffOutputFormat = DataframeDiffOutputFormat.SideBySide
+  ): String = {
     outputFormat match {
       case DataframeDiffOutputFormat.SideBySide =>
-        showProductDiffSideBySide(Seq("Actual Content", "Expected Content"), actual, expected, truncate, minColWidth)
+        showProductDiffSideBySide(header, actual, expected, truncate, minColWidth)
       case DataframeDiffOutputFormat.SeparateLines =>
         showProductDiffSeparateLine(actual, expected, columns, truncate, minColWidth)
     }
@@ -46,9 +64,16 @@ object ProductUtil {
       truncate: Int = 20,
       minColWidth: Int = 3
   ): String = {
-
-    val runTimeClass                     = implicitly[ClassTag[T]].runtimeClass
-    val (className, lBracket, rBracket)  = if (runTimeClass == classOf[Row]) ("", "[", "]") else (runTimeClass.getSimpleName, "(", ")")
+    val runTimeClass = implicitly[ClassTag[T]].runtimeClass
+    val (className, lBracket, rBracket) = {
+      if (classOf[RowLike].isAssignableFrom(runTimeClass) || classOf[Seq[_]].isAssignableFrom(runTimeClass)) {
+        ("", "[", "]")
+      } else if (classOf[FieldLike].isAssignableFrom(runTimeClass)) {
+        ("StructField", "(", ")") // Use StructField for FieldLike to match Spark's format
+      } else {
+        (runTimeClass.getSimpleName, "(", ")")
+      }
+    }
     val prodToString: Seq[Any] => String = s => s.mkString(s"$className$lBracket", ",", rBracket)
     val emptyProd                        = "MISSING"
 
@@ -60,8 +85,8 @@ object ProductUtil {
         if (actualRow == expectedRow) {
           List(DarkGray(actualRow.toString), DarkGray(expectedRow.toString))
         } else {
-          val actualSeq   = productOrRowToSeq(actualRow)
-          val expectedSeq = productOrRowToSeq(expectedRow)
+          val actualSeq   = productOrSeqToSeq(actualRow)
+          val expectedSeq = productOrSeqToSeq(expectedRow)
           if (actualSeq.isEmpty)
             List(Red(emptyProd), Green(prodToString(expectedSeq)))
           else if (expectedSeq.isEmpty)
@@ -95,13 +120,11 @@ object ProductUtil {
       }
     val numCols = 2
 
-    // Initialise the width of each column to a minimum value
     val colWidths = Array.fill(numCols)(minColWidth)
 
-    // Compute the width of each column
-    header.zipWithIndex.foreach({ case (cell, i) =>
+    header.zipWithIndex.foreach { case (cell, i) =>
       colWidths(i) = math.max(colWidths(i), cell.length)
-    })
+    }
 
     diff.foreach { row =>
       row.zipWithIndex.foreach { case (cell, i) =>
@@ -109,20 +132,18 @@ object ProductUtil {
       }
     }
 
-    // Create SeparateLine
     val sep: String =
       colWidths
         .map("-" * _)
         .addString(sb, "+", "+", "+\n")
         .toString
 
-    // column names
     header.zipWithIndex
       .map { case (cell, i) =>
         if (truncate > 0) {
-          StringUtils.leftPad(cell, colWidths(i))
+          leftPad(cell, colWidths(i))
         } else {
-          StringUtils.rightPad(cell, colWidths(i))
+          rightPad(cell, colWidths(i))
         }
       }
       .addString(sb, "|", "|", "|\n")
@@ -139,17 +160,16 @@ object ProductUtil {
           } else {
             cell.toString + pads
           }
-
         }
         .addString(sb, "|", "|", "|\n")
     }
 
     sb.append(sep)
-
     sb.toString
   }
 
   private val EmptyStr = Str("")
+
   private[mrpowers] def showProductDiffSeparateLine[T: ClassTag](
       actual: Seq[T],
       expected: Seq[T],
@@ -158,10 +178,9 @@ object ProductUtil {
       minColWidth: Int = 3
   ): String = {
     val sb           = new StringBuilder
-    val actualRows   = actual.map(productOrRowToSeq)
-    val expectedRows = expected.map(productOrRowToSeq)
+    val actualRows   = actual.map(productOrSeqToSeq)
+    val expectedRows = expected.map(productOrSeqToSeq)
     val colWidths    = getColWidths(fieldNames, actualRows ++ expectedRows, truncate, minColWidth)
-    // needed to calculate padding for other elements
     val largestIndexOffset = {
       if (actualRows.isEmpty && expectedRows.isEmpty) 0
       else {
@@ -205,13 +224,13 @@ object ProductUtil {
               val coloredDiff = withEquals.zipWithIndex
                 .map {
                   case ((actualRowField, expectedRowField, true), i) =>
-                    val paddedActualRow = padAny(actualRowField, colWidths(i), truncate)
-                    val paddedExpected  = padAny(expectedRowField, colWidths(i), truncate)
-                    (DarkGray(paddedActualRow), DarkGray(paddedExpected))
+                    val paddedActual   = padAny(actualRowField, colWidths(i), truncate)
+                    val paddedExpected = padAny(expectedRowField, colWidths(i), truncate)
+                    (DarkGray(paddedActual), DarkGray(paddedExpected))
                   case ((actualRowField, expectedRowField, false), i) =>
-                    val paddedActualRow = padAny(actualRowField, colWidths(i), truncate)
-                    val paddedExpected  = padAny(expectedRowField, colWidths(i), truncate)
-                    (Red(paddedActualRow), Green(paddedExpected))
+                    val paddedActual   = padAny(actualRowField, colWidths(i), truncate)
+                    val paddedExpected = padAny(expectedRowField, colWidths(i), truncate)
+                    (Red(paddedActual), Green(paddedExpected))
                 }
               val start = DarkGray("")
               val sep   = DarkGray("|")
@@ -232,20 +251,21 @@ object ProductUtil {
     val separatorLine: String =
       colWidths
         .map("-" * _)
-        .mkString(StringUtils.leftPad("+", largestIndexOffset), "+", "+\n")
+        .mkString(leftPad("+", largestIndexOffset), "+", "+\n")
 
     sb.append(separatorLine)
 
     headerFields
       .zip(colWidths)
       .map { case (cell, colWidth) =>
-        StringUtils.leftPad(cell, colWidth)
+        leftPad(cell, colWidth)
       }
-      .addString(sb, StringUtils.leftPad("|", largestIndexOffset), "|", "|\n")
+      .addString(sb, leftPad("|", largestIndexOffset), "|", "|\n")
+
     diff.zipWithIndex.foreach { case ((actual :: expected :: Nil, areRowsEqual), i) =>
       def appendRow(row: Str, i: Int): Unit = {
         if (row.length > 0) {
-          val indexString = StringUtils.leftPad(s"${i + 1}:|", largestIndexOffset)
+          val indexString = leftPad(s"${i + 1}:|", largestIndexOffset)
           sb.append(indexString)
           sb.append(row)
           sb.append(s"|:${i + 1}\n")
@@ -266,21 +286,53 @@ object ProductUtil {
   private def pad(items: Seq[Any], colWidths: Array[Int], truncateColumnLen: Int): Seq[String] =
     items.zip(colWidths).map { case (v, colWidth) => padAny(v, colWidth, truncateColumnLen) }
 
-  private def padAny(s: Any, width: Int, truncateColumnLen: Int) = {
-    StringUtils.leftPad(DataFramePrettyPrint.cellToString(s, truncateColumnLen), width)
+  private def padAny(s: Any, width: Int, truncateColumnLen: Int): String = {
+    leftPad(cellToString(s, truncateColumnLen), width)
   }
 
-  private def getColWidths(fields: Array[String], rows: Seq[Seq[Any]], truncate: Int, minColWidth: Int) = {
+  private def getColWidths(fields: Array[String], rows: Seq[Seq[Any]], truncate: Int, minColWidth: Int): Array[Int] = {
     val colWidths = fields.map { field =>
-      math.max(minColWidth, DataFramePrettyPrint.cellToString(field, truncate).length)
+      math.max(minColWidth, cellToString(field, truncate).length)
     }
 
     rows.foreach { row =>
       row.zipWithIndex.foreach { case (cell, i) =>
-        colWidths(i) = math.max(colWidths(i), DataFramePrettyPrint.cellToString(cell, truncate).length)
+        if (i < colWidths.length) {
+          colWidths(i) = math.max(colWidths(i), cellToString(cell, truncate).length)
+        }
       }
     }
 
     colWidths
+  }
+
+  private def leftPad(s: String, width: Int): String = {
+    if (s.length >= width) s else " " * (width - s.length) + s
+  }
+
+  private def rightPad(s: String, width: Int): String = {
+    if (s.length >= width) s else s + " " * (width - s.length)
+  }
+
+  private[mrpowers] def cellToString(cell: Any, truncate: Int): String = {
+    val str = cell match {
+      case null => "null"
+      case r: RowLike =>
+        r.schema.fieldNames
+          .zip(r.toSeq)
+          .map { case (k, v) => s"$k -> $v" }
+          .mkString("{", ", ", "}")
+      case d: Date =>
+        d.toLocalDate.format(DateTimeFormatter.ISO_DATE)
+      case binary: Array[Byte] => binary.map("%02X".format(_)).mkString("[", " ", "]")
+      case array: Array[_]     => array.mkString("[", ", ", "]")
+      case seq: Seq[_]         => seq.mkString("[", ", ", "]")
+      case map: Map[_, _]      => map.map { case (k, v) => s"$k -> $v" }.mkString("{", ", ", "}")
+      case _                   => cell.toString
+    }
+    if (truncate > 0 && str.length > truncate) {
+      if (truncate < 4) str.substring(0, truncate)
+      else str.substring(0, truncate - 3) + "..."
+    } else str
   }
 }

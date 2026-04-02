@@ -6,6 +6,9 @@ import scala.reflect.ClassTag
 
 case class RDDContentMismatch(smth: String) extends Exception(smth)
 
+/**
+ * Provides assertion utilities for comparing RDDs.
+ */
 trait RDDComparer {
 
   def contentMismatchMessage[T: ClassTag](actualRDD: RDD[T], expectedRDD: RDD[T]): String = {

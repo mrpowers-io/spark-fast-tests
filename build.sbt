@@ -1,8 +1,9 @@
 val versionRegex = """^(.*)\.(.*)\.(.*)$""".r
 val thisVersionShortRegex = """^([0-9]+\.[0-9]+\.[0-9]+)(.*)$""".r
-val scala2_13    = "2.13.14"
-val scala2_12    = "2.12.20"
-val sparkVersion = System.getProperty("spark.version", "3.5.3")
+val scala2_13       = "2.13.14"
+val scala2_12       = "2.12.20"
+val sparkVersion    = System.getProperty("spark.version", "3.5.3")
+val snowparkVersion = System.getProperty("snowpark.version", "1.14.0")
 val noPublish = Seq(
   (publish / skip) := true,
   publishArtifact  := false
@@ -37,26 +38,58 @@ lazy val commonSettings = Seq(
                                                             else Seq.empty)
   },
   libraryDependencies ++= Seq(
-    "org.apache.spark" %% "spark-sql" % sparkVersion % "provided",
-    "org.scalatest"    %% "scalatest" % "3.2.18"     % "test"
+    "org.scalatest" %% "scalatest" % "3.2.18" % "test"
   )
 )
 
+// Core module - no Spark/Snowpark dependencies, contains abstractions and shared utilities
 lazy val core = (project in file("core"))
+  .settings(
+    commonSettings,
+    moduleName                             := "spark-fast-tests-core",
+    name                                   := moduleName.value,
+    Compile / packageSrc / publishArtifact := true,
+    Compile / packageDoc / publishArtifact := true,
+    libraryDependencies ++= Seq(
+      "org.apache.commons" % "commons-math3" % "3.6.1"
+    )
+  )
+
+// Spark module - Spark-specific implementation (main module for Spark users)
+lazy val spark = (project in file("spark"))
+  .dependsOn(core)
   .settings(
     commonSettings,
     moduleName                             := "spark-fast-tests",
     name                                   := moduleName.value,
     Compile / packageSrc / publishArtifact := true,
-    Compile / packageDoc / publishArtifact := true
+    Compile / packageDoc / publishArtifact := true,
+    libraryDependencies ++= Seq(
+      "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
+    )
+  )
+
+// Snowpark module - Snowpark-specific implementation
+lazy val snowpark = (project in file("snowpark"))
+  .dependsOn(core)
+  .settings(
+    commonSettings,
+    moduleName                             := "spark-fast-tests-snowpark",
+    name                                   := moduleName.value,
+    Compile / packageSrc / publishArtifact := true,
+    Compile / packageDoc / publishArtifact := true,
+    libraryDependencies ++= Seq(
+      "com.snowflake" % "snowpark" % snowparkVersion % "provided"
+    )
   )
 
 lazy val benchmarks = (project in file("benchmarks"))
-  .dependsOn(core)
+  .dependsOn(core, spark)
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
-      "org.openjdk.jmh" % "jmh-generator-annprocess" % "1.37" // required for jmh IDEA plugin. Make sure this version matches sbt-jmh version!
+      "org.openjdk.jmh"  % "jmh-generator-annprocess" % "1.37", // required for jmh IDEA plugin. Make sure this version matches sbt-jmh version!
+      "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
     ),
     name := "benchmarks"
   )
@@ -162,7 +195,7 @@ lazy val root = (project in file("."))
     commonSettings,
     noPublish
   )
-  .aggregate(core, benchmarks, docs)
+  .aggregate(core, spark, snowpark, benchmarks, docs)
 
 scmInfo := Some(ScmInfo(url("https://github.com/mrpowers-io/spark-fast-tests"), "git@github.com:MrPowers/spark-fast-tests.git"))
 
