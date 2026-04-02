@@ -389,9 +389,9 @@
       
       
     </li><li name="com.github.mrpowers.spark.fast.tests.comparer.schema.FieldComparison#apply" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="apply(name:String,leftField:Option[org.apache.spark.sql.types.StructField],rightField:Option[org.apache.spark.sql.types.StructField],matchFieldByName:Boolean):com.github.mrpowers.spark.fast.tests.comparer.schema.FieldComparison"></a><a id="apply(String,Option[StructField],Option[StructField],Boolean):FieldComparison"></a>
+      <a id="apply(name:String,leftField:Option[com.github.mrpowers.spark.fast.tests.api.FieldLike],rightField:Option[com.github.mrpowers.spark.fast.tests.api.FieldLike],matchFieldByName:Boolean):com.github.mrpowers.spark.fast.tests.comparer.schema.FieldComparison"></a><a id="apply(String,Option[FieldLike],Option[FieldLike],Boolean):FieldComparison"></a>
       <span class="permalink">
-      <a href="../../../../../../../../com/github/mrpowers/spark/fast/tests/comparer/schema/FieldComparison$.html#apply(name:String,leftField:Option[org.apache.spark.sql.types.StructField],rightField:Option[org.apache.spark.sql.types.StructField],matchFieldByName:Boolean):com.github.mrpowers.spark.fast.tests.comparer.schema.FieldComparison" title="Permalink">
+      <a href="../../../../../../../../com/github/mrpowers/spark/fast/tests/comparer/schema/FieldComparison$.html#apply(name:String,leftField:Option[com.github.mrpowers.spark.fast.tests.api.FieldLike],rightField:Option[com.github.mrpowers.spark.fast.tests.api.FieldLike],matchFieldByName:Boolean):com.github.mrpowers.spark.fast.tests.comparer.schema.FieldComparison" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -400,7 +400,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">apply</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="leftField">leftField: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.types.StructField">StructField</span>]</span>, <span name="rightField">rightField: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="org.apache.spark.sql.types.StructField">StructField</span>]</span>, <span name="matchFieldByName">matchFieldByName: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="FieldComparison.html" class="extype" name="com.github.mrpowers.spark.fast.tests.comparer.schema.FieldComparison">FieldComparison</a></span>
+        <span class="name">apply</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="leftField">leftField: <span class="extype" name="scala.Option">Option</span>[<a href="../../api/FieldLike.html" class="extype" name="com.github.mrpowers.spark.fast.tests.api.FieldLike">FieldLike</a>]</span>, <span name="rightField">rightField: <span class="extype" name="scala.Option">Option</span>[<a href="../../api/FieldLike.html" class="extype" name="com.github.mrpowers.spark.fast.tests.api.FieldLike">FieldLike</a>]</span>, <span name="matchFieldByName">matchFieldByName: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="FieldComparison.html" class="extype" name="com.github.mrpowers.spark.fast.tests.comparer.schema.FieldComparison">FieldComparison</a></span>
       </span>
       
       
@@ -440,9 +440,9 @@
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.github.mrpowers.spark.fast.tests.comparer.schema.FieldComparison#buildComparison" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="buildComparison(s1:org.apache.spark.sql.types.StructType,s2:org.apache.spark.sql.types.StructType,matchFieldByName:Boolean):Seq[com.github.mrpowers.spark.fast.tests.comparer.schema.FieldComparison]"></a><a id="buildComparison(StructType,StructType,Boolean):Seq[FieldComparison]"></a>
+      <a id="buildComparison(s1:com.github.mrpowers.spark.fast.tests.api.SchemaLike,s2:com.github.mrpowers.spark.fast.tests.api.SchemaLike,matchFieldByName:Boolean):Seq[com.github.mrpowers.spark.fast.tests.comparer.schema.FieldComparison]"></a><a id="buildComparison(SchemaLike,SchemaLike,Boolean):Seq[FieldComparison]"></a>
       <span class="permalink">
-      <a href="../../../../../../../../com/github/mrpowers/spark/fast/tests/comparer/schema/FieldComparison$.html#buildComparison(s1:org.apache.spark.sql.types.StructType,s2:org.apache.spark.sql.types.StructType,matchFieldByName:Boolean):Seq[com.github.mrpowers.spark.fast.tests.comparer.schema.FieldComparison]" title="Permalink">
+      <a href="../../../../../../../../com/github/mrpowers/spark/fast/tests/comparer/schema/FieldComparison$.html#buildComparison(s1:com.github.mrpowers.spark.fast.tests.api.SchemaLike,s2:com.github.mrpowers.spark.fast.tests.api.SchemaLike,matchFieldByName:Boolean):Seq[com.github.mrpowers.spark.fast.tests.comparer.schema.FieldComparison]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -451,7 +451,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">buildComparison</span><span class="params">(<span name="s1">s1: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="s2">s2: <span class="extype" name="org.apache.spark.sql.types.StructType">StructType</span></span>, <span name="matchFieldByName">matchFieldByName: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="FieldComparison.html" class="extype" name="com.github.mrpowers.spark.fast.tests.comparer.schema.FieldComparison">FieldComparison</a>]</span>
+        <span class="name">buildComparison</span><span class="params">(<span name="s1">s1: <a href="../../api/SchemaLike.html" class="extype" name="com.github.mrpowers.spark.fast.tests.api.SchemaLike">SchemaLike</a></span>, <span name="s2">s2: <a href="../../api/SchemaLike.html" class="extype" name="com.github.mrpowers.spark.fast.tests.api.SchemaLike">SchemaLike</a></span>, <span name="matchFieldByName">matchFieldByName: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<a href="FieldComparison.html" class="extype" name="com.github.mrpowers.spark.fast.tests.comparer.schema.FieldComparison">FieldComparison</a>]</span>
       </span>
       
       
