@@ -7,6 +7,7 @@ import org.openjdk.jmh.infra.Blackhole
 import java.util.concurrent.TimeUnit
 import scala.util.Try
 
+@State(Scope.Benchmark)
 private class ColumnComparerBenchmark extends ColumnComparer {
   @Benchmark
   @BenchmarkMode(Array(Mode.SingleShotTime))
