@@ -1,9 +1,9 @@
 package com.github.mrpowers.spark.fast.tests
 
-import com.github.mrpowers.spark.fast.tests.api._
-import org.apache.spark.sql.{DataFrame, Row}
 import com.github.mrpowers.spark.fast.tests.DataframeDiffOutputFormat.DataframeDiffOutputFormat
+import com.github.mrpowers.spark.fast.tests.api._
 import SparkDataFrameLike.instance
+import org.apache.spark.sql.{DataFrame, Row}
 
 /**
  * Provides assertion utilities for Spark DataFrames.
@@ -47,7 +47,8 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreColumnNames: Boolean = false,
       orderedComparison: Boolean = true,
       ignoreColumnOrder: Boolean = false,
-      ignoreMetadata: Boolean = true
+      ignoreMetadata: Boolean = true,
+      primaryKeys: Seq[String]
   ): Unit = {
     assertLargeDatasetEquality(
       actualDF,
@@ -56,7 +57,8 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreColumnNames = ignoreColumnNames,
       orderedComparison = orderedComparison,
       ignoreColumnOrder = ignoreColumnOrder,
-      ignoreMetadata = ignoreMetadata
+      ignoreMetadata = ignoreMetadata,
+      primaryKeys = primaryKeys
     )
   }
 
@@ -100,7 +102,8 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreColumnNames: Boolean = false,
       orderedComparison: Boolean = true,
       ignoreColumnOrder: Boolean = false,
-      ignoreMetadata: Boolean = true
+      ignoreMetadata: Boolean = true,
+      primaryKeys: Seq[String]
   ): Unit = {
     assertLargeDatasetEquality(
       actualDF,
@@ -110,7 +113,8 @@ trait DataFrameComparer extends DatasetComparer {
       ignoreColumnNames,
       orderedComparison,
       ignoreColumnOrder,
-      ignoreMetadata
+      ignoreMetadata,
+      primaryKeys
     )
   }
 }

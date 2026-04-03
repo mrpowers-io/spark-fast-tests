@@ -240,11 +240,12 @@ To compare large DataFrames that are partitioned across different nodes in a clu
 `assertLargeDatasetEquality` method.
 
 ```scala
-assertLargeDatasetEquality(actualDF, expectedDF)
+assertLargeDatasetEquality(actualDF, expectedDF, primaryKeys = Seq("id"))
 ```
 
 `assertSmallDatasetEquality` is faster for test suites that run on your local machine.  `assertLargeDatasetEquality`
-should only be used for DataFrames that are split across nodes in a cluster.
+should only be used for DataFrames that are split across nodes in a cluster. Large comparisons require non-empty
+`primaryKeys` so rows can be matched reliably across partitions.
 
 #### Unordered DataFrame equality comparisons
 
@@ -334,7 +335,7 @@ val expectedDF = spark.createDF(
   )
 )
 
-assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, primaryKeys = Seq("id"))
 ```
 
 ### Column Equality

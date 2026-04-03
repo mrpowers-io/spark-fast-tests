@@ -4,7 +4,7 @@ import org.apache.spark.sql.types._
 import SparkSessionExt._
 import com.github.mrpowers.spark.fast.tests.api.{DatasetSchemaMismatch, DatasetContentMismatch, DatasetCountMismatch}
 import com.github.mrpowers.spark.fast.tests.TestUtilsExt.ExceptionOps
-import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.functions.{col, lower}
 import org.scalatest.freespec.AnyFreeSpec
 
 object Person {
@@ -203,7 +203,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       )
 
       assertSmallDatasetEquality(sourceDF, expectedDF)
-      assertLargeDatasetEquality(sourceDF, expectedDF)
+      assertLargeDatasetEquality(sourceDF, expectedDF, primaryKeys = Seq("number"))
     }
 
     "does nothing if the Datasets have the same schemas and content" in {
@@ -222,7 +222,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       )
 
       assertSmallDatasetEquality(sourceDS, expectedDS)
-      assertLargeDatasetEquality(sourceDS, expectedDS)
+      assertLargeDatasetEquality(sourceDS, expectedDS, primaryKeys = Seq("name"))
     }
 
     "works with DataFrames that have ArrayType columns" in {
@@ -248,7 +248,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         )
       )
 
-      assertLargeDatasetEquality(sourceDF, expectedDF)
+      assertLargeDatasetEquality(sourceDF, expectedDF, primaryKeys = Seq("number"))
       assertSmallDatasetEquality(sourceDF, expectedDF)
     }
 
@@ -307,7 +307,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       )
 
       intercept[DatasetSchemaMismatch] {
-        assertLargeDatasetEquality(sourceDF, expectedDF)
+        assertLargeDatasetEquality(sourceDF, expectedDF, primaryKeys = Seq("number"))
       }
 
       intercept[DatasetSchemaMismatch] {
@@ -324,10 +324,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         (10), (5), (3), (7), (1)
       ).toDF("number")
 
-      val e = intercept[DatasetContentMismatch] {
-        assertLargeDatasetEquality(sourceDF, expectedDF)
-      }
-      val e2 = intercept[DatasetContentMismatch] {
+      intercept[DatasetContentMismatch] {
         assertSmallDatasetEquality(sourceDF, expectedDF)
       }
     }
@@ -347,11 +344,8 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         )
       )
 
-      val e = intercept[DatasetContentMismatch] {
-        assertLargeDatasetEquality(sourceDS, expectedDS)
-      }
-      val e2 = intercept[DatasetContentMismatch] {
-        assertLargeDatasetEquality(sourceDS, expectedDS)
+      intercept[DatasetContentMismatch] {
+        assertLargeDatasetEquality(sourceDS, expectedDS, primaryKeys = Seq("name"))
       }
     }
 
@@ -368,7 +362,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
           Person("Alice", 5)
         )
       )
-      assertLargeDatasetEquality(sourceDS, expectedDS, Person.caseInsensitivePersonEquals)
+      assertLargeDatasetEquality(sourceDS, expectedDS, Person.caseInsensitivePersonEquals _, primaryKeys = Seq("age"))
     }
 
     "fails if custom comparator for returns false" in {
@@ -384,8 +378,8 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
           Person("Alice", 5)
         )
       )
-      val e = intercept[DatasetContentMismatch] {
-        assertLargeDatasetEquality(sourceDS, expectedDS, Person.caseInsensitivePersonEquals)
+      intercept[DatasetContentMismatch] {
+        assertLargeDatasetEquality(sourceDS, expectedDS, Person.caseInsensitivePersonEquals _, primaryKeys = Seq("age"))
       }
     }
 
@@ -411,7 +405,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         List(("number", IntegerType, true))
       )
 
-      assertLargeDatasetEquality(sourceDF, expectedDF, ignoreNullable = true)
+      assertLargeDatasetEquality(sourceDF, expectedDF, ignoreNullable = true, primaryKeys = Seq("number"))
     }
 
     "should not ignore nullable if ignoreNullable is false" in {
@@ -433,70 +427,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       )
 
       intercept[DatasetSchemaMismatch] {
-        assertLargeDatasetEquality(sourceDF, expectedDF)
-      }
-    }
-
-    "can performed unordered DataFrame comparisons" in {
-      val sourceDF = spark.createDF(
-        List(
-          (1),
-          (5)
-        ),
-        List(("number", IntegerType, true))
-      )
-
-      val expectedDF = spark.createDF(
-        List(
-          (5),
-          (1)
-        ),
-        List(("number", IntegerType, true))
-      )
-
-      assertLargeDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
-    }
-
-    "throws an error for unordered Dataset comparisons that don't match" in {
-      val sourceDS = spark.createDataset[Person](
-        Seq(
-          Person("bob", 1),
-          Person("frank", 5)
-        )
-      )
-
-      val expectedDS = spark.createDataset[Person](
-        Seq(
-          Person("frank", 5),
-          Person("bob", 1),
-          Person("sadie", 2)
-        )
-      )
-
-      val e = intercept[DatasetCountMismatch] {
-        assertLargeDatasetEquality(sourceDS, expectedDS, orderedComparison = false)
-      }
-    }
-
-    "throws an error for unordered DataFrame comparisons that don't match" in {
-      val sourceDF = spark.createDF(
-        List(
-          (1),
-          (5)
-        ),
-        List(("number", IntegerType, true))
-      )
-      val expectedDF = spark.createDF(
-        List(
-          (5),
-          (1),
-          (10)
-        ),
-        List(("number", IntegerType, true))
-      )
-
-      val e = intercept[DatasetCountMismatch] {
-        assertLargeDatasetEquality(sourceDF, expectedDF, orderedComparison = false)
+        assertLargeDatasetEquality(sourceDF, expectedDF, primaryKeys = Seq("number"))
       }
     }
 
@@ -517,8 +448,8 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         List(("number", IntegerType, true))
       )
 
-      val e = intercept[DatasetCountMismatch] {
-        assertLargeDatasetEquality(sourceDF, expectedDF)
+      intercept[DatasetCountMismatch] {
+        assertLargeDatasetEquality(sourceDF, expectedDF, primaryKeys = Seq("number"))
       }
     }
 
@@ -543,7 +474,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
           ("number", IntegerType, true)
         )
       )
-      assertLargeDatasetEquality(sourceDF, expectedDF, ignoreColumnOrder = true)
+      assertLargeDatasetEquality(sourceDF, expectedDF, ignoreColumnOrder = true, primaryKeys = Seq("number"))
     }
 
     "can performed Dataset comparisons with unordered column" in {
@@ -561,8 +492,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         Person("alice", 5)
       ).toDS.select("age", "name").as(ds1.encoder)
 
-      assertLargeDatasetEquality(ds1, ds2, ignoreColumnOrder = true)
-      assertLargeDatasetEquality(ds2, ds1, ignoreColumnOrder = true)
+      assertLargeDatasetEquality(ds2, ds1, ignoreColumnOrder = true, primaryKeys = Seq("name"))
     }
 
     "correctly mark unequal schema field" in {
@@ -590,7 +520,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
       )
 
       val e = intercept[DatasetSchemaMismatch] {
-        assertLargeDatasetEquality(sourceDF, expectedDF)
+        assertLargeDatasetEquality(sourceDF, expectedDF, primaryKeys = Seq("number"))
       }
 
       e.assertColorDiff(Seq("float", "DoubleType", "MISSING"), Seq("word", "StringType", "StructField(long,LongType,true,{})"))
@@ -615,7 +545,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         .withColumn("name", col("name").as("name", new MetadataBuilder().putString("description", "name of the individual").build()))
         .as[Person]
 
-      assertLargeDatasetEquality(ds2, ds1)
+      assertLargeDatasetEquality(ds2, ds1, primaryKeys = Seq("name"))
     }
 
     "can performed Dataset comparisons and compare metadata" in {
@@ -638,8 +568,107 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         .as[Person]
 
       intercept[DatasetSchemaMismatch] {
-        assertLargeDatasetEquality(ds2, ds1, ignoreMetadata = false)
+        assertLargeDatasetEquality(ds2, ds1, ignoreMetadata = false, primaryKeys = Seq("name"))
       }
+    }
+
+    "requires non-empty primaryKeys" in {
+      val sourceDF = Seq(
+        (1, "word"),
+        (2, "word")
+      ).toDF("id", "text")
+      val expectedDF = Seq(
+        (1, "word"),
+        (2, "word")
+      ).toDF("id", "text")
+
+      val e = intercept[IllegalArgumentException] {
+        assertLargeDatasetEquality(sourceDF, expectedDF, primaryKeys = Seq.empty)
+      }
+
+      assert(e.getMessage.contains("requires non-empty primaryKeys"))
+    }
+
+    "uses equality column expressions when comparing keyed rows" in {
+      val sourceDF = Seq(
+        (1, "bob"),
+        (2, "alice")
+      ).toDF("id", "name")
+      val expectedDF = Seq(
+        (1, "BOB"),
+        (2, "ALICE")
+      ).toDF("id", "name")
+
+      assertLargeDatasetEquality(
+        sourceDF,
+        expectedDF,
+        equals = lower(col("actual.name")) <=> lower(col("expected.name")),
+        primaryKeys = Seq("id")
+      )
+    }
+
+    "fails when primary keys are disjoint even if row counts match" in {
+      val sourceDF = Seq(
+        (1, "same"),
+        (2, "values")
+      ).toDF("id", "text")
+      val expectedDF = Seq(
+        (3, "same"),
+        (4, "values")
+      ).toDF("id", "text")
+
+      intercept[DatasetContentMismatch] {
+        assertLargeDatasetEquality(sourceDF, expectedDF, primaryKeys = Seq("id"))
+      }
+    }
+
+    "can handle when there are unmatched row of Product Type" in {
+      val sourceDS = spark.createDataset[Person](
+        Seq(
+          Person("Alice", 12),
+          Person("Bob", 17)
+        )
+      )
+
+      val expectedDS = spark.createDataset[Person](
+        Seq(
+          Person("Alice", 12),
+          Person("Bob1", 17)
+        )
+      )
+
+      intercept[DatasetContentMismatch] {
+        assertLargeDatasetEquality(
+          sourceDS,
+          expectedDS,
+          equals = (p1: Person, p2: Person) => p1.age == p2.age && p1.name == p2.name,
+          ignoreNullable = false,
+          ignoreColumnNames = false,
+          ignoreColumnOrder = false,
+          ignoreMetadata = true,
+          primaryKeys = Seq("age")
+        )
+      }
+
+    }
+
+    "can handle when there are unmatched rows of Primitive Type" in {
+      val sourceDS   = spark.range(0, 10, 1)
+      val expectedDS = spark.range(0, 20, 2)
+
+      intercept[DatasetContentMismatch] {
+        assertLargeDatasetEquality(
+          sourceDS,
+          expectedDS,
+          equals = (p1: java.lang.Long, p2: java.lang.Long) => p1 == p2,
+          ignoreNullable = false,
+          ignoreColumnNames = false,
+          ignoreColumnOrder = false,
+          ignoreMetadata = true,
+          primaryKeys = Seq("id")
+        )
+      }
+
     }
   }
 
@@ -1208,100 +1237,100 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
     "does nothing if the DataFrames have the same schemas and content" in {
       val sourceDF = spark.createDF(
         List(
-          (1.2),
-          (5.1),
-          (null)
+          (1, 1.2),
+          (2, 5.1),
+          (3, null)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
       val expectedDF = spark.createDF(
         List(
-          (1.2),
-          (5.1),
-          (null)
+          (1, 1.2),
+          (2, 5.1),
+          (3, null)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
-      assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+      assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, primaryKeys = Seq("id"))
     }
 
     "throws an error if the rows are different" in {
       val sourceDF = spark.createDF(
         List(
-          (100.9),
-          (5.1)
+          (1, 100.9),
+          (2, 5.1)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
       val expectedDF = spark.createDF(
         List(
-          (1.2),
-          (5.1)
+          (1, 1.2),
+          (2, 5.1)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
-      val e = intercept[DatasetContentMismatch] {
-        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+      intercept[DatasetContentMismatch] {
+        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, primaryKeys = Seq("id"))
       }
     }
 
     "throws an error DataFrames have a different number of rows" in {
       val sourceDF = spark.createDF(
         List(
-          (1.2),
-          (5.1),
-          (8.8)
+          (1, 1.2),
+          (2, 5.1),
+          (3, 8.8)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
       val expectedDF = spark.createDF(
         List(
-          (1.2),
-          (5.1)
+          (1, 1.2),
+          (2, 5.1)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
-      val e = intercept[DatasetCountMismatch] {
-        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+      intercept[DatasetCountMismatch] {
+        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, primaryKeys = Seq("id"))
       }
     }
 
     "can ignore the nullable property" in {
       val sourceDF = spark.createDF(
         List(
-          (1.2),
-          (5.1)
+          (1, 1.2),
+          (2, 5.1)
         ),
-        List(("number", DoubleType, false))
+        List(("id", IntegerType, true), ("number", DoubleType, false))
       )
       val expectedDF = spark.createDF(
         List(
-          (1.2),
-          (5.1)
+          (1, 1.2),
+          (2, 5.1)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
-      assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, ignoreNullable = true)
+      assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, ignoreNullable = true, primaryKeys = Seq("id"))
     }
 
     "can ignore the column names" in {
       val sourceDF = spark.createDF(
         List(
-          (1.2),
-          (5.1),
-          (null)
+          (1, 1.2),
+          (2, 5.1),
+          (3, null)
         ),
-        List(("BLAHBLBH", DoubleType, true))
+        List(("id", IntegerType, true), ("BLAHBLBH", DoubleType, true))
       )
       val expectedDF = spark.createDF(
         List(
-          (1.2),
-          (5.1),
-          (null)
+          (1, 1.2),
+          (2, 5.1),
+          (3, null)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
-      assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, ignoreColumnNames = true)
+      assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, ignoreColumnNames = true, primaryKeys = Seq("id"))
     }
 
     "can work with precision and unordered comparison" in {
@@ -1316,7 +1345,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         ("1", "11/01/2019", 26.76249999999991)
       ).toDF("col_B", "col_C", "col_A")
 
-      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
+      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false, primaryKeys = Seq("col_B", "col_C"))
     }
 
     "can work with precision and unordered comparison 2" in {
@@ -1331,7 +1360,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         ("1", "10/01/2019", 26.76249999999991, "B")
       ).toDF("col_B", "col_C", "col_A", "col_D")
 
-      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
+      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false, primaryKeys = Seq("col_B", "col_C", "col_D"))
     }
 
     "can work with precision and unordered comparison on nested column" in {
@@ -1346,7 +1375,7 @@ class DatasetComparerTest extends AnyFreeSpec with DatasetComparer with SparkSes
         ("1", "10/01/2019", 26.762499999999997, Seq(26.762499999999997, 26.762499999999997))
       ).toDF("col_B", "col_C", "col_A", "col_D")
 
-      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
+      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false, primaryKeys = Seq("col_B", "col_C"))
     }
   }
 }

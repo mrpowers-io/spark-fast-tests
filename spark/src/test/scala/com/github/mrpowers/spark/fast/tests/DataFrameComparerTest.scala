@@ -227,7 +227,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         ),
         List(("number", IntegerType, true))
       )
-      assertLargeDataFrameEquality(sourceDF, expectedDF)
+      assertLargeDataFrameEquality(sourceDF, expectedDF, primaryKeys = Seq("number"))
     }
 
     "throws an error if the DataFrames have different schemas" in {
@@ -251,7 +251,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       )
 
       intercept[DatasetSchemaMismatch] {
-        assertLargeDataFrameEquality(sourceDF, expectedDF)
+        assertLargeDataFrameEquality(sourceDF, expectedDF, primaryKeys = Seq("number"))
       }
       intercept[DatasetSchemaMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF)
@@ -276,7 +276,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       )
 
       intercept[DatasetContentMismatch] {
-        assertLargeDataFrameEquality(sourceDF, expectedDF)
+        assertLargeDataFrameEquality(sourceDF, expectedDF, primaryKeys = Seq("number"))
       }
       intercept[DatasetContentMismatch] {
         assertSmallDataFrameEquality(sourceDF, expectedDF)
@@ -343,7 +343,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
           ("number", IntegerType, true)
         )
       )
-      assertLargeDataFrameEquality(sourceDF, expectedDF, ignoreColumnOrder = true)
+      assertLargeDataFrameEquality(sourceDF, expectedDF, ignoreColumnOrder = true, primaryKeys = Seq("number"))
     }
 
     "should not ignore nullable if ignoreNullable is false" in {
@@ -363,7 +363,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       )
 
       intercept[DatasetSchemaMismatch] {
-        assertLargeDataFrameEquality(sourceDF, expectedDF)
+        assertLargeDataFrameEquality(sourceDF, expectedDF, primaryKeys = Seq("number"))
       }
     }
 
@@ -422,7 +422,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         )
         .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small number").build()))
 
-      assertLargeDataFrameEquality(sourceDF, expectedDF)
+      assertLargeDataFrameEquality(sourceDF, expectedDF, primaryKeys = Seq("number"))
     }
 
     "can performed Dataset comparisons and compare metadata" in {
@@ -447,7 +447,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small number").build()))
 
       intercept[DatasetSchemaMismatch] {
-        assertLargeDataFrameEquality(sourceDF, expectedDF, ignoreMetadata = false)
+        assertLargeDataFrameEquality(sourceDF, expectedDF, ignoreMetadata = false, primaryKeys = Seq("number"))
       }
     }
 
@@ -853,121 +853,122 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
     "does nothing if the DataFrames have the same schemas and content" in {
       val sourceDF = spark.createDF(
         List(
-          1.2,
-          5.1,
-          null
+          (1, 1.2),
+          (2, 5.1),
+          (3, null)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
       val expectedDF = spark.createDF(
         List(
-          1.2,
-          5.1,
-          null
+          (1, 1.2),
+          (2, 5.1),
+          (3, null)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
-      assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+      assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, primaryKeys = Seq("id"))
+      assertApproximateLargeDataFrameEquality(sourceDF, expectedDF, 0.01, primaryKeys = Seq("id"))
     }
 
     "throws an error if the rows are different" in {
       val sourceDF = spark.createDF(
         List(
-          100.9,
-          5.1
+          (1, 100.9),
+          (2, 5.1)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
       val expectedDF = spark.createDF(
         List(
-          1.2,
-          5.1
+          (1, 1.2),
+          (2, 5.1)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
-      val e = intercept[DatasetContentMismatch] {
-        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+      intercept[DatasetContentMismatch] {
+        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, primaryKeys = Seq("id"))
       }
     }
 
     "throws an error DataFrames have a different number of rows" in {
       val sourceDF = spark.createDF(
         List(
-          1.2,
-          5.1,
-          8.8
+          (1, 1.2),
+          (2, 5.1),
+          (3, 8.8)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
       val expectedDF = spark.createDF(
         List(
-          1.2,
-          5.1
+          (1, 1.2),
+          (2, 5.1)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
-      val e = intercept[DatasetCountMismatch] {
-        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+      intercept[DatasetCountMismatch] {
+        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, primaryKeys = Seq("id"))
       }
     }
 
     "should not ignore nullable if ignoreNullable is false" in {
       val sourceDF = spark.createDF(
         List(
-          1.2,
-          5.1
+          (1, 1.2),
+          (2, 5.1)
         ),
-        List(("number", DoubleType, false))
+        List(("id", IntegerType, true), ("number", DoubleType, false))
       )
       val expectedDF = spark.createDF(
         List(
-          1.2,
-          5.1
+          (1, 1.2),
+          (2, 5.1)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
 
       intercept[DatasetSchemaMismatch] {
-        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01)
+        assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, primaryKeys = Seq("id"))
       }
     }
 
     "can ignore the nullable property" in {
       val sourceDF = spark.createDF(
         List(
-          1.2,
-          5.1
+          (1, 1.2),
+          (2, 5.1)
         ),
-        List(("number", DoubleType, false))
+        List(("id", IntegerType, true), ("number", DoubleType, false))
       )
       val expectedDF = spark.createDF(
         List(
-          1.2,
-          5.1
+          (1, 1.2),
+          (2, 5.1)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
-      assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, ignoreNullable = true)
+      assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, ignoreNullable = true, primaryKeys = Seq("id"))
     }
 
     "can ignore the column names" in {
       val sourceDF = spark.createDF(
         List(
-          1.2,
-          5.1,
-          null
+          (1, 1.2),
+          (2, 5.1),
+          (3, null)
         ),
-        List(("BLAHBLBH", DoubleType, true))
+        List(("id", IntegerType, true), ("BLAHBLBH", DoubleType, true))
       )
       val expectedDF = spark.createDF(
         List(
-          1.2,
-          5.1,
-          null
+          (1, 1.2),
+          (2, 5.1),
+          (3, null)
         ),
-        List(("number", DoubleType, true))
+        List(("id", IntegerType, true), ("number", DoubleType, true))
       )
-      assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, ignoreColumnNames = true)
+      assertApproximateDataFrameEquality(sourceDF, expectedDF, 0.01, ignoreColumnNames = true, primaryKeys = Seq("id"))
     }
 
     "can work with precision and unordered comparison" in {
@@ -982,7 +983,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         ("1", "11/01/2019", 26.76249999999991)
       ).toDF("col_B", "col_C", "col_A")
 
-      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
+      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false, primaryKeys = Seq("col_B", "col_C"))
     }
 
     "can work with precision and unordered comparison 2" in {
@@ -997,7 +998,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         ("1", "10/01/2019", 26.76249999999991, "B")
       ).toDF("col_B", "col_C", "col_A", "col_D")
 
-      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
+      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false, primaryKeys = Seq("col_B", "col_C", "col_D"))
     }
 
     "throw error when exceed precision" in {
@@ -1013,7 +1014,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       ).toDF("col_B", "col_C", "col_A")
 
       intercept[DatasetContentMismatch] {
-        assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
+        assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false, primaryKeys = Seq("col_B", "col_C"))
       }
     }
 
@@ -1030,7 +1031,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       ).toDF("col_B", "col_A")
 
       intercept[DatasetContentMismatch] {
-        assertApproximateDataFrameEquality(ds1, ds2, precision = 100, orderedComparison = false)
+        assertApproximateDataFrameEquality(ds1, ds2, precision = 100, orderedComparison = false, primaryKeys = Seq("col_B"))
       }
     }
 
@@ -1047,7 +1048,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
       ).toDF("col_B", "col_A")
 
       intercept[DatasetContentMismatch] {
-        assertApproximateDataFrameEquality(ds1, ds2, precision = 2, orderedComparison = false)
+        assertApproximateDataFrameEquality(ds1, ds2, precision = 2, orderedComparison = false, primaryKeys = Seq("col_B"))
       }
     }
 
@@ -1063,7 +1064,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         ("1", "10/01/2019", 26.762499999999997, Seq(26.762499999999997, 26.762499999999997))
       ).toDF("col_B", "col_C", "col_A", "col_D")
 
-      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false)
+      assertApproximateDataFrameEquality(ds1, ds2, precision = 0.0000001, orderedComparison = false, primaryKeys = Seq("col_B", "col_C"))
     }
 
     "can performed Dataset comparisons and ignore metadata" in {
@@ -1087,7 +1088,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         )
         .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small number").build()))
 
-      assertApproximateDataFrameEquality(sourceDF, expectedDF, precision = 0.0000001)
+      assertApproximateDataFrameEquality(sourceDF, expectedDF, precision = 0.0000001, primaryKeys = Seq("number"))
     }
 
     "can performed Dataset comparisons and compare metadata" in {
@@ -1112,7 +1113,7 @@ class DataFrameComparerTest extends AnyFreeSpec with DataFrameComparer with Spar
         .withColumn("number", col("number").as("number", new MetadataBuilder().putString("description", "small number").build()))
 
       intercept[DatasetSchemaMismatch] {
-        assertApproximateDataFrameEquality(sourceDF, expectedDF, precision = 0.0000001, ignoreMetadata = false)
+        assertApproximateDataFrameEquality(sourceDF, expectedDF, precision = 0.0000001, ignoreMetadata = false, primaryKeys = Seq("number"))
       }
     }
   }
